@@ -1,5 +1,8 @@
 /**
  * VratyaVani AI (व्रात्यवाणी) — Client Engine with Firebase Offline Fallback
+ * Admin Credentials:
+ * ID: admin@vratyavani.ai (or 'admin')
+ * Password: Admin@2026
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -8,7 +11,7 @@ let mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
 
-// Register Service Worker
+// Register Service Worker for Offline PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -17,7 +20,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Track Online/Offline Status
+// Track Online/Offline Network Status
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -34,12 +37,14 @@ function updateNetworkStatus() {
   }
 }
 
+// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDistrictData(window.currentDistrict);
   updateNetworkStatus();
 });
 
+// Initialize Leaflet Live Radar Map
 function initMap() {
   mapInstance = L.map('map').setView([26.1209, 85.3647], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -47,6 +52,7 @@ function initMap() {
   }).addTo(mapInstance);
 }
 
+// Handle District Change
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
   const badge = document.getElementById("currentDistrictBadge");
@@ -60,6 +66,7 @@ function onDistrictChange(districtKey) {
   loadDistrictData(window.currentDistrict);
 }
 
+// Category Tabs Filter
 function filterCategory(catKey) {
   currentCategory = catKey;
   document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -67,6 +74,7 @@ function filterCategory(catKey) {
   renderCards();
 }
 
+// Load District Data (Base + Cloud Firebase + LocalStorage Sync)
 window.loadDistrictData = function(districtKey) {
   let items = heritageData[districtKey] ? [...heritageData[districtKey]] : [];
 
@@ -81,6 +89,7 @@ window.loadDistrictData = function(districtKey) {
     console.error("Local sync error:", e);
   }
 
+  // Clear existing map markers
   mapMarkers.forEach(m => mapInstance.removeLayer(m));
   mapMarkers = [];
 
@@ -102,6 +111,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
+// Render Heritage & Artisan Cards Grid
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
@@ -148,10 +158,12 @@ function renderCards(preloadedItems) {
   });
 }
 
+// Pan to Marker on Map
 function panToLocation(lat, lng) {
   mapInstance.flyTo([lat, lng], 15);
 }
 
+// Select item for Bhashini Audio Guide
 function selectForVoice(itemId) {
   let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
   try {
@@ -173,6 +185,7 @@ function selectForVoice(itemId) {
   playBtn.innerText = "▶ AI आवाज़ सुनें";
 }
 
+// Web Speech API for Offline Audio Playback
 function togglePlayVoice() {
   if (!activeAudioItem) return;
 
@@ -195,6 +208,7 @@ function togglePlayVoice() {
   }
 }
 
+// Spot QR Modal Handlers
 function showQrModal() {
   if (activeAudioItem) {
     document.getElementById("modalHeritageTitle").innerText = `QR: ${activeAudioItem.title}`;
@@ -212,6 +226,7 @@ function closeQrModal(e) {
   }
 }
 
+// Admin Security Gate Handlers
 function openLoginModal() {
   document.getElementById("loginModal").style.display = "flex";
 }
@@ -222,11 +237,13 @@ function closeLoginModal(e) {
   }
 }
 
+// Admin Login Verification Logic
 function handleAdminLogin(e) {
   e.preventDefault();
   const uid = document.getElementById("adminUserId").value.trim();
   const pass = document.getElementById("adminPassword").value.trim();
 
+  // Authentication check
   if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
     window.location.href = "admin.html";
