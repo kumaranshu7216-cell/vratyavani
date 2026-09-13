@@ -15,36 +15,35 @@
 </head>
 <body onload="openLocationSelector()">
 
-  <!-- Initial Location & Language Selector Modal (Vihaan Purkha Style) -->
+  <!-- Initial Location & Language Cascading Modal -->
   <div id="locationModal" class="modal-backdrop" style="display: flex; background: rgba(15,23,42,0.95); z-index: 9999;">
     <div class="modal-box" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold); max-width:400px; text-align:left;">
-      <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); margin-bottom:5px;">🏛️ व्रात्यवाणी चयन (VratyaVani Selector)</h3>
-      <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px;">अपनी लोकेशन और भाषा चुनकर यात्रा शुरू करें</p>
+      <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); margin-bottom:5px;" id="modalHeading">🏛️ व्रात्यवाणी चयन (VratyaVani Selector)</h3>
+      <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px;" id="modalSub">अपनी लोकेशन और भाषा चुनकर यात्रा शुरू करें</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
           <label style="font-size:11px; font-weight:bold;">राज्य (State)</label>
-          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateChange(this.value)">
             <option value="bihar" selected>बिहार (Bihar)</option>
             <option value="up">उत्तर प्रदेश (Uttar Pradesh)</option>
-            पंजाब (Punjab)</option>
+            <option value="punjab">पंजाब (Punjab)</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; font-weight:bold;">ज़िला (District)</label>
-          <select id="selDistrict" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="updateDistrictSelection(this.value)">
+          <select id="selDistrict" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onDistrictModalChange(this.value)">
+            <!-- Populated dynamically based on state -->
             <option value="muzaffarpur" selected>मुजफ्फरपुर (तिरहुत)</option>
             <option value="patna">पटना (पाटलिपुत्र)</option>
-            <option value="varanasi">वाराणसी (काशी)</option>
-            <option value="amritsar">अमृतसर</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; font-weight:bold;">गाँव / क्षेत्र (Village / Zone)</label>
           <select id="selVillage" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
             <option value="all">संपूर्ण ज़िला हब (All Hubs)</option>
-            <option value="garhan">गरहन / बोचहा क्लस्टर</option>
-            <option value="kumhrar">कुम्रहार हेरिटेज ज़ोन</option>
+            <option value="garhan">गरहन / बोचहा</option>
+            <option value="sikandarpur">सिकंदरपुर क्षेत्र</option>
           </select>
         </div>
         <div>
@@ -88,8 +87,8 @@
 
   <!-- Hero -->
   <section class="hero-banner">
-    <h2>पुरखों की थाती, डिजिटल वाणी की पाती</h2>
-    <p>वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
+    <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
+    <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
     <div class="hero-badges">
       <span>🏛️ 4-Tier District Hub</span>
       <span>🎙️ Bhashini Audio Guide</span>
@@ -104,10 +103,10 @@
     <!-- Left Column -->
     <section>
       <div class="category-tabs">
-        <button class="tab-btn active" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
-        <button class="tab-btn" onclick="filterCategory('monument')">स्मारक (Monuments)</button>
-        <button class="tab-btn" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
-        <button class="tab-btn" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
+        <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
+        <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक (Monuments)</button>
+        <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
+        <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
       </div>
       <div id="cardsGrid" class="cards-grid"></div>
     </section>
@@ -115,15 +114,15 @@
     <!-- Right Column: Leaflet Map & Audio Console -->
     <aside class="map-sidebar">
       <div class="map-header">
-        <h3>📍 लाइव हेरिटेज मैप (Map)</h3>
+        <h3 id="mapSectionTitle">📍 लाइव हेरिटेज मैप (Map)</h3>
         <span id="currentDistrictBadge">मुजफ्फरपुर</span>
       </div>
       <div id="map"></div>
 
       <div class="voice-console">
         <div class="console-title">
-          <span>🎙️ भाषिणी AI ऑडियो गाइड</span>
-          <select id="langSelect" onchange="syncConsoleLanguage(this.value)">
+          <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
+          <select id="langSelect" onchange="onConsoleLangChange(this.value)">
             <option value="hi-IN">हिंदी (Hindi)</option>
             <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
             <option value="mai-IN">मैथिली (Maithili)</option>
@@ -151,7 +150,7 @@
       <div style="margin: 15px 0;">
         <img id="qrImage" src="" alt="VratyaVani QR" style="width: 180px; height: 180px; border-radius: 8px;" />
       </div>
-      <p style="font-size: 13px; color: var(--text-muted);">
+      <p style="font-size: 13px; color: var(--text-muted);" id="qrScanDesc">
         स्थल पर पहुँचकर स्कैन करें और बिना इंटरनेट के भी तुरंत ऑडियो गाइड शुरू करें।
       </p>
     </div>
@@ -208,10 +207,10 @@
           <div>
             <label style="font-size:11px; font-weight:bold;">ज़िला</label>
             <select id="recDistrict" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
-              <option value="muzaffarpur">मुजफ्फरपुर</option>
-              <option value="patna">पटना</option>
-              <option value="varanasi">वाराणसी</option>
-              <option value="amritsar">अमृतसर</option>
+              <option value="muzaffarpur">मुजफ्फरपुर (बिहार)</option>
+              <option value="patna">पटना (बिहार)</option>
+              <option value="varanasi">वाराणसी (UP)</option>
+              <option value="amritsar">अमृतसर (पंजाब)</option>
             </select>
           </div>
           <div style="grid-column:1/-1;">
@@ -261,7 +260,7 @@
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -289,27 +288,71 @@
       } catch (e) {}
     };
 
+    window.saveToFirestore = async function(record) {
+      try {
+        const docRef = await addDoc(collection(db, "heritage_records"), record);
+        return docRef.id;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    window.deleteFromFirestore = async function(docId) {
+      try { await deleteDoc(doc(db, "heritage_records", docId)); } catch(e) {}
+    };
+
     window.syncCloudHeritage();
   </script>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
 
+  <!-- Cascading Location and District Logic -->
   <script>
     function openLocationSelector() {
       document.getElementById("locationModal").style.display = "flex";
+      onStateChange("bihar");
     }
-    function updateDistrictSelection(val) {
-      const villageSel = document.getElementById("selVillage");
-      villageSel.innerHTML = "";
-      if(val === "muzaffarpur") {
-        villageSel.innerHTML = `<option value="all">संपूर्ण मुजफ्फरपुर हब</option><option value="garhan">गरहन / बोचहा</option><option value="sikandarpur">सिकंदरपुर झील</option>`;
-      } else if(val === "patna") {
-        villageSel.innerHTML = `<option value="all">संपूर्ण पटना हब</option><option value="kumhrar">कुम्रहार ज़ोन</option>`;
-      } else {
-        villageSel.innerHTML = `<option value="all">मुख्य शहर केंद्र</option>`;
+
+    // Cascading state to district mapping
+    function onStateChange(stateVal) {
+      const distSel = document.getElementById("selDistrict");
+      distSel.innerHTML = "";
+      
+      if (stateVal === "bihar") {
+        distSel.innerHTML = `
+          <option value="muzaffarpur" selected>मुजफ्फरपुर (Tirhut)</option>
+          <option value="patna">पटना (Patliputra)</option>
+        `;
+        onDistrictModalChange("muzaffarpur");
+      } else if (stateVal === "up") {
+        distSel.innerHTML = `
+          <option value="varanasi" selected>वाराणसी (काशी)</option>
+        `;
+        onDistrictModalChange("varanasi");
+      } else if (stateVal === "punjab") {
+        distSel.innerHTML = `
+          <option value="amritsar" selected>अमृतसर (Amritsar)</option>
+        `;
+        onDistrictModalChange("amritsar");
       }
     }
+
+    // Cascading district to village mapping
+    function onDistrictModalChange(distVal) {
+      const villageSel = document.getElementById("selVillage");
+      villageSel.innerHTML = "";
+      if (distVal === "muzaffarpur") {
+        villageSel.innerHTML = `<option value="all">संपूर्ण मुजफ्फरपुर हब</option><option value="garhan">गरहन / बोचहा</option><option value="sikandarpur">सिकंदरपुर झील क्षेत्र</option>`;
+      } else if (distVal === "patna") {
+        villageSel.innerHTML = `<option value="all">संपूर्ण पटना हब</option><option value="kumhrar">कुम्रहार हेरिटेज ज़ोन</option>`;
+      } else if (distVal === "varanasi") {
+        villageSel.innerHTML = `<option value="all">दशाश्वमेध एवं कॉरिडोर क्षेत्र</option><option value="sarnath">सारनाथ क्लस्टर</option>`;
+      } else if (distVal === "amritsar") {
+        villageSel.innerHTML = `<option value="all">गोल्डन टेम्पल परिसर</option><option value="heritage_street">हेरिटेज स्ट्रीट</option>`;
+      }
+    }
+
     function confirmLocationSelection() {
       const dist = document.getElementById("selDistrict").value;
       const lang = document.getElementById("selLang").value;
@@ -318,11 +361,12 @@
       document.getElementById("langSelect").value = lang;
       
       document.getElementById("locationModal").style.display = "none";
-      if(window.onDistrictChange) window.onDistrictChange(dist);
+      if (window.applyLanguage) window.applyLanguage(lang);
+      if (window.onDistrictChange) window.onDistrictChange(dist);
     }
-    function syncConsoleLanguage(lang) {
-      // Sync audio voice language preference across session
-      console.log("Language switched to:", lang);
+
+    function onConsoleLangChange(lang) {
+      if (window.applyLanguage) window.applyLanguage(lang);
     }
   </script>
 </body>

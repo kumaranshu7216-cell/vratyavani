@@ -1,14 +1,129 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Single-Page Unified Engine
- * Admin Credentials: admin@vratyavani.ai (or 'admin') / Admin@2026
+ * VratyaVani AI (व्रात्यवाणी) — Dynamic Multilingual Engine with Map Sync
  */
 
 window.currentDistrict = "muzaffarpur";
+window.currentLanguage = "hi-IN";
 let currentCategory = "major";
 let mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
 const STORAGE_KEY = "vratyavani_custom_records";
+
+// Multi-language UI Dictionaries
+const i18n = {
+  "hi-IN": {
+    heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
+    heroSub: "वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "प्रमुख धरोहर (Major)",
+    tabMonument: "स्मारक (Monuments)",
+    tabGem: "छिपे रत्न (Undiscovered)",
+    tabArtisan: "स्थानीय शिल्पी (Artisans)",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
+    btnListen: "🎙️ AI सुनें",
+    btnMap: "📍 मैप",
+    btnArtisan: "💬 कारीगर",
+    btnPlay: "▶ चलाएं (Play)",
+    btnStop: "⏹ चल रहा है...",
+    btnReplay: "▶ पुनः सुनें",
+    emptyMsg: "इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है। Admin Portal से नया डेटा जोड़ें।"
+  },
+  "en-IN": {
+    heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
+    heroSub: "From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "Major Heritage",
+    tabMonument: "Monuments",
+    tabGem: "Undiscovered Gems",
+    tabArtisan: "Local Artisans",
+    mapTitle: "📍 Live Heritage Map",
+    voiceConsoleTitle: "🎙️ Bhashini AI Audio Guide",
+    nowPlayingDefault: "Select a heritage site to listen in your voice...",
+    btnListen: "🎙️ AI Listen",
+    btnMap: "📍 Map",
+    btnArtisan: "💬 Artisan",
+    btnPlay: "▶ Play Audio",
+    btnStop: "⏹ Playing...",
+    btnReplay: "▶ Replay",
+    emptyMsg: "No records verified in this category yet. Add new data from Admin Portal."
+  },
+  "pa-IN": {
+    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
+    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "ਮੁੱਖ ਵਿਰਾਸਤ",
+    tabMonument: "ਸਮਾਰਕ",
+    tabGem: "ਅਣਗੌਲੇ ਰਤਨ",
+    tabArtisan: "ਕਾਰੀਗਰ",
+    mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
+    voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
+    nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
+    btnListen: "🎙️ AI ਸੁਣੋ",
+    btnMap: "📍 ਨਕਸ਼ਾ",
+    btnArtisan: "💬 ਕਾਰੀਗਰ",
+    btnPlay: "▶ ਚਲਾਓ (Play)",
+    btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
+    btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
+    emptyMsg: "ਇਸ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਫਿਲਹਾਲ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।"
+  },
+  "bho-IN": {
+    heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
+    heroSub: "वैदिक जड़ से आधुनिक AI ले • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "खास धरोहर",
+    tabMonument: "स्मारक",
+    tabGem: "छुपल रतन",
+    tabArtisan: "लोकल कारीगर",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
+    btnListen: "🎙️ AI सुनीं",
+    btnMap: "📍 मैप",
+    btnArtisan: "💬 कारीगर",
+    btnPlay: "▶ बजाईं (Play)",
+    btnStop: "⏹ बाजत बा...",
+    btnReplay: "▶ फेर से सुनीं",
+    emptyMsg: "ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे।"
+  },
+  "mai-IN": {
+    heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
+    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "प्रमुख धरोहर",
+    tabMonument: "स्मारक",
+    tabGem: "लुकल रत्न",
+    tabArtisan: "स्थानीय शिल्पी",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
+    btnListen: "🎙️ AI सुनू",
+    btnMap: "📍 मैप",
+    btnArtisan: "💬 शिल्पी",
+    btnPlay: "▶ बजाउ (Play)",
+    btnStop: "⏹ बाजि रहल अछि...",
+    btnReplay: "▶ पुनः सुनू",
+    emptyMsg: "एहि श्रेणी में एखन कोनो रेकॉर्ड नहि अछि।"
+  }
+};
+
+// Language Application Engine
+window.applyLanguage = function(langKey) {
+  window.currentLanguage = langKey;
+  const t = i18n[langKey] || i18n["hi-IN"];
+
+  document.getElementById("heroTagline").innerText = t.heroTitle;
+  document.getElementById("heroSubTagline").innerText = t.heroSub;
+  document.getElementById("tabMajor").innerText = t.tabMajor;
+  document.getElementById("tabMonument").innerText = t.tabMonument;
+  document.getElementById("tabGem").innerText = t.tabGem;
+  document.getElementById("tabArtisan").innerText = t.tabArtisan;
+  document.getElementById("mapSectionTitle").innerText = t.mapTitle;
+  document.getElementById("audioConsoleTitle").innerText = t.voiceConsoleTitle;
+  if (!activeAudioItem) {
+    document.getElementById("nowPlayingText").innerText = t.nowPlayingDefault;
+  }
+  document.getElementById("langSelect").value = langKey;
+
+  renderCards();
+};
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -97,7 +212,7 @@ window.loadDistrictData = function(districtKey) {
         <strong>${item.title}</strong><br>
         <small style="text-transform:uppercase; color:#c2410c;">${item.category}</small><br>
         <button onclick="selectForVoice('${item.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:700; cursor:pointer;">
-          🎙️ AI वॉयस गाइड
+          🎙️ AI Guide
         </button>
       `);
       mapMarkers.push(marker);
@@ -110,6 +225,8 @@ window.loadDistrictData = function(districtKey) {
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
+
+  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
 
   let items = preloadedItems;
   if (!items) {
@@ -125,7 +242,7 @@ function renderCards(preloadedItems) {
   const filtered = items.filter(item => item.category === currentCategory);
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; padding:20px;">इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है। Admin Portal से नया डेटा जोड़ें।</p>`;
+    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; padding:20px;">${t.emptyMsg}</p>`;
     return;
   }
 
@@ -139,10 +256,10 @@ function renderCards(preloadedItems) {
           <h4 class="card-title">${item.title}</h4>
           <p class="card-desc">${item.desc}</p>
           <div class="card-actions">
-            <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">🎙️ AI सुनें</button>
-            <button class="btn-sm btn-locate" onclick="panToLocation(${item.coords[0]}, ${item.coords[1]})">📍 रडार</button>
+            <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">${t.btnListen}</button>
+            <button class="btn-sm btn-locate" onclick="panToLocation(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
             ${isArtisan && item.artisanPhone ? `
-              <a href="https://wa.me/${item.artisanPhone}?text=नमस्ते! मैंने VratyaVani AI पर आपकी कला देखी।" target="_blank" class="btn-sm btn-artisan-wa">💬 कारीगर</a>
+              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I found your art on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">${t.btnArtisan}</a>
             ` : ''}
           </div>
         </div>
@@ -174,28 +291,31 @@ function selectForVoice(itemId) {
   `;
   const playBtn = document.getElementById("playAudioBtn");
   playBtn.disabled = false;
-  playBtn.innerText = "▶ AI आवाज़ सुनें";
+  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
+  playBtn.innerText = t.btnPlay;
 }
 
 function togglePlayVoice() {
   if (!activeAudioItem) return;
 
+  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
+
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(activeAudioItem.bhashiniAudioText);
-    utterance.lang = document.getElementById("langSelect").value;
+    utterance.lang = window.currentLanguage;
     utterance.rate = 0.92;
 
     utterance.onstart = () => {
-      document.getElementById("playAudioBtn").innerText = "⏹ चल रहा है...";
+      document.getElementById("playAudioBtn").innerText = t.btnStop;
     };
     utterance.onend = () => {
-      document.getElementById("playAudioBtn").innerText = "▶ पुनः सुनें";
+      document.getElementById("playAudioBtn").innerText = t.btnReplay;
     };
 
     window.speechSynthesis.speak(utterance);
   } else {
-    alert("डिवाइस में वॉयस सिंथेसिस उपलब्ध नहीं है।");
+    alert("Voice synthesis not supported on this browser.");
   }
 }
 
@@ -217,8 +337,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- ADMIN LOGIN & IN-PAGE DASHBOARD LOGIC ---------------- //
-
+// Admin Gate Handlers
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
@@ -238,13 +357,12 @@ function handleAdminLogin(e) {
   const uid = document.getElementById("adminUserId").value.trim();
   const pass = document.getElementById("adminPassword").value.trim();
 
-  // Validate Credentials
   if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
     document.getElementById("loginModal").style.display = "none";
     openAdminPanel();
   } else {
-    alert("अमान्य क्रेडेंशियल्स! सही Admin User ID और Password दर्ज करें। (ID: admin, Pass: Admin@2026)");
+    alert("अमान्य क्रेडेंशियल्स! सही ID: admin और Pass: Admin@2026 डालें।");
   }
 }
 
@@ -322,7 +440,6 @@ async function handleAdminSubmit(e) {
     source: "Firebase Cloud Synced"
   };
 
-  // Firebase Firestore Sync
   if (window.saveToFirestore) {
     const cloudId = await window.saveToFirestore(newRecord);
     if (cloudId) newRecord.cloudDocId = cloudId;
@@ -332,7 +449,7 @@ async function handleAdminSubmit(e) {
   customRecords.unshift(newRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर तुरंत लाइव कर दिया गया है!`);
+  alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर लाइव कर दिया गया है!`);
   e.target.reset();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
