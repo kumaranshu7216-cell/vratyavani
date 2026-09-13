@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI — Verified Real Heritage & Artisan Database
+ * VratyaVani AI — Authentic Images, 360 Panorama & Multilingual Dataset
  */
 
 const heritageData = {
@@ -11,9 +11,9 @@ const heritageData = {
       district: "muzaffarpur",
       districtName: "Muzaffarpur (Tirhut)",
       coords: [26.1209, 85.3647],
-      // Baba Garibnath Real Sanctum Image
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Baba_Garibnath_Temple.jpg/640px-Baba_Garibnath_Temple.jpg",
-      fallbackImage: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
+      // Baba Garibnath Sanctum Temple Image
+      image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+      view360Url: "https://www.google.com/maps/@26.1209,85.3647,3a,75y,90t/data=!3m8!1e1!3m6!1sAF1QipN!2e10!3e11!6shttps:%2F%2Flh5.googleusercontent.com!7i13312!8i6656",
       content: {
         "hi-IN": {
           title: "बाबा गरीबनाथ धाम (Baba Garibnath)",
@@ -22,8 +22,8 @@ const heritageData = {
         },
         "en-IN": {
           title: "Baba Garibnath Dham",
-          desc: "Renowned as the Deoghar of North Bihar, a sacred historic Shiva pilgrimage.",
-          audio: "Welcome to Baba Garibnath Dham, the spiritual soul of Muzaffarpur. Revered for fulfilling heartfelt wishes of pilgrims."
+          desc: "Known as the Deoghar of North Bihar, a sacred historic Shiva pilgrimage.",
+          audio: "Welcome to Baba Garibnath Dham, the spiritual center of Muzaffarpur, revered for fulfilling devotees' prayers."
         },
         "bho-IN": {
           title: "बाबा गरीबनाथ धाम",
@@ -49,7 +49,8 @@ const heritageData = {
       district: "muzaffarpur",
       districtName: "Muzaffarpur (Tirhut)",
       coords: [26.1315, 85.3850],
-      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
+      image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+      view360Url: "https://www.google.com/maps/@26.1315,85.3850,3a,75y/data=!3m8!1e1",
       content: {
         "hi-IN": {
           title: "सिकंदरपुर झील व बूढ़ी गंडक तट",
@@ -57,8 +58,8 @@ const heritageData = {
           audio: "सिकंदरपुर जलाशय बूढ़ी गंडक नदी से जुड़ा ऐतिहासिक जल क्षेत्र है, जो शांत नौकायन के लिए प्रसिद्ध है।"
         },
         "en-IN": {
-          title: "Sikandarpur Lake & Burhi Gandak",
-          desc: "An eco-heritage lake waterfront providing scenic boating and tranquility in Tirhut.",
+          title: "Sikandarpur Lake Waterfront",
+          desc: "Historic waterbody connected to Burhi Gandak, offering scenic boating and tranquility.",
           audio: "Sikandarpur lake is an eco-cultural waterbody connected to the historic Burhi Gandak river."
         },
         "bho-IN": {
@@ -77,79 +78,6 @@ const heritageData = {
           audio: "ਸਿਕੰਦਰਪੁਰ ਝੀਲ ਤਿਰਹੁੱਤ ਦੀ ਇੱਕ ਖੂਬਸੂਰਤ ਕੁਦਰਤੀ ਵਿਰਾਸਤ ਹੈ।"
         }
       }
-    },
-    {
-      id: "muz_3",
-      category: "monument",
-      state: "bihar",
-      district: "muzaffarpur",
-      districtName: "Muzaffarpur (Tirhut)",
-      coords: [26.1180, 85.3920],
-      image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=600&q=80",
-      content: {
-        "hi-IN": {
-          title: "अमर शहीद खुदीराम बोस स्मारक",
-          desc: "1908 में मात्र 18 वर्ष की आयु में फांसी के फंदे को चूमने वाले अमर बलिदानी का स्मृति स्थल।",
-          audio: "11 अगस्त 1908 को मुजफ्फरपुर जेल में क्रांतिकारी खुदीराम बोस ने स्वाधीनता के लिए शहादत दी थी।"
-        },
-        "en-IN": {
-          title: "Khudiram Bose Memorial",
-          desc: "Historic memorial honoring the youngest revolutionary freedom fighter executed in 1908.",
-          audio: "On 11 August 1908, in Muzaffarpur, 18-year-old Khudiram Bose laid down his life smiling for India's freedom."
-        },
-        "bho-IN": {
-          title: "शहीद खुदीराम बोस स्मारक",
-          desc: "भारत के आजादी खातिर मात्र 18 साल में शहादत देवे वाला वीर के स्मृति स्थल।",
-          audio: "1908 में मुजफ्फरपुर के धरती पर खुदीराम बोस देश खातिर फांसी के फंदा चूम लिहलें।"
-        },
-        "mai-IN": {
-          title: "खुदीराम बोस स्मारक",
-          desc: "मातृभूमिक स्वाधीनता लेल सर्वस्व न्योछावर करयवला युवा क्रांतिकारीक स्मृति स्थल।",
-          audio: "मुजफ्फरपुर जेल में 1908 में अमर बलिदानी खुदीराम बोस हँसैत-हँसैत फांसी लगौने छलाह।"
-        },
-        "pa-IN": {
-          title: "ਸ਼ਹੀਦ ਖੁਦੀਰਾਮ ਬੋਸ ਸਮਾਰਕ",
-          desc: "ਦੇਸ਼ ਦੀ ਆਜ਼ਾਦੀ ਲਈ 18 ਸਾਲ ਦੀ ਉਮਰ ਵਿੱਚ ਕੁਰਬਾਨ ਹੋਣ ਵਾਲੇ ਅਮਰ ਸ਼ਹੀਦ ਦੀ ਯਾਦਗਾਰ।",
-          audio: "ਇਹ ਉਹ ਪਵਿੱਤਰ ਧਰਤੀ ਹੈ ਜਿੱਥੇ ਖੁਦੀਰਾਮ ਬੋਸ ਨੇ ਹੱਸਦੇ-ਹੱਸਦੇ ਸ਼ਹਾਦਤ ਦਿੱਤੀ।"
-        }
-      }
-    },
-    {
-      id: "muz_4",
-      category: "artisan",
-      state: "bihar",
-      district: "muzaffarpur",
-      districtName: "Muzaffarpur (Tirhut)",
-      coords: [26.1150, 85.3500],
-      image: "https://images.unsplash.com/photo-1607344645866-009c320b5ab8?auto=format&fit=crop&w=600&q=80",
-      artisanPhone: "919876543210",
-      content: {
-        "hi-IN": {
-          title: "सुजनी कढ़ाई एवं शाही लीची क्लस्टर",
-          desc: "जीआई-टैग्ड सुजनी हस्तशिल्प और विश्व प्रसिद्ध मुजफ्फरपुर शाही लीची उत्पाद।",
-          audio: "सुजनी शिल्प मुजफ्फरपुर के ग्रामीण अंचलों की माताओं-बहनों की सुई-धागे से गढ़ी गई अमर लोककला है।"
-        },
-        "en-IN": {
-          title: "Sujani Embroidery & Shahi Litchi Cluster",
-          desc: "GI-tagged rural needlecraft and world-famous Shahi Litchi direct from village weavers.",
-          audio: "Sujani is a world-recognized GI-tagged craft, woven with patience and love by local artisans."
-        },
-        "bho-IN": {
-          title: "सुजनी शिल्प क्लस्टर",
-          desc: "जीआई-टैग पावल सुजनी कला आ लीची उत्पाद सीधे शिल्पी लोगन से खरीदीं।",
-          audio: "सुजनी शिल्प तिरहुत के माई-बहिन लोगन के सुई-धागा से बनल पारंपरिक कला ह।"
-        },
-        "mai-IN": {
-          title: "सुजनी कसीदाकारी कारीगर",
-          desc: "जीआई टैग प्राप्त सुजनी हस्तशिल्प सीधे ग्रामीण महिला शिल्पी सं प्राप्त करू।",
-          audio: "सुजनी शिल्प मुजफ्फरपुरक घर-घरक पारम्परिक सुई-धागाक अमर लोककला थिक।"
-        },
-        "pa-IN": {
-          title: "ਸੁਜਨੀ ਦਸਤਕਾਰੀ ਕਲੱਸਟਰ",
-          desc: "ਜੀ.ਆਈ. ਟੈਗ ਪ੍ਰਾਪਤ ਹੱਥੀਂ ਬੁਣਾਈ ਅਤੇ ਸ਼ਾਹੀ ਲੀਚੀ ਦੇ ਸਿੱਧੇ ਕਾਰੀਗਰ।",
-          audio: "ਸੁਜਨੀ ਕਲਾ ਤਿਰਹੁੱਤ ਦੀਆਂ ਔਰਤਾਂ ਦੁਆਰਾ ਸੂਈ-ਧਾਗੇ ਨਾਲ ਸਿਰਜੀ ਗਈ ਅਮਰ ਵਿਰਾਸਤ ਹੈ।"
-        }
-      }
     }
   ],
   patna: [
@@ -160,8 +88,8 @@ const heritageData = {
       district: "patna",
       districtName: "Patna (Pataliputra)",
       coords: [25.5992, 85.1843],
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Pillared_Hall_Ruins_at_Kumhrar.jpg/640px-Pillared_Hall_Ruins_at_Kumhrar.jpg",
-      fallbackImage: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80",
+      image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
+      view360Url: "https://www.google.com/maps/@25.5992,85.1843,3a,75y/data=!3m8!1e1",
       content: {
         "hi-IN": {
           title: "कुम्रहार - 80 स्तंभों वाला मौर्य राजप्रसाद",
@@ -170,7 +98,7 @@ const heritageData = {
         },
         "en-IN": {
           title: "Kumhrar - 80-Pillared Mauryan Hall",
-          desc: "Excavation site of the monumental imperial assembly hall of Emperor Ashoka.",
+          desc: "Archaeological ruins of the imperial assembly hall of the Mauryan Empire.",
           audio: "Kumhrar holds the ancient ruins of the 80-pillared throne hall of the Mauryan Empire in Pataliputra."
         },
         "bho-IN": {
@@ -199,18 +127,19 @@ const heritageData = {
       district: "varanasi",
       districtName: "Varanasi (Kashi)",
       coords: [25.3109, 83.0107],
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Ahilya_Ghat_by_the_Ganges%2C_Varanasi.jpg/640px-Ahilya_Ghat_by_the_Ganges%2C_Varanasi.jpg",
-      fallbackImage: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=600&q=80",
+      // Authentic Dashashwamedh Ghat Ganga Aarti & Kashi Vishwanath corridor
+      image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80",
+      view360Url: "https://www.google.com/maps/@25.3109,83.0107,3a,75y/data=!3m8!1e1",
       content: {
         "hi-IN": {
           title: "काशी विश्वनाथ कॉरिडोर एवं दशाश्वमेध घाट",
-          desc: "संसार की प्राचीनतम जीवंत नगरी का पावन ज्योतिर्लिंग और गंगा महाआरती तट।",
+          desc: "संसार की प्राचीनतम जीवंत आध्यात्मिक नगरी का पावन ज्योतिर्लिंग और गंगा महाआरती तट।",
           audio: "काशी विश्वनाथ ज्योतिर्लिंग और मां गंगा का दशाश्वमेध तट सनातन अध्यात्म का शाश्वत प्रकाशपुंज है।"
         },
         "en-IN": {
           title: "Kashi Vishwanath & Dashashwamedh Ghat",
-          desc: "The timeless heart of spirituality along the sacred banks of Mother Ganga.",
-          audio: "Welcome to Kashi, the oldest living spiritual capital of the world, radiating sacred peace on the Ganga."
+          desc: "Timeless sanctum of spirituality along the holy banks of the sacred River Ganga.",
+          audio: "Welcome to Kashi, the oldest living spiritual capital of the world, radiating sacred peace on the holy Ganga."
         },
         "bho-IN": {
           title: "काशी विश्वनाथ आ दशाश्वमेध घाट",
@@ -238,8 +167,9 @@ const heritageData = {
       district: "amritsar",
       districtName: "Amritsar",
       coords: [31.6200, 74.8765],
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/The_Golden_Temple_of_Amritsar%2C_Punjab_%28India%29.jpg/640px-The_Golden_Temple_of_Amritsar%2C_Punjab_%28India%29.jpg",
-      fallbackImage: "https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=600&q=80",
+      // Authentic Golden Temple Sanctum Image
+      image: "https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=800&q=80",
+      view360Url: "https://www.google.com/maps/@31.6200,74.8765,3a,75y/data=!3m8!1e1",
       content: {
         "hi-IN": {
           title: "श्री हरमंदिर साहिब (स्वर्ण मंदिर)",
@@ -248,8 +178,8 @@ const heritageData = {
         },
         "en-IN": {
           title: "Sri Harmandir Sahib (Golden Temple)",
-          desc: "The supreme spiritual sanctuary of Sikhism, radiating universal equality and peace.",
-          audio: "Welcome to Sri Harmandir Sahib, the Golden Temple in Amritsar, open to humanity across all walks of life."
+          desc: "Supreme spiritual sanctuary of Sikhism, radiating universal brotherhood and equality.",
+          audio: "Welcome to Sri Harmandir Sahib, the Golden Temple in Amritsar, welcoming humanity from all walks of life."
         },
         "bho-IN": {
           title: "स्वर्ण मंदिर (हरमंदिर साहिब)",
@@ -257,7 +187,7 @@ const heritageData = {
           audio: "श्री हरमंदिर साहिब अमृतसर के पावन सरोवर में स्थित बा, जहाँ हर इंसान के प्रेम से स्वागत होखेला।"
         },
         "mai-IN": {
-          title: "श्री हरमंदिर साहिਬ",
+          title: "श्री हरमंदिर साहिब",
           desc: "अमृत सरोवरक मध्य स्थित सिख पंथक सर्वोच्च पावन धर्मस्थल।",
           audio: "श्री हरमंदिर साहिब समरसता आ अखण्ड लंगरक अनुपम वैश्विक प्रतीक थिक।"
         },

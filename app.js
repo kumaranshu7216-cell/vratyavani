@@ -1,16 +1,15 @@
 /**
- * VratyaVani AI — Fully Translated Multilingual Engine & Google Maps Integration
+ * VratyaVani AI — Client Logic with Dedicated Views & Instant Translation
  */
 
 window.currentDistrict = "muzaffarpur";
 window.currentLanguage = "hi-IN";
 let currentCategory = "major";
-let mapInstance = null;
+window.mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
-// Multi-language UI Strings
 const i18n = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -23,8 +22,7 @@ const i18n = {
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
     btnListen: "🎙️ AI सुनें",
-    btnMap: "📍 मैप / दिशा",
-    btnArtisan: "💬 कारीगर",
+    btnMap: "📍 मैप देखें",
     btnPlay: "▶ चलाएं (Play)",
     btnStop: "⏹ चल रहा है...",
     btnReplay: "▶ पुनः सुनें",
@@ -41,8 +39,7 @@ const i18n = {
     voiceConsoleTitle: "🎙️ Bhashini AI Audio Guide",
     nowPlayingDefault: "Select a heritage site to listen to the narrative...",
     btnListen: "🎙️ AI Listen",
-    btnMap: "📍 Map / Directions",
-    btnArtisan: "💬 Artisan",
+    btnMap: "📍 View on Map",
     btnPlay: "▶ Play Audio",
     btnStop: "⏹ Playing...",
     btnReplay: "▶ Replay",
@@ -59,8 +56,7 @@ const i18n = {
     voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
     nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
     btnListen: "🎙️ AI ਸੁਣੋ",
-    btnMap: "📍 ਨਕਸ਼ਾ / ਰਸਤਾ",
-    btnArtisan: "💬 ਕਾਰੀਗਰ",
+    btnMap: "📍 ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ",
     btnPlay: "▶ ਚਲਾਓ (Play)",
     btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
     btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
@@ -77,8 +73,7 @@ const i18n = {
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
     btnListen: "🎙️ AI सुनीं",
-    btnMap: "📍 मैप / रास्ता",
-    btnArtisan: "💬 कारीगर",
+    btnMap: "📍 मैप पर देखीं",
     btnPlay: "▶ बजाईं (Play)",
     btnStop: "⏹ बाजत बा...",
     btnReplay: "▶ फेर से सुनीं",
@@ -95,8 +90,7 @@ const i18n = {
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
     btnListen: "🎙️ AI सुनू",
-    btnMap: "📍 मैप / दिशानिर्देश",
-    btnArtisan: "💬 शिल्पी",
+    btnMap: "📍 मैप पर देखू",
     btnPlay: "▶ बजाउ (Play)",
     btnStop: "⏹ बाजि रहल अछि...",
     btnReplay: "▶ पुनः सुनू",
@@ -124,14 +118,12 @@ window.applyLanguage = function(langKey) {
   renderCards();
 };
 
-// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
 
-// Track Network
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -155,10 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initMap() {
-  mapInstance = L.map('map').setView([26.1209, 85.3647], 12);
+  window.mapInstance = L.map('map').setView([26.1209, 85.3647], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap | VratyaVani AI'
-  }).addTo(mapInstance);
+  }).addTo(window.mapInstance);
 }
 
 function onDistrictChange(districtKey) {
@@ -178,9 +170,7 @@ function getCustomRecords() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 window.loadDistrictData = function(districtKey) {
@@ -194,25 +184,25 @@ window.loadDistrictData = function(districtKey) {
     items = [...matching, ...items];
   } catch (e) {}
 
-  mapMarkers.forEach(m => mapInstance.removeLayer(m));
+  mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
   mapMarkers = [];
 
   if (items.length > 0) {
-    mapInstance.flyTo(items[0].coords, 12);
+    window.mapInstance.flyTo(items[0].coords, 12);
     items.forEach(item => {
       const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title });
-      const marker = L.marker(item.coords).addTo(mapInstance);
+      const marker = L.marker(item.coords).addTo(window.mapInstance);
       marker.bindPopup(`
         <strong>${locContent.title}</strong><br>
-        <button onclick="selectForVoice('${item.id}')" style="margin-top:5px; padding:3px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+        <button onclick="selectForVoice('${item.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
           🎙️ Audio
         </button>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.coords[0]},${item.coords[1]}" target="_blank" style="margin-top:5px; display:inline-block; padding:3px 8px; font-size:11px; background:#1e1b4b; color:#fff; border-radius:4px; text-decoration:none;">
-          🗺️ Google Maps
-        </a>
       `);
       mapMarkers.push(marker);
     });
+
+    // Update bottom Google Maps direct navigation link
+    document.getElementById("btnDirectGoogleMaps").href = `https://www.google.com/maps/dir/?api=1&destination=${items[0].coords[0]},${items[0].coords[1]}`;
   }
 
   renderCards(items);
@@ -238,7 +228,7 @@ function renderCards(preloadedItems) {
   const filtered = items.filter(item => item.category === currentCategory);
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; padding:20px;">${t.emptyMsg}</p>`;
+    container.innerHTML = `<p style="color:var(--text-muted); padding:20px; text-align:center;">${t.emptyMsg}</p>`;
     return;
   }
 
@@ -248,16 +238,21 @@ function renderCards(preloadedItems) {
 
     const cardHtml = `
       <div class="heritage-card">
-        <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='${item.fallbackImage || 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80'}';" loading="lazy" />
+        <div class="card-image-wrap">
+          <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
+          ${item.view360Url ? `
+            <a href="${item.view360Url}" target="_blank" class="btn-view360-badge">🌐 360° View</a>
+          ` : ''}
+        </div>
         <div class="card-content">
           <span class="card-tag">${item.category}</span>
           <h4 class="card-title">${locContent.title}</h4>
           <p class="card-desc">${locContent.desc}</p>
           <div class="card-actions">
             <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">${t.btnListen}</button>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.coords[0]},${item.coords[1]}" target="_blank" class="btn-sm btn-locate">${t.btnMap}</a>
+            <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
             ${isArtisan && item.artisanPhone ? `
-              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I found your art on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">${t.btnArtisan}</a>
+              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I found your art on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">💬 WhatsApp</a>
             ` : ''}
           </div>
         </div>
@@ -265,6 +260,15 @@ function renderCards(preloadedItems) {
     `;
     container.innerHTML += cardHtml;
   });
+}
+
+// Focus on Map tab and zoom
+function focusOnMapTab(lat, lng) {
+  switchMobileTab('map');
+  setTimeout(() => {
+    window.mapInstance.flyTo([lat, lng], 16);
+    document.getElementById("btnDirectGoogleMaps").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  }, 250);
 }
 
 function selectForVoice(itemId) {
@@ -412,7 +416,7 @@ async function handleAdminSubmit(e) {
   const dist = document.getElementById("recDistrict").value;
   const title = document.getElementById("recTitle").value.trim();
   const coordsRaw = document.getElementById("recCoords").value.trim();
-  const phone = document.getElementById("recPhone").value.trim();
+  const image = document.getElementById("recImage").value.trim();
   const desc = document.getElementById("recDesc").value.trim();
 
   let coords = [26.1209, 85.3647];
@@ -426,8 +430,7 @@ async function handleAdminSubmit(e) {
     category: cat,
     district: dist,
     coords: coords,
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
-    artisanPhone: phone || null,
+    image: image,
     source: "Firebase Cloud",
     content: {
       "en-IN": { title: title, desc: desc, audio: desc },

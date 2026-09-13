@@ -8,37 +8,40 @@
   
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body onload="startAppFlow()">
 
-  <!-- 1. Splash Intro Screen -->
-  <div id="splashScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#1e1b4b; z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fff;">
-    <div style="width:70px; height:70px; border-radius:18px; background:linear-gradient(135deg,#d97706,#c2410c); display:flex; align-items:center; justify-content:center; font-size:36px; box-shadow:0 0 25px rgba(217,119,6,0.6);">
+  <!-- 1. Smooth Fade-Out Splash Screen -->
+  <div id="splashScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#1e1b4b; z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fff; transition:opacity 0.6s ease;">
+    <div style="width:72px; height:72px; border-radius:20px; background:linear-gradient(135deg,#d97706,#c2410c); display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 0 30px rgba(217,119,6,0.5); animation:pulseLogo 1.5s infinite alternate;">
       🏛️
     </div>
-    <h1 style="font-family:'Cinzel',serif; font-size:28px; margin-top:16px; letter-spacing:1px;">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
-    <p style="font-size:12px; color:#cbd5e1; letter-spacing:2px; text-transform:uppercase;">The Purkha Heritage Engine</p>
-    <div style="margin-top:20px; width:40px; height:40px; border:3px solid rgba(255,255,255,0.2); border-top-color:#d97706; border-radius:50%; animation:spin 1s linear infinite;"></div>
+    <h1 style="font-family:'Cinzel',serif; font-size:26px; margin-top:16px; letter-spacing:1px;">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
+    <p style="font-size:11px; color:#cbd5e1; letter-spacing:2px; text-transform:uppercase;">The Purkha Heritage Engine</p>
+    <div style="margin-top:24px; width:34px; height:34px; border:3px solid rgba(255,255,255,0.2); border-top-color:#d97706; border-radius:50%; animation:spin 0.9s linear infinite;"></div>
   </div>
-  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulseLogo { from { transform: scale(0.95); } to { transform: scale(1.05); } }
+  </style>
 
-  <!-- 2. Clean English Location & Language Selector Modal -->
+  <!-- 2. Clean English Location & Language Selector Modal (VratyaVani Shree) -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-        <span style="font-size:24px;">🏛️</span>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+        <span style="font-size:22px;">🏛️</span>
         <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Shree</h3>
       </div>
-      <p style="font-size:12px; color:#cbd5e1; margin-bottom:16px;">Select state, district, zone and preferred dialect</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:14px;">Configure territory and audio narration language</p>
       
-      <div style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">State</label>
-          <select id="selState" style="width:100%; padding:9px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateChange(this.value)">
+          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateChange(this.value)">
             <option value="bihar" selected>Bihar</option>
             <option value="up">Uttar Pradesh</option>
             <option value="punjab">Punjab</option>
@@ -46,22 +49,22 @@
         </div>
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">District</label>
-          <select id="selDistrict" style="width:100%; padding:9px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onDistrictModalChange(this.value)">
+          <select id="selDistrict" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onDistrictModalChange(this.value)">
             <option value="muzaffarpur" selected>Muzaffarpur (Tirhut)</option>
             <option value="patna">Patna (Pataliputra)</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">Zone / Village Cluster</label>
-          <select id="selVillage" style="width:100%; padding:9px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+          <select id="selVillage" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
             <option value="all">Entire District Heritage Hub</option>
-            <option value="garhan">Garhan / Bochaha Cluster</option>
-            <option value="sikandarpur">Sikandarpur Lake Sector</option>
+            <option value="garhan">Garhan / Bochaha</option>
+            <option value="sikandarpur">Sikandarpur Lake</option>
           </select>
         </div>
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">Preferred Voice Guide Language</label>
-          <select id="selLang" style="width:100%; padding:9px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+          <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
             <option value="en-IN">English</option>
             <option value="hi-IN" selected>Hindi (हिंदी)</option>
             <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
@@ -69,7 +72,7 @@
             <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
           </select>
         </div>
-        <button onclick="confirmLocationSelection()" style="margin-top:10px; padding:11px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
+        <button onclick="confirmLocationSelection()" style="margin-top:8px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
           Enter VratyaVani AI ➔
         </button>
       </div>
@@ -89,12 +92,11 @@
     <div class="nav-controls">
       <span id="networkStatusBadge" class="network-badge online">● Online</span>
       <select id="districtSelect" onchange="onDistrictChange(this.value)">
-        <option value="muzaffarpur" selected>Muzaffarpur (Tirhut)</option>
-        <option value="patna">Patna (Pataliputra)</option>
-        <option value="varanasi">Varanasi (Kashi)</option>
-        <option value="amritsar">Amritsar (Punjab)</option>
+        <option value="muzaffarpur" selected>Muzaffarpur</option>
+        <option value="patna">Patna</option>
+        <option value="varanasi">Varanasi</option>
+        <option value="amritsar">Amritsar</option>
       </select>
-      <button class="admin-link" onclick="openLoginModal()">⚙️ Admin</button>
     </div>
   </header>
 
@@ -103,71 +105,69 @@
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
     <div class="hero-badges">
-      <span>🏛️ 4-Tier District Hub</span>
-      <span>🎙️ Bhashini Audio</span>
-      <span>🔥 Cloud Synced</span>
+      <span>🏛️ 4-Tier Hub</span>
+      <span>🎙️ Bhashini AI</span>
+      <span>🔥 Firebase Cloud</span>
       <span>🛍️ Local Artisans</span>
     </div>
   </section>
 
-  <!-- Main View -->
-  <main class="main-layout" id="homeView">
-    
-    <!-- Left Explorer Column -->
-    <section>
-      <div class="category-tabs">
-        <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
-        <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक (Monuments)</button>
-        <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
-        <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
-      </div>
-      <div id="cardsGrid" class="cards-grid"></div>
-    </section>
+  <!-- TAB 1: HOME VIEW (Heritage Cards + Audio Console Only) -->
+  <main class="view-container" id="homeView">
+    <div class="category-tabs">
+      <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
+      <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक (Monuments)</button>
+      <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
+      <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
+    </div>
 
-    <!-- Right Map & Voice Console -->
-    <aside class="map-sidebar" id="mapSidebarSection">
-      <div class="map-header">
-        <h3 id="mapSectionTitle">📍 लाइव हेरिटेज मैप (Map)</h3>
-        <span id="currentDistrictBadge">Muzaffarpur</span>
-      </div>
-      <div id="map"></div>
+    <div id="cardsGrid" class="cards-grid"></div>
 
-      <div class="voice-console">
-        <div class="console-title">
-          <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
-          <select id="langSelect" onchange="onConsoleLangChange(this.value)">
-            <option value="hi-IN">हिंदी (Hindi)</option>
-            <option value="en-IN">English</option>
-            <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
-            <option value="mai-IN">मैथिली (Maithili)</option>
-            <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
-          </select>
-        </div>
-        <div class="audio-now-playing" id="nowPlayingText">
-          धरोहर चुनें और अपनी बोली में इतिहास सुनें...
-        </div>
-        <div class="audio-controls">
-          <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ चलाएं (Play)</button>
-          <button id="qrGuideBtn" onclick="showQrModal()">📲 QR कोड</button>
-        </div>
+    <!-- Embedded Bhashini Voice Console -->
+    <div class="voice-console">
+      <div class="console-title">
+        <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
+        <select id="langSelect" onchange="onConsoleLangChange(this.value)">
+          <option value="hi-IN">हिंदी (Hindi)</option>
+          <option value="en-IN">English</option>
+          <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
+          <option value="mai-IN">मैथिली (Maithili)</option>
+          <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+        </select>
       </div>
-    </aside>
-
+      <div class="audio-now-playing" id="nowPlayingText">
+        धरोहर चुनें और अपनी बोली में इतिहास सुनें...
+      </div>
+      <div class="audio-controls">
+        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ चलाएं (Play)</button>
+        <button id="qrGuideBtn" onclick="showQrModal()">📲 QR कोड</button>
+      </div>
+    </div>
   </main>
 
-  <!-- Mobile Bottom Application Bar -->
+  <!-- TAB 2: DEDICATED MAP VIEW (Interactive Leaflet + Google Maps Action) -->
+  <main class="view-container" id="mapView">
+    <div class="map-header">
+      <h3 id="mapSectionTitle">📍 लाइव हेरिटेज मैप (Map)</h3>
+      <span id="currentDistrictBadge">Muzaffarpur</span>
+    </div>
+    <div id="map"></div>
+    <div class="map-actions-panel">
+      <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct">
+        🗺️ Open in Google Maps (Live Turn-by-Turn Navigation)
+      </a>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Application Bar (Home, Map, Admin) -->
   <nav class="bottom-app-bar">
-    <div class="bottom-nav-item active" onclick="switchMobileTab('home')">
+    <div class="bottom-nav-item active" id="btnNavHome" onclick="switchMobileTab('home')">
       <span class="icon">🏛️</span>
       <span id="bNavHome">Home</span>
     </div>
-    <div class="bottom-nav-item" onclick="switchMobileTab('map')">
+    <div class="bottom-nav-item" id="btnNavMap" onclick="switchMobileTab('map')">
       <span class="icon">📍</span>
       <span id="bNavMap">Map</span>
-    </div>
-    <div class="bottom-nav-item" onclick="switchMobileTab('voice')">
-      <span class="icon">🎙️</span>
-      <span id="bNavVoice">Audio</span>
     </div>
     <div class="bottom-nav-item" onclick="openLoginModal()">
       <span class="icon">⚙️</span>
@@ -183,7 +183,7 @@
       <div style="margin: 15px 0;">
         <img id="qrImage" src="" alt="VratyaVani QR" style="width: 180px; height: 180px; border-radius: 8px;" />
       </div>
-      <p style="font-size: 12px; color: var(--text-muted);" id="qrScanDesc">
+      <p style="font-size: 11px; color: var(--text-muted);" id="qrScanDesc">
         Scan on spot to trigger offline narration directly.
       </p>
     </div>
@@ -194,7 +194,7 @@
     <div class="modal-box" style="text-align: left;">
       <span class="close-modal" onclick="closeLoginModal()">&times;</span>
       <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin-bottom: 4px;">Admin Security Gate</h3>
-      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Authorized nodal curation desk only</p>
+      <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Authorized curation desk only</p>
       
       <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
         <div style="display:flex; flex-direction:column; gap:10px;">
@@ -214,7 +214,7 @@
     </div>
   </div>
 
-  <!-- In-Page Admin Curation Panel -->
+  <!-- In-Page Admin Desk -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
     <div class="modal-box" style="text-align: left; max-width: 650px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
@@ -255,8 +255,8 @@
             <input type="text" id="recCoords" required placeholder="26.1209, 85.3647" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">Artisan WhatsApp (Optional)</label>
-            <input type="tel" id="recPhone" placeholder="919876543210" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <label style="font-size:11px; font-weight:bold;">Image URL (Direct JPG/PNG)</label>
+            <input type="url" id="recImage" required placeholder="https://..." style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
             <label style="font-size:11px; font-weight:bold;">Narration Script (Bhashini TTS)</label>
@@ -324,9 +324,7 @@
       try {
         const docRef = await addDoc(collection(db, "heritage_records"), record);
         return docRef.id;
-      } catch (e) {
-        return null;
-      }
+      } catch (e) { return null; }
     };
 
     window.deleteFromFirestore = async function(docId) {
@@ -339,14 +337,17 @@
   <script src="data.js"></script>
   <script src="app.js"></script>
 
-  <!-- Flow & Cascading Scripts -->
   <script>
     function startAppFlow() {
       setTimeout(() => {
-        document.getElementById("splashScreen").style.display = "none";
-        document.getElementById("locationModal").style.display = "flex";
-        onStateChange("bihar");
-      }, 1000);
+        const splash = document.getElementById("splashScreen");
+        splash.style.opacity = "0";
+        setTimeout(() => {
+          splash.style.display = "none";
+          document.getElementById("locationModal").style.display = "flex";
+          onStateChange("bihar");
+        }, 600);
+      }, 1200);
     }
 
     function onStateChange(stateVal) {
@@ -397,18 +398,23 @@
       if (window.applyLanguage) window.applyLanguage(lang);
     }
 
-    // Mobile Bottom Tab Switcher
+    // Dedicated Tab Switcher (Home vs Map)
     function switchMobileTab(tab) {
-      document.querySelectorAll(".bottom-nav-item").forEach(el => el.classList.remove("active"));
+      document.getElementById("btnNavHome").classList.remove("active");
+      document.getElementById("btnNavMap").classList.remove("active");
+
       if (tab === 'home') {
-        event.currentTarget.classList.add("active");
+        document.getElementById("btnNavHome").classList.add("active");
+        document.getElementById("homeView").style.display = "block";
+        document.getElementById("mapView").style.display = "none";
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (tab === 'map') {
-        event.currentTarget.classList.add("active");
-        document.getElementById("map").scrollIntoView({ behavior: 'smooth' });
-      } else if (tab === 'voice') {
-        event.currentTarget.classList.add("active");
-        document.querySelector(".voice-console").scrollIntoView({ behavior: 'smooth' });
+        document.getElementById("btnNavMap").classList.add("active");
+        document.getElementById("homeView").style.display = "none";
+        document.getElementById("mapView").style.display = "block";
+        if (window.mapInstance) {
+          setTimeout(() => { window.mapInstance.invalidateSize(); }, 200);
+        }
       }
     }
   </script>
