@@ -13,7 +13,56 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body onload="openLocationSelector()">
+
+  <!-- Initial Location & Language Selector Modal (Vihaan Purkha Style) -->
+  <div id="locationModal" class="modal-backdrop" style="display: flex; background: rgba(15,23,42,0.95); z-index: 9999;">
+    <div class="modal-box" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold); max-width:400px; text-align:left;">
+      <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); margin-bottom:5px;">🏛️ व्रात्यवाणी चयन (VratyaVani Selector)</h3>
+      <p style="font-size:12px; color:#cbd5e1; margin-bottom:15px;">अपनी लोकेशन और भाषा चुनकर यात्रा शुरू करें</p>
+      
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <label style="font-size:11px; font-weight:bold;">राज्य (State)</label>
+          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+            <option value="bihar" selected>बिहार (Bihar)</option>
+            <option value="up">उत्तर प्रदेश (Uttar Pradesh)</option>
+            पंजाब (Punjab)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:bold;">ज़िला (District)</label>
+          <select id="selDistrict" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="updateDistrictSelection(this.value)">
+            <option value="muzaffarpur" selected>मुजफ्फरपुर (तिरहुत)</option>
+            <option value="patna">पटना (पाटलिपुत्र)</option>
+            <option value="varanasi">वाराणसी (काशी)</option>
+            <option value="amritsar">अमृतसर</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:bold;">गाँव / क्षेत्र (Village / Zone)</label>
+          <select id="selVillage" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+            <option value="all">संपूर्ण ज़िला हब (All Hubs)</option>
+            <option value="garhan">गरहन / बोचहा क्लस्टर</option>
+            <option value="kumhrar">कुम्रहार हेरिटेज ज़ोन</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px; font-weight:bold;">भाषा चुनें (Preferred Language)</label>
+          <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+            <option value="hi-IN" selected>हिंदी (Hindi)</option>
+            <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
+            <option value="mai-IN">मैथिली (Maithili)</option>
+            <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="en-IN">English</option>
+          </select>
+        </div>
+        <button onclick="confirmLocationSelection()" style="margin-top:10px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
+          आगे बढ़ें (Explore VratyaVani)
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <header class="navbar">
@@ -40,7 +89,7 @@
   <!-- Hero -->
   <section class="hero-banner">
     <h2>पुरखों की थाती, डिजिटल वाणी की पाती</h2>
-    <p>वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Radar & Voice Guide</p>
+    <p>वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
     <div class="hero-badges">
       <span>🏛️ 4-Tier District Hub</span>
       <span>🎙️ Bhashini Audio Guide</span>
@@ -66,7 +115,7 @@
     <!-- Right Column: Leaflet Map & Audio Console -->
     <aside class="map-sidebar">
       <div class="map-header">
-        <h3>📍 लाइव हेरिटेज रडार</h3>
+        <h3>📍 लाइव हेरिटेज मैप (Map)</h3>
         <span id="currentDistrictBadge">मुजफ्फरपुर</span>
       </div>
       <div id="map"></div>
@@ -74,7 +123,7 @@
       <div class="voice-console">
         <div class="console-title">
           <span>🎙️ भाषिणी AI ऑडियो गाइड</span>
-          <select id="langSelect">
+          <select id="langSelect" onchange="syncConsoleLanguage(this.value)">
             <option value="hi-IN">हिंदी (Hindi)</option>
             <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
             <option value="mai-IN">मैथिली (Maithili)</option>
@@ -119,7 +168,7 @@
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:12px; font-weight:700;">Admin User ID / Email</label>
-            <input type="text" id="adminUserId" placeholder="admin@vratyavani.ai" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px; margin-top:4px;" />
+            <input type="text" id="adminUserId" placeholder="admin" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px; margin-top:4px;" />
           </div>
           <div>
             <label style="font-size:12px; font-weight:700;">Security Password</label>
@@ -133,7 +182,7 @@
     </div>
   </div>
 
-  <!-- IN-PAGE ADMIN DASHBOARD MODAL (No 404 error!) -->
+  <!-- In-Page Admin Panel -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
     <div class="modal-box" style="text-align: left; max-width: 650px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
@@ -210,10 +259,9 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   
-  <!-- Firebase App & Firestore SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -238,22 +286,7 @@
           localStorage.setItem("vratyavani_firebase_records", JSON.stringify(cloudRecords));
           if (window.loadDistrictData) window.loadDistrictData(window.currentDistrict);
         }
-      } catch (e) {
-        console.log("Offline mode active.");
-      }
-    };
-
-    window.saveToFirestore = async function(record) {
-      try {
-        const docRef = await addDoc(collection(db, "heritage_records"), record);
-        return docRef.id;
-      } catch (e) {
-        return null;
-      }
-    };
-
-    window.deleteFromFirestore = async function(docId) {
-      try { await deleteDoc(doc(db, "heritage_records", docId)); } catch(e) {}
+      } catch (e) {}
     };
 
     window.syncCloudHeritage();
@@ -261,5 +294,36 @@
 
   <script src="data.js"></script>
   <script src="app.js"></script>
+
+  <script>
+    function openLocationSelector() {
+      document.getElementById("locationModal").style.display = "flex";
+    }
+    function updateDistrictSelection(val) {
+      const villageSel = document.getElementById("selVillage");
+      villageSel.innerHTML = "";
+      if(val === "muzaffarpur") {
+        villageSel.innerHTML = `<option value="all">संपूर्ण मुजफ्फरपुर हब</option><option value="garhan">गरहन / बोचहा</option><option value="sikandarpur">सिकंदरपुर झील</option>`;
+      } else if(val === "patna") {
+        villageSel.innerHTML = `<option value="all">संपूर्ण पटना हब</option><option value="kumhrar">कुम्रहार ज़ोन</option>`;
+      } else {
+        villageSel.innerHTML = `<option value="all">मुख्य शहर केंद्र</option>`;
+      }
+    }
+    function confirmLocationSelection() {
+      const dist = document.getElementById("selDistrict").value;
+      const lang = document.getElementById("selLang").value;
+      
+      document.getElementById("districtSelect").value = dist;
+      document.getElementById("langSelect").value = lang;
+      
+      document.getElementById("locationModal").style.display = "none";
+      if(window.onDistrictChange) window.onDistrictChange(dist);
+    }
+    function syncConsoleLanguage(lang) {
+      // Sync audio voice language preference across session
+      console.log("Language switched to:", lang);
+    }
+  </script>
 </body>
 </html>
