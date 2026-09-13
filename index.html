@@ -133,6 +133,77 @@
     </div>
   </div>
 
+  <!-- IN-PAGE ADMIN DASHBOARD MODAL (No 404 error!) -->
+  <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
+    <div class="modal-box" style="text-align: left; max-width: 650px;">
+      <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-bottom:15px;">
+        <div>
+          <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin:0;">🏛️ VratyaVani Curation Desk</h3>
+          <span style="font-size:11px; color:#15803d; font-weight:bold;">● Logged in as Admin</span>
+        </div>
+        <button onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:bold; cursor:pointer;">लॉगआउट</button>
+      </div>
+
+      <form id="addRecordForm" onsubmit="handleAdminSubmit(event)">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:11px; font-weight:bold;">श्रेणी</label>
+            <select id="recCat" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
+              <option value="major">प्रमुख धरोहर</option>
+              <option value="monument">स्मारक</option>
+              <option value="gem">छिपे रत्न</option>
+              <option value="artisan">कारीगर</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold;">ज़िला</label>
+            <select id="recDistrict" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
+              <option value="muzaffarpur">मुजफ्फरपुर</option>
+              <option value="patna">पटना</option>
+              <option value="varanasi">वाराणसी</option>
+              <option value="amritsar">अमृतसर</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px; font-weight:bold;">धरोहर / कारीगर का नाम</label>
+            <input type="text" id="recTitle" required placeholder="उदा. सिकंदरपुर नौकायन केंद्र" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold;">अक्षांश, देशांतर (Lat, Lng)</label>
+            <input type="text" id="recCoords" required placeholder="26.1209, 85.3647" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold;">व्हाट्सएप नंबर (कारीगर हेतु)</label>
+            <input type="tel" id="recPhone" placeholder="919876543210" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px; font-weight:bold;">विवरण (भाषिणी AI ऑडियो स्क्रिप्ट)</label>
+            <textarea id="recDesc" rows="2" required placeholder="धरोहर का ऐतिहासिक संदर्भ लिखें..." style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-family:inherit;"></textarea>
+          </div>
+        </div>
+        <button type="submit" style="margin-top:12px; width:100%; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
+          सत्यापित करें एवं तुरंत लाइव करें (Publish Live)
+        </button>
+      </form>
+
+      <h4 style="margin-top:16px; font-size:13px; border-top:1px solid var(--border-color); padding-top:10px;">सत्यापित डायरेक्ट्री</h4>
+      <div style="max-height:160px; overflow-y:auto; margin-top:8px;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead>
+            <tr style="background:#f8fafc; text-align:left;">
+              <th style="padding:6px; border:1px solid var(--border-color);">नाम</th>
+              <th style="padding:6px; border:1px solid var(--border-color);">ज़िला</th>
+              <th style="padding:6px; border:1px solid var(--border-color);">श्रेणी</th>
+              <th style="padding:6px; border:1px solid var(--border-color);">कार्रवाई</th>
+            </tr>
+          </thead>
+          <tbody id="inpageAdminTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <p><strong>VratyaVani AI (व्रात्यवाणी)</strong> — The Purkha Heritage Engine (SIH26197)</p>
   </footer>
@@ -142,7 +213,7 @@
   <!-- Firebase App & Firestore SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -156,26 +227,33 @@
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
 
-    try {
-      enableIndexedDbPersistence(db);
-    } catch (err) {}
+    try { enableIndexedDbPersistence(db); } catch (err) {}
 
     window.syncCloudHeritage = async function() {
       try {
         const querySnapshot = await getDocs(collection(db, "heritage_records"));
         const cloudRecords = [];
-        querySnapshot.forEach((doc) => {
-          cloudRecords.push({ id: doc.id, ...doc.data() });
-        });
+        querySnapshot.forEach((d) => cloudRecords.push({ id: d.id, ...d.data() }));
         if (cloudRecords.length > 0) {
           localStorage.setItem("vratyavani_firebase_records", JSON.stringify(cloudRecords));
-          if (window.loadDistrictData) {
-            window.loadDistrictData(window.currentDistrict);
-          }
+          if (window.loadDistrictData) window.loadDistrictData(window.currentDistrict);
         }
       } catch (e) {
-        console.log("Firestore offline/fallback active:", e);
+        console.log("Offline mode active.");
       }
+    };
+
+    window.saveToFirestore = async function(record) {
+      try {
+        const docRef = await addDoc(collection(db, "heritage_records"), record);
+        return docRef.id;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    window.deleteFromFirestore = async function(docId) {
+      try { await deleteDoc(doc(db, "heritage_records", docId)); } catch(e) {}
     };
 
     window.syncCloudHeritage();

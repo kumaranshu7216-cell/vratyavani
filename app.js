@@ -1,8 +1,6 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Client Engine with Firebase Offline Fallback
- * Admin Credentials:
- * ID: admin@vratyavani.ai (or 'admin')
- * Password: Admin@2026
+ * VratyaVani AI (व्रात्यवाणी) — Single-Page Unified Engine
+ * Admin Credentials: admin@vratyavani.ai (or 'admin') / Admin@2026
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -10,17 +8,16 @@ let currentCategory = "major";
 let mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
+const STORAGE_KEY = "vratyavani_custom_records";
 
-// Register Service Worker for Offline PWA
+// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('VratyaVani Offline Engine Ready'))
-      .catch((err) => console.log('SW Registration Failed:', err));
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
 
-// Track Online/Offline Network Status
+// Track Network
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -37,14 +34,12 @@ function updateNetworkStatus() {
   }
 }
 
-// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDistrictData(window.currentDistrict);
   updateNetworkStatus();
 });
 
-// Initialize Leaflet Live Radar Map
 function initMap() {
   mapInstance = L.map('map').setView([26.1209, 85.3647], 12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -52,21 +47,18 @@ function initMap() {
   }).addTo(mapInstance);
 }
 
-// Handle District Change
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
-  const badge = document.getElementById("currentDistrictBadge");
   const districtNames = {
     muzaffarpur: "मुजफ्फरपुर (तिरहुत)",
     patna: "पटना (पाटलिपुत्र)",
     varanasi: "वाराणसी (काशी)",
     amritsar: "अमृतसर (पंजाब)"
   };
-  badge.innerText = districtNames[districtKey] || districtKey;
+  document.getElementById("currentDistrictBadge").innerText = districtNames[districtKey] || districtKey;
   loadDistrictData(window.currentDistrict);
 }
 
-// Category Tabs Filter
 function filterCategory(catKey) {
   currentCategory = catKey;
   document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -74,22 +66,26 @@ function filterCategory(catKey) {
   renderCards();
 }
 
-// Load District Data (Base + Cloud Firebase + LocalStorage Sync)
+function getCustomRecords() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 window.loadDistrictData = function(districtKey) {
   let items = heritageData[districtKey] ? [...heritageData[districtKey]] : [];
 
   try {
-    const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
+    const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
     const merged = [...firebaseRecs, ...custom];
-    
     const matching = merged.filter(c => c.district === districtKey);
     items = [...matching, ...items];
-  } catch (e) {
-    console.error("Local sync error:", e);
-  }
+  } catch (e) {}
 
-  // Clear existing map markers
   mapMarkers.forEach(m => mapInstance.removeLayer(m));
   mapMarkers = [];
 
@@ -111,7 +107,6 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// Render Heritage & Artisan Cards Grid
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
@@ -120,18 +115,17 @@ function renderCards(preloadedItems) {
   if (!items) {
     items = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
     try {
-      const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
+      const custom = getCustomRecords();
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
       const merged = [...firebaseRecs, ...custom];
-      const matching = merged.filter(c => c.district === window.currentDistrict);
-      items = [...matching, ...items];
+      items = [...merged.filter(c => c.district === window.currentDistrict), ...items];
     } catch(e) {}
   }
 
   const filtered = items.filter(item => item.category === currentCategory);
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; padding:20px;">इस श्रेणी में वर्तमान में कोई रिकॉर्ड सत्यापित नहीं है। Admin Panel से नया डेटा जोड़ें।</p>`;
+    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; padding:20px;">इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है। Admin Portal से नया डेटा जोड़ें।</p>`;
     return;
   }
 
@@ -148,7 +142,7 @@ function renderCards(preloadedItems) {
             <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">🎙️ AI सुनें</button>
             <button class="btn-sm btn-locate" onclick="panToLocation(${item.coords[0]}, ${item.coords[1]})">📍 रडार</button>
             ${isArtisan && item.artisanPhone ? `
-              <a href="https://wa.me/${item.artisanPhone}?text=नमस्ते! मैंने VratyaVani AI पोर्टल पर आपकी कला देखी। मुझे उत्पाद खरीदने हैं।" target="_blank" class="btn-sm btn-artisan-wa">💬 कारीगर</a>
+              <a href="https://wa.me/${item.artisanPhone}?text=नमस्ते! मैंने VratyaVani AI पर आपकी कला देखी।" target="_blank" class="btn-sm btn-artisan-wa">💬 कारीगर</a>
             ` : ''}
           </div>
         </div>
@@ -158,16 +152,14 @@ function renderCards(preloadedItems) {
   });
 }
 
-// Pan to Marker on Map
 function panToLocation(lat, lng) {
   mapInstance.flyTo([lat, lng], 15);
 }
 
-// Select item for Bhashini Audio Guide
 function selectForVoice(itemId) {
   let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
   try {
-    const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
+    const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
     allItems = [...firebaseRecs, ...custom, ...allItems];
   } catch(e) {}
@@ -185,7 +177,6 @@ function selectForVoice(itemId) {
   playBtn.innerText = "▶ AI आवाज़ सुनें";
 }
 
-// Web Speech API for Offline Audio Playback
 function togglePlayVoice() {
   if (!activeAudioItem) return;
 
@@ -208,14 +199,14 @@ function togglePlayVoice() {
   }
 }
 
-// Spot QR Modal Handlers
 function showQrModal() {
+  const qrImg = document.getElementById("qrImage");
   if (activeAudioItem) {
     document.getElementById("modalHeritageTitle").innerText = `QR: ${activeAudioItem.title}`;
-    document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/${activeAudioItem.id}`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/${activeAudioItem.id}`;
   } else {
     document.getElementById("modalHeritageTitle").innerText = `VratyaVani AI Spot Guide`;
-    document.getElementById("qrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/muzaffarpur`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/muzaffarpur`;
   }
   document.getElementById("qrModal").style.display = "flex";
 }
@@ -226,9 +217,14 @@ function closeQrModal(e) {
   }
 }
 
-// Admin Security Gate Handlers
+// ---------------- ADMIN LOGIN & IN-PAGE DASHBOARD LOGIC ---------------- //
+
 function openLoginModal() {
-  document.getElementById("loginModal").style.display = "flex";
+  if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
+    openAdminPanel();
+  } else {
+    document.getElementById("loginModal").style.display = "flex";
+  }
 }
 
 function closeLoginModal(e) {
@@ -237,17 +233,122 @@ function closeLoginModal(e) {
   }
 }
 
-// Admin Login Verification Logic
 function handleAdminLogin(e) {
   e.preventDefault();
   const uid = document.getElementById("adminUserId").value.trim();
   const pass = document.getElementById("adminPassword").value.trim();
 
-  // Authentication check
+  // Validate Credentials
   if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
-    window.location.href = "admin.html";
+    document.getElementById("loginModal").style.display = "none";
+    openAdminPanel();
   } else {
-    alert("अमान्य क्रेडेंशियल्स! सही Admin User ID और Password दर्ज करें। (डिफ़ॉल्ट: admin@vratyavani.ai / Admin@2026)");
+    alert("अमान्य क्रेडेंशियल्स! सही Admin User ID और Password दर्ज करें। (ID: admin, Pass: Admin@2026)");
   }
 }
+
+function openAdminPanel() {
+  renderInpageAdminTable();
+  document.getElementById("adminPanelModal").style.display = "flex";
+}
+
+function closeAdminPanelModal(e) {
+  if (!e || e.target.id === "adminPanelModal" || e.target.classList.contains("close-modal")) {
+    document.getElementById("adminPanelModal").style.display = "none";
+  }
+}
+
+function logoutAdmin() {
+  sessionStorage.removeItem("vratyavani_admin_auth");
+  document.getElementById("adminPanelModal").style.display = "none";
+  alert("लॉगआउट सफल!");
+}
+
+function renderInpageAdminTable() {
+  const tbody = document.getElementById("inpageAdminTableBody");
+  tbody.innerHTML = "";
+
+  let allRecords = [];
+  Object.keys(heritageData).forEach((dk) => {
+    heritageData[dk].forEach((item) => {
+      allRecords.push({ ...item, isCustom: false });
+    });
+  });
+
+  const customRecords = getCustomRecords().map(i => ({ ...i, isCustom: true }));
+  allRecords = [...customRecords, ...allRecords];
+
+  allRecords.forEach((item, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td style="padding:5px; border:1px solid #e2e8f0;"><strong>${item.title}</strong></td>
+      <td style="padding:5px; border:1px solid #e2e8f0;">${item.district}</td>
+      <td style="padding:5px; border:1px solid #e2e8f0; text-transform:uppercase;">${item.category}</td>
+      <td style="padding:5px; border:1px solid #e2e8f0;">
+        ${item.isCustom ? `<button onclick="deleteCustomRecord(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">हटाएं</button>` : `<span style="color:#94a3b8;">Core</span>`}
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+async function handleAdminSubmit(e) {
+  e.preventDefault();
+
+  const cat = document.getElementById("recCat").value;
+  const dist = document.getElementById("recDistrict").value;
+  const title = document.getElementById("recTitle").value.trim();
+  const coordsRaw = document.getElementById("recCoords").value.trim();
+  const phone = document.getElementById("recPhone").value.trim();
+  const desc = document.getElementById("recDesc").value.trim();
+
+  let coords = [26.1209, 85.3647];
+  if (coordsRaw.includes(",")) {
+    const parts = coordsRaw.split(",");
+    coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
+  }
+
+  const newRecord = {
+    id: `vv_${Date.now()}`,
+    category: cat,
+    district: dist,
+    title: title,
+    desc: desc,
+    coords: coords,
+    image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80",
+    bhashiniAudioText: desc,
+    artisanPhone: phone || null,
+    source: "Firebase Cloud Synced"
+  };
+
+  // Firebase Firestore Sync
+  if (window.saveToFirestore) {
+    const cloudId = await window.saveToFirestore(newRecord);
+    if (cloudId) newRecord.cloudDocId = cloudId;
+  }
+
+  const customRecords = getCustomRecords();
+  customRecords.unshift(newRecord);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
+
+  alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर तुरंत लाइव कर दिया गया है!`);
+  e.target.reset();
+  renderInpageAdminTable();
+  loadDistrictData(window.currentDistrict);
+}
+
+window.deleteCustomRecord = async function(recordIndex) {
+  if (!confirm("क्या आप इस रिकॉर्ड को हटाना चाहते हैं?")) return;
+
+  const customRecords = getCustomRecords();
+  const target = customRecords[recordIndex];
+  if (target && target.cloudDocId && window.deleteFromFirestore) {
+    await window.deleteFromFirestore(target.cloudDocId);
+  }
+
+  customRecords.splice(recordIndex, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
+  renderInpageAdminTable();
+  loadDistrictData(window.currentDistrict);
+};
