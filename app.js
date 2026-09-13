@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Dynamic Multilingual Engine with Map Sync
+ * VratyaVani AI — Fully Translated Multilingual Engine & Google Maps Integration
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -10,7 +10,7 @@ let mapMarkers = [];
 let activeAudioItem = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
-// Multi-language UI Dictionaries
+// Multi-language UI Strings
 const i18n = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -23,12 +23,12 @@ const i18n = {
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
     btnListen: "🎙️ AI सुनें",
-    btnMap: "📍 मैप",
+    btnMap: "📍 मैप / दिशा",
     btnArtisan: "💬 कारीगर",
     btnPlay: "▶ चलाएं (Play)",
     btnStop: "⏹ चल रहा है...",
     btnReplay: "▶ पुनः सुनें",
-    emptyMsg: "इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है। Admin Portal से नया डेटा जोड़ें।"
+    emptyMsg: "इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है।"
   },
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
@@ -39,14 +39,14 @@ const i18n = {
     tabArtisan: "Local Artisans",
     mapTitle: "📍 Live Heritage Map",
     voiceConsoleTitle: "🎙️ Bhashini AI Audio Guide",
-    nowPlayingDefault: "Select a heritage site to listen in your voice...",
+    nowPlayingDefault: "Select a heritage site to listen to the narrative...",
     btnListen: "🎙️ AI Listen",
-    btnMap: "📍 Map",
+    btnMap: "📍 Map / Directions",
     btnArtisan: "💬 Artisan",
     btnPlay: "▶ Play Audio",
     btnStop: "⏹ Playing...",
     btnReplay: "▶ Replay",
-    emptyMsg: "No records verified in this category yet. Add new data from Admin Portal."
+    emptyMsg: "No records found in this category."
   },
   "pa-IN": {
     heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
@@ -59,12 +59,12 @@ const i18n = {
     voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
     nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
     btnListen: "🎙️ AI ਸੁਣੋ",
-    btnMap: "📍 ਨਕਸ਼ਾ",
+    btnMap: "📍 ਨਕਸ਼ਾ / ਰਸਤਾ",
     btnArtisan: "💬 ਕਾਰੀਗਰ",
     btnPlay: "▶ ਚਲਾਓ (Play)",
     btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
     btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
-    emptyMsg: "ਇਸ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਫਿਲਹਾਲ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।"
+    emptyMsg: "ਇਸ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।"
   },
   "bho-IN": {
     heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
@@ -72,17 +72,17 @@ const i18n = {
     tabMajor: "खास धरोहर",
     tabMonument: "स्मारक",
     tabGem: "छुपल रतन",
-    tabArtisan: "लोकल कारीगर",
+    tabArtisan: "कारीगर",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
     btnListen: "🎙️ AI सुनीं",
-    btnMap: "📍 मैप",
+    btnMap: "📍 मैप / रास्ता",
     btnArtisan: "💬 कारीगर",
     btnPlay: "▶ बजाईं (Play)",
     btnStop: "⏹ बाजत बा...",
     btnReplay: "▶ फेर से सुनीं",
-    emptyMsg: "ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे।"
+    emptyMsg: "ए श्रेणी में कवनो रेकॉर्ड नइखे।"
   },
   "mai-IN": {
     heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
@@ -90,24 +90,23 @@ const i18n = {
     tabMajor: "प्रमुख धरोहर",
     tabMonument: "स्मारक",
     tabGem: "लुकल रत्न",
-    tabArtisan: "स्थानीय शिल्पी",
+    tabArtisan: "शिल्पी",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
     nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
     btnListen: "🎙️ AI सुनू",
-    btnMap: "📍 मैप",
+    btnMap: "📍 मैप / दिशानिर्देश",
     btnArtisan: "💬 शिल्पी",
     btnPlay: "▶ बजाउ (Play)",
     btnStop: "⏹ बाजि रहल अछि...",
     btnReplay: "▶ पुनः सुनू",
-    emptyMsg: "एहि श्रेणी में एखन कोनो रेकॉर्ड नहि अछि।"
+    emptyMsg: "एहि श्रेणी में कोनो रेकॉर्ड नहि अछि।"
   }
 };
 
-// Language Application Engine
 window.applyLanguage = function(langKey) {
   window.currentLanguage = langKey;
-  const t = i18n[langKey] || i18n["hi-IN"];
+  const t = i18n[langKey] || i18n["en-IN"];
 
   document.getElementById("heroTagline").innerText = t.heroTitle;
   document.getElementById("heroSubTagline").innerText = t.heroSub;
@@ -141,11 +140,11 @@ function updateNetworkStatus() {
   if (!badge) return;
   if (navigator.onLine) {
     badge.className = "network-badge online";
-    badge.innerText = "● Online (Firebase Live)";
+    badge.innerText = "● Online";
     if (window.syncCloudHeritage) window.syncCloudHeritage();
   } else {
     badge.className = "network-badge offline";
-    badge.innerText = "● Offline (Cached)";
+    badge.innerText = "● Offline";
   }
 }
 
@@ -164,13 +163,7 @@ function initMap() {
 
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
-  const districtNames = {
-    muzaffarpur: "मुजफ्फरपुर (तिरहुत)",
-    patna: "पटना (पाटलिपुत्र)",
-    varanasi: "वाराणसी (काशी)",
-    amritsar: "अमृतसर (पंजाब)"
-  };
-  document.getElementById("currentDistrictBadge").innerText = districtNames[districtKey] || districtKey;
+  document.getElementById("currentDistrictBadge").innerText = districtKey.toUpperCase();
   loadDistrictData(window.currentDistrict);
 }
 
@@ -207,13 +200,16 @@ window.loadDistrictData = function(districtKey) {
   if (items.length > 0) {
     mapInstance.flyTo(items[0].coords, 12);
     items.forEach(item => {
+      const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title });
       const marker = L.marker(item.coords).addTo(mapInstance);
       marker.bindPopup(`
-        <strong>${item.title}</strong><br>
-        <small style="text-transform:uppercase; color:#c2410c;">${item.category}</small><br>
-        <button onclick="selectForVoice('${item.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:700; cursor:pointer;">
-          🎙️ AI Guide
+        <strong>${locContent.title}</strong><br>
+        <button onclick="selectForVoice('${item.id}')" style="margin-top:5px; padding:3px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+          🎙️ Audio
         </button>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.coords[0]},${item.coords[1]}" target="_blank" style="margin-top:5px; display:inline-block; padding:3px 8px; font-size:11px; background:#1e1b4b; color:#fff; border-radius:4px; text-decoration:none;">
+          🗺️ Google Maps
+        </a>
       `);
       mapMarkers.push(marker);
     });
@@ -226,7 +222,7 @@ function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
 
-  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
+  const t = i18n[window.currentLanguage] || i18n["en-IN"];
 
   let items = preloadedItems;
   if (!items) {
@@ -248,16 +244,18 @@ function renderCards(preloadedItems) {
 
   filtered.forEach(item => {
     const isArtisan = item.category === "artisan";
+    const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
+
     const cardHtml = `
       <div class="heritage-card">
-        <img src="${item.image}" alt="${item.title}" loading="lazy" />
+        <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='${item.fallbackImage || 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80'}';" loading="lazy" />
         <div class="card-content">
           <span class="card-tag">${item.category}</span>
-          <h4 class="card-title">${item.title}</h4>
-          <p class="card-desc">${item.desc}</p>
+          <h4 class="card-title">${locContent.title}</h4>
+          <p class="card-desc">${locContent.desc}</p>
           <div class="card-actions">
             <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">${t.btnListen}</button>
-            <button class="btn-sm btn-locate" onclick="panToLocation(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${item.coords[0]},${item.coords[1]}" target="_blank" class="btn-sm btn-locate">${t.btnMap}</a>
             ${isArtisan && item.artisanPhone ? `
               <a href="https://wa.me/${item.artisanPhone}?text=Hello! I found your art on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">${t.btnArtisan}</a>
             ` : ''}
@@ -267,10 +265,6 @@ function renderCards(preloadedItems) {
     `;
     container.innerHTML += cardHtml;
   });
-}
-
-function panToLocation(lat, lng) {
-  mapInstance.flyTo([lat, lng], 15);
 }
 
 function selectForVoice(itemId) {
@@ -285,24 +279,27 @@ function selectForVoice(itemId) {
   if (!found) return;
 
   activeAudioItem = found;
+  const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["en-IN"] : { title: found.title, audio: found.bhashiniAudioText });
+
   document.getElementById("nowPlayingText").innerHTML = `
-    <strong>${found.title}</strong><br>
-    <em>"${found.bhashiniAudioText}"</em>
+    <strong>${locContent.title}</strong><br>
+    <em>"${locContent.audio}"</em>
   `;
   const playBtn = document.getElementById("playAudioBtn");
   playBtn.disabled = false;
-  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
+  const t = i18n[window.currentLanguage] || i18n["en-IN"];
   playBtn.innerText = t.btnPlay;
 }
 
 function togglePlayVoice() {
   if (!activeAudioItem) return;
 
-  const t = i18n[window.currentLanguage] || i18n["hi-IN"];
+  const t = i18n[window.currentLanguage] || i18n["en-IN"];
+  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
 
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(activeAudioItem.bhashiniAudioText);
+    const utterance = new SpeechSynthesisUtterance(locContent.audio);
     utterance.lang = window.currentLanguage;
     utterance.rate = 0.92;
 
@@ -314,18 +311,15 @@ function togglePlayVoice() {
     };
 
     window.speechSynthesis.speak(utterance);
-  } else {
-    alert("Voice synthesis not supported on this browser.");
   }
 }
 
 function showQrModal() {
   const qrImg = document.getElementById("qrImage");
   if (activeAudioItem) {
-    document.getElementById("modalHeritageTitle").innerText = `QR: ${activeAudioItem.title}`;
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/${activeAudioItem.id}`;
+    document.getElementById("modalHeritageTitle").innerText = `QR Guide`;
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.google.com/maps/dir/?api=1&destination=${activeAudioItem.coords[0]},${activeAudioItem.coords[1]}`;
   } else {
-    document.getElementById("modalHeritageTitle").innerText = `VratyaVani AI Spot Guide`;
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/muzaffarpur`;
   }
   document.getElementById("qrModal").style.display = "flex";
@@ -337,7 +331,7 @@ function closeQrModal(e) {
   }
 }
 
-// Admin Gate Handlers
+// Admin Security Gate Handlers
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
@@ -362,7 +356,7 @@ function handleAdminLogin(e) {
     document.getElementById("loginModal").style.display = "none";
     openAdminPanel();
   } else {
-    alert("अमान्य क्रेडेंशियल्स! सही ID: admin और Pass: Admin@2026 डालें।");
+    alert("Invalid Credentials! User: admin, Pass: Admin@2026");
   }
 }
 
@@ -380,7 +374,7 @@ function closeAdminPanelModal(e) {
 function logoutAdmin() {
   sessionStorage.removeItem("vratyavani_admin_auth");
   document.getElementById("adminPanelModal").style.display = "none";
-  alert("लॉगआउट सफल!");
+  alert("Logged out!");
 }
 
 function renderInpageAdminTable() {
@@ -398,13 +392,13 @@ function renderInpageAdminTable() {
   allRecords = [...customRecords, ...allRecords];
 
   allRecords.forEach((item, index) => {
+    const title = (item.content && item.content["en-IN"]) ? item.content["en-IN"].title : item.title;
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td style="padding:5px; border:1px solid #e2e8f0;"><strong>${item.title}</strong></td>
-      <td style="padding:5px; border:1px solid #e2e8f0;">${item.district}</td>
-      <td style="padding:5px; border:1px solid #e2e8f0; text-transform:uppercase;">${item.category}</td>
-      <td style="padding:5px; border:1px solid #e2e8f0;">
-        ${item.isCustom ? `<button onclick="deleteCustomRecord(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">हटाएं</button>` : `<span style="color:#94a3b8;">Core</span>`}
+      <td style="padding:4px; border:1px solid #e2e8f0;"><strong>${title}</strong></td>
+      <td style="padding:4px; border:1px solid #e2e8f0;">${item.district}</td>
+      <td style="padding:4px; border:1px solid #e2e8f0;">
+        ${item.isCustom ? `<button onclick="deleteCustomRecord(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">Del</button>` : `<span style="color:#94a3b8;">Core</span>`}
       </td>
     `;
     tbody.appendChild(row);
@@ -431,13 +425,14 @@ async function handleAdminSubmit(e) {
     id: `vv_${Date.now()}`,
     category: cat,
     district: dist,
-    title: title,
-    desc: desc,
     coords: coords,
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80",
-    bhashiniAudioText: desc,
+    image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
     artisanPhone: phone || null,
-    source: "Firebase Cloud Synced"
+    source: "Firebase Cloud",
+    content: {
+      "en-IN": { title: title, desc: desc, audio: desc },
+      "hi-IN": { title: title, desc: desc, audio: desc }
+    }
   };
 
   if (window.saveToFirestore) {
@@ -449,14 +444,14 @@ async function handleAdminSubmit(e) {
   customRecords.unshift(newRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर लाइव कर दिया गया है!`);
+  alert(`Published: ${title}`);
   e.target.reset();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 }
 
 window.deleteCustomRecord = async function(recordIndex) {
-  if (!confirm("क्या आप इस रिकॉर्ड को हटाना चाहते हैं?")) return;
+  if (!confirm("Delete record?")) return;
 
   const customRecords = getCustomRecords();
   const target = customRecords[recordIndex];
