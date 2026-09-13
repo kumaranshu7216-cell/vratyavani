@@ -15,28 +15,23 @@
 </head>
 <body onload="startAppFlow()">
 
-  <!-- 1. Smooth Fade-Out Splash Screen -->
-  <div id="splashScreen" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#1e1b4b; z-index:10000; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fff; transition:opacity 0.6s ease;">
-    <div style="width:72px; height:72px; border-radius:20px; background:linear-gradient(135deg,#d97706,#c2410c); display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 0 30px rgba(217,119,6,0.5); animation:pulseLogo 1.5s infinite alternate;">
-      🏛️
-    </div>
-    <h1 style="font-family:'Cinzel',serif; font-size:26px; margin-top:16px; letter-spacing:1px;">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
-    <p style="font-size:11px; color:#cbd5e1; letter-spacing:2px; text-transform:uppercase;">The Purkha Heritage Engine</p>
-    <div style="margin-top:24px; width:34px; height:34px; border:3px solid rgba(255,255,255,0.2); border-top-color:#d97706; border-radius:50%; animation:spin 0.9s linear infinite;"></div>
+  <!-- 1. Cinematic Animated Splash Screen -->
+  <div id="splashScreen">
+    <div class="splash-logo-anim">🏛️</div>
+    <h1 class="splash-title-anim">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
+    <p class="splash-sub-anim">The Purkha Heritage Engine</p>
+    <div style="margin-top:20px; width:30px; height:30px; border:3px solid rgba(255,255,255,0.2); border-top-color:#d97706; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
   </div>
-  <style>
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes pulseLogo { from { transform: scale(0.95); } to { transform: scale(1.05); } }
-  </style>
+  <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-  <!-- 2. Clean English Location & Language Selector Modal (VratyaVani Shree) -->
+  <!-- 2. Clean English Selector Modal -->
   <div id="locationModal" class="modal-backdrop">
-    <div class="modal-box" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
+    <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
         <span style="font-size:22px;">🏛️</span>
         <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Shree</h3>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:14px;">Configure territory and audio narration language</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Configure territory and audio narration language</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -72,7 +67,7 @@
             <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
           </select>
         </div>
-        <button onclick="confirmLocationSelection()" style="margin-top:8px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
+        <button onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
           Enter VratyaVani AI ➔
         </button>
       </div>
@@ -91,16 +86,12 @@
 
     <div class="nav-controls">
       <span id="networkStatusBadge" class="network-badge online">● Online</span>
-      <select id="districtSelect" onchange="onDistrictChange(this.value)">
-        <option value="muzaffarpur" selected>Muzaffarpur</option>
-        <option value="patna">Patna</option>
-        <option value="varanasi">Varanasi</option>
-        <option value="amritsar">Amritsar</option>
-      </select>
+      <!-- Dynamically Synced District Dropdown -->
+      <select id="districtSelect" onchange="onDistrictChange(this.value)"></select>
     </div>
   </header>
 
-  <!-- Hero Header -->
+  <!-- Hero Banner -->
   <section class="hero-banner">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
@@ -112,7 +103,7 @@
     </div>
   </section>
 
-  <!-- TAB 1: HOME VIEW (Heritage Cards + Audio Console Only) -->
+  <!-- TAB 1: HOME VIEW -->
   <main class="view-container" id="homeView">
     <div class="category-tabs">
       <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
@@ -123,7 +114,6 @@
 
     <div id="cardsGrid" class="cards-grid"></div>
 
-    <!-- Embedded Bhashini Voice Console -->
     <div class="voice-console">
       <div class="console-title">
         <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
@@ -145,18 +135,16 @@
     </div>
   </main>
 
-  <!-- TAB 2: DEDICATED MAP VIEW (Interactive Leaflet + Google Maps Action) -->
+  <!-- TAB 2: MAP VIEW -->
   <main class="view-container" id="mapView">
     <div class="map-header">
       <h3 id="mapSectionTitle">📍 लाइव हेरिटेज मैप (Map)</h3>
       <span id="currentDistrictBadge">Muzaffarpur</span>
     </div>
     <div id="map"></div>
-    <div class="map-actions-panel">
-      <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct">
-        🗺️ Open in Google Maps (Live Turn-by-Turn Navigation)
-      </a>
-    </div>
+    <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct">
+      🗺️ Open in Google Maps (Live Navigation)
+    </a>
   </main>
 
   <!-- Mobile Bottom Application Bar (Home, Map, Admin) -->
@@ -214,7 +202,7 @@
     </div>
   </div>
 
-  <!-- In-Page Admin Desk -->
+  <!-- In-Page Admin Panel -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
     <div class="modal-box" style="text-align: left; max-width: 650px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
@@ -255,7 +243,7 @@
             <input type="text" id="recCoords" required placeholder="26.1209, 85.3647" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">Image URL (Direct JPG/PNG)</label>
+            <label style="font-size:11px; font-weight:bold;">Direct Image URL</label>
             <input type="url" id="recImage" required placeholder="https://..." style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
@@ -342,17 +330,20 @@
       setTimeout(() => {
         const splash = document.getElementById("splashScreen");
         splash.style.opacity = "0";
+        splash.style.transform = "scale(1.08)";
         setTimeout(() => {
           splash.style.display = "none";
           document.getElementById("locationModal").style.display = "flex";
           onStateChange("bihar");
-        }, 600);
-      }, 1200);
+        }, 700);
+      }, 1600);
     }
 
+    // State change filters both modal and navbar dropdown
     function onStateChange(stateVal) {
       const distSel = document.getElementById("selDistrict");
       distSel.innerHTML = "";
+
       if (stateVal === "bihar") {
         distSel.innerHTML = `
           <option value="muzaffarpur" selected>Muzaffarpur (Tirhut)</option>
@@ -365,6 +356,24 @@
       } else if (stateVal === "punjab") {
         distSel.innerHTML = `<option value="amritsar" selected>Amritsar</option>`;
         onDistrictModalChange("amritsar");
+      }
+
+      syncTopNavbarDistricts(stateVal);
+    }
+
+    // Synchronize top navbar dropdown strictly to selected state
+    function syncTopNavbarDistricts(stateVal) {
+      const topSelect = document.getElementById("districtSelect");
+      topSelect.innerHTML = "";
+      if (stateVal === "bihar") {
+        topSelect.innerHTML = `
+          <option value="muzaffarpur">Muzaffarpur</option>
+          <option value="patna">Patna</option>
+        `;
+      } else if (stateVal === "up") {
+        topSelect.innerHTML = `<option value="varanasi">Varanasi</option>`;
+      } else if (stateVal === "punjab") {
+        topSelect.innerHTML = `<option value="amritsar">Amritsar</option>`;
       }
     }
 
@@ -398,7 +407,6 @@
       if (window.applyLanguage) window.applyLanguage(lang);
     }
 
-    // Dedicated Tab Switcher (Home vs Map)
     function switchMobileTab(tab) {
       document.getElementById("btnNavHome").classList.remove("active");
       document.getElementById("btnNavMap").classList.remove("active");
