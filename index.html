@@ -33,7 +33,7 @@
         <option value="varanasi">वाराणसी (काशी - UP)</option>
         <option value="amritsar">अमृतसर (पंजाब)</option>
       </select>
-      <a href="admin.html" class="admin-link">Admin Desk</a>
+      <button class="admin-link" onclick="openLoginModal()">⚙️ Admin Portal</button>
     </div>
   </header>
 
@@ -44,7 +44,7 @@
     <div class="hero-badges">
       <span>🏛️ 4-Tier District Hub</span>
       <span>🎙️ Bhashini Audio Guide</span>
-      <span>📡 Offline Cache Engine</span>
+      <span>🔥 Firebase Cloud Synced</span>
       <span>🛍️ Vocal for Local Artisans</span>
     </div>
   </section>
@@ -108,11 +108,79 @@
     </div>
   </div>
 
+  <!-- Admin Login Modal -->
+  <div id="loginModal" class="modal-backdrop" onclick="closeLoginModal(event)">
+    <div class="modal-box" style="text-align: left;">
+      <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+      <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin-bottom: 5px;">Admin Security Gate</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">केवल अधिकृत नोडल ऑफिसर व Curation टीम के लिए</p>
+      
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <label style="font-size:12px; font-weight:700;">Admin User ID / Email</label>
+            <input type="text" id="adminUserId" placeholder="admin@vratyavani.ai" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px; margin-top:4px;" />
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700;">Security Password</label>
+            <input type="password" id="adminPassword" placeholder="••••••••" required style="width:100%; padding:9px; border:1px solid var(--border-color); border-radius:6px; margin-top:4px;" />
+          </div>
+          <button type="submit" style="margin-top:10px; padding:10px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
+            सुरक्षित लॉगिन करें (Authenticate)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer class="footer">
     <p><strong>VratyaVani AI (व्रात्यवाणी)</strong> — The Purkha Heritage Engine (SIH26197)</p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Firebase App & Firestore SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
+      authDomain: "vratyavani-a48fc.firebaseapp.com",
+      projectId: "vratyavani-a48fc",
+      storageBucket: "vratyavani-a48fc.firebasestorage.app",
+      messagingSenderId: "512746364837",
+      appId: "1:512746364837:web:639440528e52d23fd4d24c"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
+
+    try {
+      enableIndexedDbPersistence(db);
+    } catch (err) {}
+
+    window.syncCloudHeritage = async function() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "heritage_records"));
+        const cloudRecords = [];
+        querySnapshot.forEach((doc) => {
+          cloudRecords.push({ id: doc.id, ...doc.data() });
+        });
+        if (cloudRecords.length > 0) {
+          localStorage.setItem("vratyavani_firebase_records", JSON.stringify(cloudRecords));
+          if (window.loadDistrictData) {
+            window.loadDistrictData(window.currentDistrict);
+          }
+        }
+      } catch (e) {
+        console.log("Firestore offline/fallback active:", e);
+      }
+    };
+
+    window.syncCloudHeritage();
+  </script>
+
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>

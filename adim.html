@@ -10,6 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
+  <script>
+    if (sessionStorage.getItem("vratyavani_admin_auth") !== "true") {
+      alert("कृपया पहले लॉगिन करें!");
+      window.location.href = "index.html";
+    }
+  </script>
+
   <style>
     .admin-container {
       max-width: 1100px;
@@ -97,6 +104,16 @@
       font-size: 11px;
       font-weight: 600;
     }
+    .btn-logout {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body style="background: #f1f5f9;">
@@ -104,16 +121,19 @@
   <div class="admin-container">
     <div class="admin-header">
       <div>
-        <h2>🏛️ VratyaVani Verification & Curation Desk</h2>
+        <h2>🏛️ VratyaVani Verification & Firebase Cloud Desk</h2>
         <p style="margin-top: 4px; font-size: 13px; color: var(--text-muted);">
           डिस्ट्रिक्ट हेरिटेज हब, अनडिस्कवर्ड रत्न व वोकल फॉर लोकल कारीगर डेटा प्रबंधन
         </p>
       </div>
-      <a href="index.html" class="tab-btn" style="text-decoration:none; display:inline-block;">← मुख्य पोर्टल</a>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="index.html" class="tab-btn" style="text-decoration:none; display:inline-block;">← मुख्य पोर्टल</a>
+        <button onclick="logoutAdmin()" class="btn-logout">लॉगआउट</button>
+      </div>
     </div>
 
     <!-- Heritage / Artisan Add Form -->
-    <h3 style="margin-top: 26px; font-size: 17px;">नया हेरिटेज या शिल्पकार रिकॉर्ड सत्यापित करें</h3>
+    <h3 style="margin-top: 26px; font-size: 17px;">नया हेरिटेज या शिल्पकार रिकॉर्ड सत्यापित करें (Cloud Synced)</h3>
     <form id="addRecordForm">
       <div class="form-grid">
         <div class="form-group">
@@ -151,11 +171,11 @@
           <textarea id="recDesc" rows="3" placeholder="धरोहर का ऐतिहासिक संदर्भ लिखें जिसे AI ऑडियो गाइड में सुनाया जाएगा..." required></textarea>
         </div>
       </div>
-      <button type="submit" class="btn-submit">सत्यापित करें एवं लाइव प्रकाशित करें (Verify & Publish)</button>
+      <button type="submit" class="btn-submit">सत्यापित करें एवं Firebase Cloud पर लाइव करें (Publish)</button>
     </form>
 
     <!-- Verified Live Table -->
-    <h3 style="margin-top: 36px; font-size: 17px;">सत्यापित लाइव डायरेक्ट्री (data.js + LocalStorage)</h3>
+    <h3 style="margin-top: 36px; font-size: 17px;">सत्यापित डायरेक्ट्री (Cloud + Core Dataset)</h3>
     <table class="records-table">
       <thead>
         <tr>
@@ -171,6 +191,49 @@
   </div>
 
   <script src="data.js"></script>
+
+  <!-- Firebase Integration for Admin -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
+      authDomain: "vratyavani-a48fc.firebaseapp.com",
+      projectId: "vratyavani-a48fc",
+      storageBucket: "vratyavani-a48fc.firebasestorage.app",
+      messagingSenderId: "512746364837",
+      appId: "1:512746364837:web:639440528e52d23fd4d24c"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
+
+    window.saveToFirestore = async function(record) {
+      try {
+        const docRef = await addDoc(collection(db, "heritage_records"), record);
+        return docRef.id;
+      } catch (e) {
+        console.warn("Firebase online save failed, keeping in local cache:", e);
+        return null;
+      }
+    };
+
+    window.deleteFromFirestore = async function(docId) {
+      try {
+        await deleteDoc(doc(db, "heritage_records", docId));
+      } catch(e) {
+        console.warn("Firebase delete failed:", e);
+      }
+    };
+  </script>
+
   <script src="admin.js"></script>
+  <script>
+    function logoutAdmin() {
+      sessionStorage.removeItem("vratyavani_admin_auth");
+      window.location.href = "index.html";
+    }
+  </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Admin Desk Controller
+ * VratyaVani AI (व्रात्यवाणी) — Admin Desk Controller with Firebase Hook
  */
 
 const STORAGE_KEY = "vratyavani_custom_records";
@@ -14,7 +14,6 @@ function getCustomRecords() {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
-    console.error("Storage read error:", err);
     return [];
   }
 }
@@ -29,7 +28,6 @@ function renderAdminTable() {
 
   tbody.innerHTML = "";
 
-  // 1. Load baseline records from data.js
   let allRecords = [];
   if (typeof heritageData !== "undefined") {
     Object.keys(heritageData).forEach((districtKey) => {
@@ -43,17 +41,11 @@ function renderAdminTable() {
     });
   }
 
-  // 2. Load LocalStorage custom records
   const customRecords = getCustomRecords();
   allRecords = [...customRecords, ...allRecords];
 
-  if (allRecords.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">कोई हेरिटेज रिकॉर्ड उपलब्ध नहीं है।</td></tr>`;
-    return;
-  }
-
   allRecords.forEach((item, index) => {
-    const isCustom = item.source === "User Verified (Custom)";
+    const isCustom = item.source.includes("Custom") || item.source.includes("Cloud");
     const row = document.createElement("tr");
 
     row.innerHTML = `
@@ -70,7 +62,7 @@ function renderAdminTable() {
       <td>
         ${
           isCustom
-            ? `<button onclick="deleteCustomRecord(${index})" class="btn-delete">🗑️ हटाएं</button>`
+            ? `<button onclick="deleteCustomRecord(${index}, '${item.cloudDocId || ''}')" class="btn-delete">🗑️ हटाएं</button>`
             : `<span style="color:#94a3b8; font-size:11px;">सुरक्षित (Core)</span>`
         }
       </td>
@@ -93,7 +85,7 @@ function bindAdminForm() {
   const form = document.getElementById("addRecordForm");
   if (!form) return;
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const category = document.getElementById("recCat").value;
@@ -120,24 +112,33 @@ function bindAdminForm() {
       image: "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80",
       bhashiniAudioText: desc,
       artisanPhone: phone || null,
-      source: "User Verified (Custom)"
+      source: "Firebase Cloud Synced"
     };
+
+    if (window.saveToFirestore) {
+      const cloudId = await window.saveToFirestore(newRecord);
+      if (cloudId) newRecord.cloudDocId = cloudId;
+    }
 
     const customRecords = getCustomRecords();
     customRecords.unshift(newRecord);
     saveCustomRecords(customRecords);
 
-    alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर लाइव कर दिया गया है!`);
+    alert(`🎉 VratyaVani AI: "${title}" को सत्यापित कर Firebase Cloud और स्थानीय रडार पर लाइव कर दिया गया है!`);
     form.reset();
     renderAdminTable();
   });
 }
 
-function deleteCustomRecord(recordIndex) {
+window.deleteCustomRecord = async function(recordIndex, cloudDocId) {
   if (!confirm("क्या आप वाकई इस रिकॉर्ड को हटाना चाहते हैं?")) return;
+
+  if (cloudDocId && window.deleteFromFirestore) {
+    await window.deleteFromFirestore(cloudDocId);
+  }
 
   let customRecords = getCustomRecords();
   customRecords.splice(recordIndex, 1);
   saveCustomRecords(customRecords);
   renderAdminTable();
-}
+};

@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Multi-District Dataset
+ * VratyaVani AI (व्रात्यवाणी) — Multi-District Core Dataset
  */
 
 const heritageData = {

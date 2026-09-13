@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vratyavani-v3-cache';
+const CACHE_NAME = 'vratyavani-firebase-v1';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,6 +32,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('firebaseinstallations.googleapis.com')
+  ) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) return cachedResponse;

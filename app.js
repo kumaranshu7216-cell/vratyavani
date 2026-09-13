@@ -1,8 +1,8 @@
 /**
- * VratyaVani AI (व्रात्यवाणी) — Client Engine
+ * VratyaVani AI (व्रात्यवाणी) — Client Engine with Firebase Offline Fallback
  */
 
-let currentDistrict = "muzaffarpur";
+window.currentDistrict = "muzaffarpur";
 let currentCategory = "major";
 let mapInstance = null;
 let mapMarkers = [];
@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Network Status
+// Track Online/Offline Status
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -26,7 +26,8 @@ function updateNetworkStatus() {
   if (!badge) return;
   if (navigator.onLine) {
     badge.className = "network-badge online";
-    badge.innerText = "● Online";
+    badge.innerText = "● Online (Firebase Live)";
+    if (window.syncCloudHeritage) window.syncCloudHeritage();
   } else {
     badge.className = "network-badge offline";
     badge.innerText = "● Offline (Cached)";
@@ -35,7 +36,7 @@ function updateNetworkStatus() {
 
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
-  loadDistrictData(currentDistrict);
+  loadDistrictData(window.currentDistrict);
   updateNetworkStatus();
 });
 
@@ -47,7 +48,7 @@ function initMap() {
 }
 
 function onDistrictChange(districtKey) {
-  currentDistrict = districtKey;
+  window.currentDistrict = districtKey;
   const badge = document.getElementById("currentDistrictBadge");
   const districtNames = {
     muzaffarpur: "मुजफ्फरपुर (तिरहुत)",
@@ -56,7 +57,7 @@ function onDistrictChange(districtKey) {
     amritsar: "अमृतसर (पंजाब)"
   };
   badge.innerText = districtNames[districtKey] || districtKey;
-  loadDistrictData(currentDistrict);
+  loadDistrictData(window.currentDistrict);
 }
 
 function filterCategory(catKey) {
@@ -66,19 +67,20 @@ function filterCategory(catKey) {
   renderCards();
 }
 
-function loadDistrictData(districtKey) {
+window.loadDistrictData = function(districtKey) {
   let items = heritageData[districtKey] ? [...heritageData[districtKey]] : [];
 
-  // Read LocalStorage
   try {
     const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
-    const matching = custom.filter(c => c.district === districtKey);
+    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+    const merged = [...firebaseRecs, ...custom];
+    
+    const matching = merged.filter(c => c.district === districtKey);
     items = [...matching, ...items];
   } catch (e) {
     console.error("Local sync error:", e);
   }
 
-  // Clear previous markers
   mapMarkers.forEach(m => mapInstance.removeLayer(m));
   mapMarkers = [];
 
@@ -98,7 +100,7 @@ function loadDistrictData(districtKey) {
   }
 
   renderCards(items);
-}
+};
 
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
@@ -106,10 +108,12 @@ function renderCards(preloadedItems) {
 
   let items = preloadedItems;
   if (!items) {
-    items = heritageData[currentDistrict] ? [...heritageData[currentDistrict]] : [];
+    items = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
     try {
       const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
-      const matching = custom.filter(c => c.district === currentDistrict);
+      const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+      const merged = [...firebaseRecs, ...custom];
+      const matching = merged.filter(c => c.district === window.currentDistrict);
       items = [...matching, ...items];
     } catch(e) {}
   }
@@ -149,10 +153,11 @@ function panToLocation(lat, lng) {
 }
 
 function selectForVoice(itemId) {
-  let allItems = heritageData[currentDistrict] ? [...heritageData[currentDistrict]] : [];
+  let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
   try {
     const custom = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
-    allItems = [...custom, ...allItems];
+    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+    allItems = [...firebaseRecs, ...custom, ...allItems];
   } catch(e) {}
 
   const found = allItems.find(i => i.id === itemId);
@@ -204,5 +209,28 @@ function showQrModal() {
 function closeQrModal(e) {
   if (!e || e.target.id === "qrModal" || e.target.classList.contains("close-modal")) {
     document.getElementById("qrModal").style.display = "none";
+  }
+}
+
+function openLoginModal() {
+  document.getElementById("loginModal").style.display = "flex";
+}
+
+function closeLoginModal(e) {
+  if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) {
+    document.getElementById("loginModal").style.display = "none";
+  }
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const uid = document.getElementById("adminUserId").value.trim();
+  const pass = document.getElementById("adminPassword").value.trim();
+
+  if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
+    sessionStorage.setItem("vratyavani_admin_auth", "true");
+    window.location.href = "admin.html";
+  } else {
+    alert("अमान्य क्रेडेंशियल्स! सही Admin User ID और Password दर्ज करें। (डिफ़ॉल्ट: admin@vratyavani.ai / Admin@2026)");
   }
 }

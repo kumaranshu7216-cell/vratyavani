@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#1e1b4b",
   "theme_color": "#1e1b4b",
-  "description": "Offline-Ready Hyperlocal Heritage Engine & Bhashini Voice Guide",
+  "description": "Offline-Ready Hyperlocal Heritage Engine with Firebase Cloud Sync",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/1042/1042339.png",
