@@ -25,7 +25,7 @@
   </div>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-  <!-- 2. Universal Pan-India Territory Setup Modal -->
+  <!-- 2. Territory Selector Modal -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -39,26 +39,26 @@
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State (राज्य - 28 States & UTs)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State (राज्य)</label>
           <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateSelectionChanged(this.value)"></select>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District (ज़िला - Select or Type)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District (ज़िला)</label>
           <input list="districtDatalist" id="selDistrictInput" placeholder="उदा. Muzaffarpur, Patna, Varanasi..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
           <datalist id="districtDatalist"></datalist>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Village / Heritage Cluster (गाँव / टोला / क्षेत्र)</label>
-          <input type="text" id="selVillageInput" placeholder="उदा. गरहन, सिकंदरपुर, दशाश्वमेध, या अपना गाँव..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Village / Cluster (गाँव / टोला)</label>
+          <input type="text" id="selVillageInput" placeholder="उदा. Sikandarpur, Garhan, Dashashwamedh..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
         </div>
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">Voice Guide Dialect (भाषा / बोली)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
-            <option value="hi-IN" selected>हिंदी (Hindi)</option>
+            <option value="en-IN" selected>English</option>
+            <option value="hi-IN">हिंदी (Hindi)</option>
             <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
             <option value="mai-IN">मैथिली (Maithili)</option>
             <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
-            <option value="en-IN">English</option>
           </select>
         </div>
         <button onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Top App Navbar with Quick Switcher -->
+  <!-- Top App Navbar -->
   <header class="navbar">
     <div class="nav-brand">
       <div class="brand-logo-img">V</div>
@@ -80,29 +80,29 @@
 
     <div class="nav-controls">
       <button class="btn-reselect" onclick="openLocationModalDirect()">
-        📍 <span id="navDistrictLabel">Muzaffarpur</span> • <span id="navLangLabel">HI</span>
+        📍 <span id="navDistrictLabel">Muzaffarpur</span> • <span id="navLangLabel">EN</span>
       </button>
       <span id="networkStatusBadge" class="network-badge online">● Online</span>
     </div>
   </header>
 
-  <!-- Hero Header with Radar Auto-Detect & Citizen Contribution -->
+  <!-- Hero Header -->
   <section class="hero-banner">
-    <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
-    <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
+    <h2 id="heroTagline">Heritage of Ancestors, Epistle of Digital Voice</h2>
+    <p id="heroSubTagline">From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide</p>
     <div class="hero-badges">
-      <span>🏛️ 28 States Active</span>
-      <span>🎙️ Bhashini AI</span>
-      <span>🔥 Firebase Cloud</span>
-      <span>🛍️ Local Artisans</span>
-      <span>⚠️ Risk Intelligence</span>
+      <span id="bTier">🏛️ 28 States Active</span>
+      <span id="bAudio">🎙️ Bhashini AI</span>
+      <span id="bCloud">🔥 Firebase Cloud</span>
+      <span id="bArtisan">🛍️ Local Artisans</span>
+      <span id="bRisk">⚠️ Risk Intelligence</span>
     </div>
     <div style="margin-top: 12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-      <button onclick="detectNearbyHeritageRadar()" style="background:#38bdf8; color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
-        📡 निकटतम धरोहर खोजें (Auto Radar)
+      <button id="btnRadarTrigger" onclick="detectNearbyHeritageRadar()" style="background:#38bdf8; color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
+        📡 Find Nearby Heritage (Auto Radar)
       </button>
-      <button onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
-        ➕ अपना गाँव / धरोहर जोड़ें (Citizen)
+      <button id="btnCitizenTrigger" onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
+        ➕ Add Heritage / Village (Citizen)
       </button>
     </div>
   </section>
@@ -110,31 +110,32 @@
   <!-- TAB 1: HOME VIEW -->
   <main class="view-container" id="homeView">
     <div class="category-tabs">
-      <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
-      <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक / संस्थान (Monuments)</button>
-      <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
-      <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
+      <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">Major Heritage</button>
+      <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">Monuments / Institutions</button>
+      <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">Undiscovered Gems</button>
+      <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">Local Artisans</button>
     </div>
 
     <div id="cardsGrid" class="cards-grid"></div>
 
+    <!-- Voice Console -->
     <div class="voice-console">
       <div class="console-title">
-        <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
+        <span id="audioConsoleTitle">🎙️ Bhashini AI Audio Guide</span>
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
+          <option value="en-IN" selected>English</option>
           <option value="hi-IN">हिंदी (Hindi)</option>
           <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
           <option value="mai-IN">मैथिली (Maithili)</option>
           <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
-          <option value="en-IN">English</option>
         </select>
       </div>
       <div class="audio-now-playing" id="nowPlayingText">
-        धरोहर चुनें और अपनी बोली में इतिहास सुनें...
+        Select a heritage site to listen to the narrative...
       </div>
       <div class="audio-controls">
-        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ चलाएं (Play)</button>
-        <button id="qrGuideBtn" onclick="showQrModal()">📲 QR कोड</button>
+        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Audio</button>
+        <button id="qrGuideBtn" onclick="showQrModal()">📲 Spot QR Code</button>
       </div>
     </div>
   </main>
@@ -142,8 +143,8 @@
   <!-- TAB 2: MAP VIEW -->
   <main class="view-container" id="mapView">
     <div class="map-header">
-      <h3 id="mapSectionTitle">📍 लाइव हेरिटेज मैप (Map)</h3>
-      <span id="currentDistrictBadge">Muzaffarpur</span>
+      <h3 id="mapSectionTitle">📍 Live Heritage Map</h3>
+      <span id="currentDistrictBadge">MUZAFFARPUR</span>
     </div>
     <div id="map"></div>
     <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct">
@@ -157,7 +158,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <h3 id="panoTitle" style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:16px;">360° Panoramic Tour</h3>
-          <p style="font-size:10px; color:#94a3b8;">स्क्रीन पर स्वाइप करके 360° में परिसर देखें</p>
+          <p style="font-size:10px; color:#94a3b8;">Swipe on screen to rotate in 360°</p>
         </div>
         <span class="close-modal" onclick="closePanoramaModal()">&times;</span>
       </div>
@@ -168,42 +169,42 @@
     </div>
   </div>
 
-  <!-- Citizen Contribution Modal (Universal Pan-India Input) -->
+  <!-- Citizen Contribution Modal -->
   <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
     <div class="modal-box modal-box-animated" style="text-align:left; max-width:480px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ धरोहर / लोक-गाथा योगदान</h3>
+        <h3 id="citModalHead" style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ Heritage / Oral History Contribution</h3>
         <span class="close-modal" onclick="closeCitizenModal()">&times;</span>
       </div>
-      <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
-        भारत के किसी भी राज्य, ज़िले या गाँव की धरोहर भेजें। नोडल एडमिन के सत्यापन के बाद यह लाइव होगी।
+      <p id="citModalDesc" style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
+        Submit any heritage or village narrative. It will go live after Nodal Admin verification.
       </p>
 
       <form id="citizenForm" onsubmit="handleCitizenSubmit(event)">
         <div style="display:flex; flex-direction:column; gap:8px;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
             <div>
-              <label style="font-size:10px; font-weight:700;">राज्य (State)</label>
+              <label style="font-size:10px; font-weight:700;">State</label>
               <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;"></select>
             </div>
             <div>
-              <label style="font-size:10px; font-weight:700;">ज़िला (District)</label>
-              <input type="text" id="citDistrict" placeholder="उदा. मुंगेर / वैशाली / मुजफ्फरपुर" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+              <label style="font-size:10px; font-weight:700;">District</label>
+              <input type="text" id="citDistrict" placeholder="e.g. Muzaffarpur, Patna" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
             </div>
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">गाँव / टोला / मुहल्ला (Village / Cluster)</label>
-            <input type="text" id="citVillage" placeholder="उदा. गरहन, रामपुर, या अपना कस्बा" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">Village / Cluster / Area</label>
+            <input type="text" id="citVillage" placeholder="e.g. Sikandarpur, Garhan" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">धरोहर / संस्थान / शिल्पी का नाम</label>
-            <input type="text" id="citTitle" placeholder="उदा. प्राचीन सूर्य मंदिर / लंगट सिंह कॉलेज" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">Heritage / Place Name</label>
+            <input type="text" id="citTitle" placeholder="e.g. Ancient Temple / Artisan Hub" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या गैलरी)</label>
+            <label style="font-size:10px; font-weight:700;">Attach Photo (Live Camera or Upload)</label>
             <input type="file" id="citPhotoInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
               <img id="citPreviewImg" src="" style="max-height:120px; border-radius:6px; border:1px solid var(--border-color);" />
@@ -212,21 +213,21 @@
 
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label style="font-size:10px; font-weight:700;">स्थान निर्देशांक (GPS)</label>
+              <label style="font-size:10px; font-weight:700;">Coordinates (GPS)</label>
               <button type="button" onclick="detectLiveGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">
-                📍 लाइव GPS लें
+                📍 Auto-Detect GPS
               </button>
             </div>
-            <input type="text" id="citCoords" placeholder="उदा. 26.1209, 85.3647" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; margin-top:3px;" />
+            <input type="text" id="citCoords" placeholder="26.1209, 85.3647" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; margin-top:3px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">मौखिक इतिहास / कहानी (Oral Narrative)</label>
-            <textarea id="citStory" rows="3" placeholder="यहाँ के बुजुर्गों की मान्यता, इतिहास या लोक-कथा लिखें..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
+            <label style="font-size:10px; font-weight:700;">Oral Narrative / Story</label>
+            <textarea id="citStory" rows="3" placeholder="Describe the oral history, tradition, or elder beliefs..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
           </div>
 
           <button type="submit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
-            सत्यापन हेतु भेजें (Submit for Review)
+            Submit for Review
           </button>
         </div>
       </form>
@@ -257,7 +258,7 @@
   <div id="qrModal" class="modal-backdrop" onclick="closeQrModal(event)">
     <div class="modal-box" style="text-align:center;">
       <span class="close-modal" onclick="closeQrModal()">&times;</span>
-      <h3 id="modalHeritageTitle">On-Spot VratyaVani QR</h3>
+      <h3 id="modalHeritageTitle">Spot QR Code</h3>
       <div style="margin: 15px 0;">
         <img id="qrImage" src="" alt="VratyaVani QR" style="width: 180px; height: 180px; border-radius: 8px;" />
       </div>
@@ -305,16 +306,16 @@
       </div>
 
       <h4 style="margin-top:4px; font-size:13px; color:#c2410c;">
-        📥 नागरिकों द्वारा भेजे गए रिकॉर्ड (Pending Approvals)
+        📥 Pending Citizen Approvals
       </h4>
       <div style="max-height:140px; overflow-y:auto; margin-top:6px; margin-bottom:16px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#fef2f2; text-align:left;">
-              <th style="padding:5px; border:1px solid #e2e8f0;">स्थल</th>
-              <th style="padding:5px; border:1px solid #e2e8f0;">ज़िला / गाँव</th>
-              <th style="padding:5px; border:1px solid #e2e8f0;">विवरण</th>
-              <th style="padding:5px; border:1px solid #e2e8f0;">कार्रवाई</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">Place</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">District / Village</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">Details</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">Action</th>
             </tr>
           </thead>
           <tbody id="pendingCitizenTableBody"></tbody>
@@ -322,7 +323,7 @@
       </div>
 
       <h4 style="font-size:13px; color:var(--primary-deep); border-top:1px solid var(--border-color); padding-top:10px;">
-        ➕ नया हेरिटेज या कॉलेज रिकॉर्ड जोड़ें
+        ➕ Add New Heritage / Institution
       </h4>
       <form id="addRecordForm" onsubmit="handleAdminSubmit(event)">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
@@ -336,20 +337,20 @@
             </select>
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">State (राज्य)</label>
+            <label style="font-size:11px; font-weight:bold;">State</label>
             <select id="recState" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;"></select>
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">District (ज़िला)</label>
-            <input type="text" id="recDistrict" required placeholder="उदा. मुजफ्फरपुर / पटना" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <label style="font-size:11px; font-weight:bold;">District</label>
+            <input type="text" id="recDistrict" required placeholder="e.g. Muzaffarpur, Patna" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">Village / Cluster (गाँव)</label>
-            <input type="text" id="recVillage" required placeholder="उदा. गरहन / कुम्रहार" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <label style="font-size:11px; font-weight:bold;">Village / Cluster</label>
+            <input type="text" id="recVillage" required placeholder="e.g. Sikandarpur, Garhan" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
             <label style="font-size:11px; font-weight:bold;">Heritage / Institution Name</label>
-            <input type="text" id="recTitle" required placeholder="उदा. लंगट सिंह कॉलेज" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <input type="text" id="recTitle" required placeholder="e.g. Langat Singh College" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
             <label style="font-size:11px; font-weight:bold;">Coordinates (Lat, Lng)</label>

@@ -1,9 +1,9 @@
 /**
- * VratyaVani AI — Dynamic Pan-India Engine with Auto Radar
+ * VratyaVani AI — Client Engine with Full Language Synchronization & Map Auto-Focus
  */
 
 window.currentDistrict = "muzaffarpur";
-window.currentLanguage = "hi-IN";
+window.currentLanguage = "en-IN";
 let currentCategory = "major";
 window.mapInstance = null;
 let mapMarkers = [];
@@ -11,7 +11,6 @@ let activeAudioItem = null;
 let pannellumViewerInstance = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
-// State District Mapping for Auto-Suggestions
 const stateDistrictHints = {
   bihar: ["Muzaffarpur", "Patna", "Gaya", "Nalanda", "Vaishali", "Bhagalpur", "Darbhanga", "Munger"],
   up: ["Varanasi", "Ayodhya", "Mathura", "Prayagraj", "Lucknow", "Agra", "Gorakhpur"],
@@ -63,7 +62,7 @@ function startAppFlow() {
       splash.style.display = "none";
       document.getElementById("locationModal").style.display = "flex";
     }, 700);
-  }, 1400);
+  }, 1200);
 }
 
 function openLocationModalDirect() {
@@ -77,8 +76,6 @@ function closeLocationModal() {
 function confirmLocationSelection() {
   const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
   const lang = document.getElementById("selLang").value;
-  const village = document.getElementById("selVillageInput").value.trim();
-
   const distKey = rawDist || "muzaffarpur";
 
   document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
@@ -86,48 +83,13 @@ function confirmLocationSelection() {
   document.getElementById("langSelect").value = lang;
 
   document.getElementById("locationModal").style.display = "none";
-  if (window.applyLanguage) window.applyLanguage(lang);
-  if (window.onDistrictChange) window.onDistrictChange(distKey);
+  window.applyLanguage(lang);
+  window.onDistrictChange(distKey);
 }
 
-// Vihaan Purkha Style Auto Heritage Radar Detector
-window.detectNearbyHeritageRadar = function() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        switchMobileTab('map');
-        window.mapInstance.flyTo([lat, lng], 13);
-        const userLocMarker = L.circleMarker([lat, lng], { radius: 9, color: '#38bdf8', fillColor: '#0284c7', fillOpacity: 0.8 }).addTo(window.mapInstance);
-        userLocMarker.bindPopup("📍 <strong>आपकी वर्तमान स्थिति (Current Radar Location)</strong>").openPopup();
-        alert("📡 रडार सक्रिय: आपकी लोकेशन मैप पर लोकेट कर दी गई है!");
-      },
-      () => alert("GPS एक्सेस की अनुमति दें।")
-    );
-  }
-};
+// ---------------- DICTIONARY WITH FULL LANGUAGE SYNCHRONIZATION ---------------- //
 
-// Client Rendering Logic
 const i18n = {
-  "hi-IN": {
-    heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
-    heroSub: "वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "प्रमुख धरोहर (Major)",
-    tabMonument: "स्मारक / संस्थान (Monuments)",
-    tabGem: "छिपे रत्न (Undiscovered)",
-    tabArtisan: "स्थानीय शिल्पी (Artisans)",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
-    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
-    btnListen: "🎙️ AI सुनें",
-    btnMap: "📍 मैप देखें",
-    btnView360: "🌐 360° दृश्य",
-    btnPlay: "▶ चलाएं (Play)",
-    btnStop: "⏹ चल रहा है...",
-    btnReplay: "▶ पुनः सुनें",
-    emptyMsg: "इस ज़िले/श्रेणी में अभी रिकॉर्ड सत्यापित नहीं है। ➕ बटन से जोड़ें।"
-  },
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
     heroSub: "From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide",
@@ -144,7 +106,94 @@ const i18n = {
     btnPlay: "▶ Play Audio",
     btnStop: "⏹ Playing...",
     btnReplay: "▶ Replay",
-    emptyMsg: "No records found in this district. Click ➕ Contribute to add."
+    btnQr: "📲 Spot QR Code",
+    btnRadar: "📡 Find Nearby Heritage (Auto Radar)",
+    btnCitizen: "➕ Add Heritage / Village (Citizen)",
+    emptyMsg: `No records found in this district. <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">Click + Contribute to add</button>`
+  },
+  "hi-IN": {
+    heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
+    heroSub: "वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "प्रमुख धरोहर (Major)",
+    tabMonument: "स्मारक / संस्थान (Monuments)",
+    tabGem: "छिपे रत्न (Undiscovered)",
+    tabArtisan: "स्थानीय शिल्पी (Artisans)",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
+    btnListen: "🎙️ AI सुनें",
+    btnMap: "📍 मैप देखें",
+    btnView360: "🌐 360° दृश्य",
+    btnPlay: "▶ चलाएं (Play)",
+    btnStop: "⏹ चल रहा है...",
+    btnReplay: "▶ पुनः सुनें",
+    btnQr: "📲 ऑन-स्पॉट QR कोड",
+    btnRadar: "📡 निकटतम धरोहर खोजें (Auto Radar)",
+    btnCitizen: "➕ अपना गाँव / धरोहर जोड़ें (Citizen)",
+    emptyMsg: `इस ज़िले/श्रेणी में अभी रिकॉर्ड सत्यापित नहीं है। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">यहाँ + क्लिक कर जोड़ें</button>`
+  },
+  "bho-IN": {
+    heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
+    heroSub: "वैदिक जड़ से आधुनिक AI ले • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "खास धरोहर",
+    tabMonument: "स्मारक / कॉलेज",
+    tabGem: "छुपल रतन",
+    tabArtisan: "कारीगर",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
+    btnListen: "🎙️ AI सुनीं",
+    btnMap: "📍 मैप पर देखीं",
+    btnView360: "🌐 360° दृश्य",
+    btnPlay: "▶ बजाईं (Play)",
+    btnStop: "⏹ बाजत बा...",
+    btnReplay: "▶ फेर से सुनीं",
+    btnQr: "📲 QR कोड",
+    btnRadar: "📡 लगे के धरोहर खोजीं (Radar)",
+    btnCitizen: "➕ आपन गाँव / धरोहर जोड़ीं",
+    emptyMsg: `ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ नया जोड़ीं</button>`
+  },
+  "mai-IN": {
+    heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
+    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "प्रमुख धरोहर",
+    tabMonument: "स्मारक / संस्थान",
+    tabGem: "लुकल रत्न",
+    tabArtisan: "शिल्पी",
+    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
+    nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
+    btnListen: "🎙️ AI सुनू",
+    btnMap: "📍 मैप पर देखू",
+    btnView360: "🌐 360° दृश्य",
+    btnPlay: "▶ बजाउ (Play)",
+    btnStop: "⏹ बाजि रहल अछि...",
+    btnReplay: "▶ पुनः सुनू",
+    btnQr: "📲 QR कोड",
+    btnRadar: "📡 निकटतम धरोहर ताकू",
+    btnCitizen: "➕ अपन गाम / धरोहर जोड़ू",
+    emptyMsg: `एहि श्रेणी में कोनो रेकॉर्ड नहि अछि। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ जोड़ू</button>`
+  },
+  "pa-IN": {
+    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
+    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • Dual-Mode Offline Heritage Map & Voice Guide",
+    tabMajor: "ਮੁੱਖ ਵਿਰਾਸਤ",
+    tabMonument: "ਸਮਾਰਕ / ਸੰਸਥਾਵਾਂ",
+    tabGem: "ਅਣਗੌਲੇ ਰਤਨ",
+    tabArtisan: "ਕਾਰੀਗਰ",
+    mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
+    voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
+    nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
+    btnListen: "🎙️ AI ਸੁਣੋ",
+    btnMap: "📍 ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ",
+    btnView360: "🌐 360° ਦ੍ਰਿਸ਼",
+    btnPlay: "▶ ਚਲਾਓ (Play)",
+    btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
+    btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
+    btnQr: "📲 QR ਕੋਡ",
+    btnRadar: "📡 ਨੇੜਲੀ ਵਿਰਾਸਤ ਲੱਭੋ",
+    btnCitizen: "➕ ਆਪਣਾ ਪਿੰਡ / ਵਿਰਾਸਤ ਜੋੜੋ",
+    emptyMsg: `ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ ਇੱਥੇ ਕਲਿੱਕ ਕਰਕੇ ਜੋੜੋ</button>`
   }
 };
 
@@ -160,6 +209,13 @@ window.applyLanguage = function(langKey) {
   document.getElementById("tabArtisan").innerText = t.tabArtisan;
   document.getElementById("mapSectionTitle").innerText = t.mapTitle;
   document.getElementById("audioConsoleTitle").innerText = t.voiceConsoleTitle;
+  document.getElementById("qrGuideBtn").innerText = t.btnQr;
+  document.getElementById("btnRadarTrigger").innerText = t.btnRadar;
+  document.getElementById("btnCitizenTrigger").innerText = t.btnCitizen;
+
+  const playBtn = document.getElementById("playAudioBtn");
+  if (playBtn) playBtn.innerText = t.btnPlay;
+
   if (!activeAudioItem) {
     document.getElementById("nowPlayingText").innerText = t.nowPlayingDefault;
   }
@@ -168,27 +224,11 @@ window.applyLanguage = function(langKey) {
   renderCards();
 };
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
+function onConsoleLangChange(lang) {
+  window.applyLanguage(lang);
 }
 
-window.addEventListener('online', updateNetworkStatus);
-window.addEventListener('offline', updateNetworkStatus);
-
-function updateNetworkStatus() {
-  const badge = document.getElementById("networkStatusBadge");
-  if (!badge) return;
-  if (navigator.onLine) {
-    badge.className = "network-badge online";
-    badge.innerText = "● Online";
-    if (window.syncCloudHeritage) window.syncCloudHeritage();
-  } else {
-    badge.className = "network-badge offline";
-    badge.innerText = "● Offline";
-  }
-}
+// ---------------- MAP INITIALIZATION & AUTO-RADAR ENGINE ---------------- //
 
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
@@ -197,11 +237,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initMap() {
-  window.mapInstance = L.map('map').setView([26.1209, 85.3647], 12);
+  window.mapInstance = L.map('map').setView([26.1209, 85.3647], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap | VratyaVani AI'
   }).addTo(window.mapInstance);
 }
+
+window.detectNearbyHeritageRadar = function() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        switchMobileTab('map');
+        
+        setTimeout(() => {
+          window.mapInstance.invalidateSize();
+          window.mapInstance.flyTo([lat, lng], 14);
+          const userLocMarker = L.circleMarker([lat, lng], { radius: 10, color: '#38bdf8', fillColor: '#0284c7', fillOpacity: 0.9 }).addTo(window.mapInstance);
+          userLocMarker.bindPopup("📍 <strong>Current Radar Location</strong>").openPopup();
+        }, 300);
+      },
+      () => alert("Please allow GPS location access to detect nearby heritage.")
+    );
+  }
+};
 
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
@@ -239,7 +299,7 @@ window.loadDistrictData = function(districtKey) {
   mapMarkers = [];
 
   if (items.length > 0) {
-    window.mapInstance.flyTo(items[0].coords, 12);
+    window.mapInstance.flyTo(items[0].coords, 13);
     items.forEach(item => {
       const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title });
       const marker = L.marker(item.coords).addTo(window.mapInstance);
@@ -279,7 +339,7 @@ function renderCards(preloadedItems) {
   const filtered = items.filter(item => item.category === currentCategory);
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted); padding:20px; text-align:center;">${t.emptyMsg}</p>`;
+    container.innerHTML = `<div style="color:var(--text-muted); padding:20px; text-align:center; grid-column:1/-1;">${t.emptyMsg}</div>`;
     return;
   }
 
@@ -292,7 +352,7 @@ function renderCards(preloadedItems) {
       <div class="heritage-card">
         <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;">
           <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
-          <span class="btn-view360-badge">🌐 360° View</span>
+          <span class="btn-view360-badge">${t.btnView360}</span>
         </div>
         <div class="card-content">
           <div style="display:flex; align-items:center; margin-bottom:4px;">
@@ -357,7 +417,8 @@ function closePanoramaModal(e) {
 function focusOnMapTab(lat, lng) {
   switchMobileTab('map');
   setTimeout(() => {
-    window.mapInstance.flyTo([lat, lng], 16);
+    window.mapInstance.invalidateSize();
+    window.mapInstance.flyTo([lat, lng], 15);
     document.getElementById("btnDirectGoogleMaps").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   }, 250);
 }
@@ -426,7 +487,8 @@ function closeQrModal(e) {
   }
 }
 
-// Citizen Contribution Logic
+// ---------------- CITIZEN MODAL & ATTACHMENT ---------------- //
+
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
 }
@@ -441,9 +503,9 @@ function detectLiveGPS() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         document.getElementById("citCoords").value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-        alert("GPS लोकेशन प्राप्त हो गई!");
+        alert("GPS Coordinates detected successfully!");
       },
-      () => alert("कृपया GPS अनुमति दें।")
+      () => alert("Please allow GPS location permission.")
     );
   }
 }
@@ -492,13 +554,14 @@ function handleCitizenSubmit(e) {
   pendingQueue.unshift(pendingItem);
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
 
-  alert(`🎉 धन्यवाद! "${title}" (${village}) को सत्यापन हेतु भेज दिया गया है।`);
+  alert(`🎉 Thank you! "${title}" (${village}) submitted for Nodal Admin review.`);
   e.target.reset();
   document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
 }
 
-// Admin Desk Logic
+// ---------------- ADMIN PANEL LOGIC ---------------- //
+
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
@@ -553,7 +616,7 @@ function renderPendingCitizenTable() {
   const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
 
   if (pendingQueue.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:8px;">कोई लंबित योगदान नहीं है।</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:8px;">No pending contributions.</td></tr>`;
     return;
   }
 
@@ -595,14 +658,14 @@ function approveCitizenSubmission(index) {
   localStorage.setItem("vratyavani_custom_records", JSON.stringify(customRecords));
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
 
-  alert(`सत्यापित! "${approvedItem.title}" अब लाइव मैप और कार्ड्स में प्रदर्शित होगा।`);
+  alert(`Verified! "${approvedItem.title}" is now live on the map and cards.`);
   renderPendingCitizenTable();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 }
 
 function rejectCitizenSubmission(index) {
-  if (!confirm("क्या आप इस सबमिशन को खारिज करना चाहते हैं?")) return;
+  if (!confirm("Reject this submission?")) return;
   const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
   pendingQueue.splice(index, 1);
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
@@ -698,6 +761,8 @@ window.deleteCustomRecord = async function(recordIndex) {
   loadDistrictData(window.currentDistrict);
 };
 
+// ---------------- TAB NAVIGATION FIX (FOR LEAFLET MAP RESIZE) ---------------- //
+
 function switchMobileTab(tab) {
   document.getElementById("btnNavHome").classList.remove("active");
   document.getElementById("btnNavMap").classList.remove("active");
@@ -711,8 +776,35 @@ function switchMobileTab(tab) {
     document.getElementById("btnNavMap").classList.add("active");
     document.getElementById("homeView").style.display = "none";
     document.getElementById("mapView").style.display = "block";
-    if (window.mapInstance) {
-      setTimeout(() => { window.mapInstance.invalidateSize(); }, 200);
-    }
+    
+    // Crucial fix: invalidateSize forces Leaflet to recalculate container bounds immediately
+    setTimeout(() => {
+      if (window.mapInstance) {
+        window.mapInstance.invalidateSize();
+      }
+    }, 150);
+  }
+}
+
+// Track Network Status
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
+
+function updateNetworkStatus() {
+  const badge = document.getElementById("networkStatusBadge");
+  if (!badge) return;
+  if (navigator.onLine) {
+    badge.className = "network-badge online";
+    badge.innerText = "● Online";
+    if (window.syncCloudHeritage) window.syncCloudHeritage();
+  } else {
+    badge.className = "network-badge offline";
+    badge.innerText = "● Offline";
   }
 }
