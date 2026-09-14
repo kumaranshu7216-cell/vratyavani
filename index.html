@@ -11,54 +11,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Pannellum for lightweight in-app 360° Interactive Panoramic Rotation -->
+  <!-- Pannellum Library for In-App 360 Rotation -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
   <link rel="stylesheet" href="style.css" />
-  
-  <style>
-    /* In-App 360 Modal Styling */
-    #panoramaModal .modal-box {
-      max-width: 800px;
-      width: 95%;
-      padding: 12px;
-      background: #0f172a;
-      color: #fff;
-    }
-    #panoramaContainer {
-      width: 100%;
-      height: 380px;
-      border-radius: 10px;
-      margin-top: 8px;
-    }
-    .btn-reselect {
-      background: rgba(217, 119, 6, 0.18);
-      color: var(--accent-gold);
-      border: 1px solid var(--accent-gold);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-    .risk-badge {
-      font-size: 9px;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      margin-left: auto;
-    }
-    .risk-high { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-    .risk-mod { background: #fef3c7; color: #92400e; border: 1px solid #fde047; }
-  </style>
 </head>
 <body onload="startAppFlow()">
 
-  <!-- 1. Splash Screen -->
+  <!-- 1. Cinematic Splash Screen -->
   <div id="splashScreen">
     <div class="splash-logo-anim">🏛️</div>
     <h1 class="splash-title-anim">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
@@ -67,7 +26,7 @@
   </div>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-  <!-- 2. VratyaVani Shree Configuration Modal -->
+  <!-- 2. VratyaVani Shree Territory Modal -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -77,7 +36,7 @@
         </div>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Select territory and your preferred voice guide language</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Configure territory and audio narration language</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -114,13 +73,13 @@
           </select>
         </div>
         <button onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
-          Apply & Explore VratyaVani ➔
+          Enter VratyaVani AI ➔
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Top App Navbar with Quick Re-Select Button -->
+  <!-- Top App Navbar with Re-Select Trigger -->
   <header class="navbar">
     <div class="nav-brand">
       <div class="brand-logo-img">V</div>
@@ -131,7 +90,6 @@
     </div>
 
     <div class="nav-controls">
-      <!-- Direct Re-Select Modal Button (Without Refreshing) -->
       <button class="btn-reselect" onclick="openLocationModalDirect()">
         📍 <span id="navDistrictLabel">Muzaffarpur</span> • <span id="navLangLabel">HI</span>
       </button>
@@ -139,7 +97,7 @@
     </div>
   </header>
 
-  <!-- Hero Header -->
+  <!-- Hero Header with Citizen Contribution Button -->
   <section class="hero-banner">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
@@ -149,6 +107,11 @@
       <span>🔥 Firebase Cloud</span>
       <span>🛍️ Local Artisans</span>
       <span>⚠️ Risk Intelligence</span>
+    </div>
+    <div style="margin-top: 12px;">
+      <button onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.3);">
+        ➕ धरोहर / लोक-गाथा योगदान (Contribute)
+      </button>
     </div>
   </section>
 
@@ -163,6 +126,7 @@
 
     <div id="cardsGrid" class="cards-grid"></div>
 
+    <!-- Bhashini Voice Console -->
     <div class="voice-console">
       <div class="console-title">
         <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
@@ -196,24 +160,88 @@
     </a>
   </main>
 
-  <!-- Dedicated In-App 360° Panoramic Virtual Viewer Modal -->
+  <!-- Dedicated In-App 360° Panorama Modal -->
   <div id="panoramaModal" class="modal-backdrop" onclick="closePanoramaModal(event)">
-    <div class="modal-box modal-box-animated">
+    <div class="modal-box modal-box-animated" style="background:#0f172a; color:#fff; max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <h3 id="panoTitle" style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:16px;">360° Virtual Tour</h3>
-          <p style="font-size:11px; color:#94a3b8;">अपनी उंगली या माउस से खींचकर 360° घुमाएँ (Swipe to rotate)</p>
+          <h3 id="panoTitle" style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:16px;">360° Panoramic Tour</h3>
+          <p style="font-size:10px; color:#94a3b8;">स्क्रीन पर स्वाइप करके 360° में परिसर देखें</p>
         </div>
         <span class="close-modal" onclick="closePanoramaModal()">&times;</span>
       </div>
-      <div id="panoramaContainer"></div>
-      <button onclick="closePanoramaModal()" style="margin-top:10px; width:100%; padding:8px; background:var(--primary-deep); color:#fff; border:1px solid #475569; border-radius:6px; font-weight:700; cursor:pointer;">
+      <div id="panoramaContainer" style="width:100%; height:360px; border-radius:10px; margin-top:10px;"></div>
+      <button onclick="closePanoramaModal()" style="margin-top:10px; width:100%; padding:8px; background:#1e1b4b; color:#fff; border:1px solid #475569; border-radius:6px; font-weight:700; cursor:pointer;">
         ✕ Close 360° View
       </button>
     </div>
   </div>
 
-  <!-- Bottom Mobile Navigation Bar -->
+  <!-- Citizen Contribution Modal (Live Camera & GPS) -->
+  <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
+    <div class="modal-box modal-box-animated" style="text-align:left; max-width:460px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ धरोहर / लोक-गाथा योगदान</h3>
+        <span class="close-modal" onclick="closeCitizenModal()">&times;</span>
+      </div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
+        आपके द्वारा सबमिट किया गया डेटा नोडल एडमिन के सत्यापन (Verification) के बाद लाइव होगा।
+      </p>
+
+      <form id="citizenForm" onsubmit="handleCitizenSubmit(event)">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <div>
+              <label style="font-size:10px; font-weight:700;">राज्य (State)</label>
+              <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;">
+                <option value="bihar">बिहार</option>
+                <option value="up">उत्तर प्रदेश</option>
+                <option value="punjab">पंजाब</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:10px; font-weight:700;">ज़िला (District)</label>
+              <input type="text" id="citDistrict" placeholder="उदा. मुजफ्फरपुर" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:10px; font-weight:700;">धरोहर / स्थल का नाम</label>
+            <input type="text" id="citTitle" placeholder="धरोहर या लोक-तीर्थ का नाम" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+          </div>
+
+          <div>
+            <label style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या फ़ाइल)</label>
+            <input type="file" id="citPhotoInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
+            <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
+              <img id="citPreviewImg" src="" style="max-height:120px; border-radius:6px; border:1px solid var(--border-color);" />
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label style="font-size:10px; font-weight:700;">स्थान निर्देशांक (GPS)</label>
+              <button type="button" onclick="detectLiveGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">
+                📍 लाइव लोकेशन लें
+              </button>
+            </div>
+            <input type="text" id="citCoords" placeholder="उदा. 26.1209, 85.3647" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; margin-top:3px;" />
+          </div>
+
+          <div>
+            <label style="font-size:10px; font-weight:700;">मौखिक इतिहास / कहानी (अपनी भाषा में)</label>
+            <textarea id="citStory" rows="3" placeholder="यहाँ के बुजुर्गों की मान्यता, इतिहास या लोक-कथा लिखें..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
+          </div>
+
+          <button type="submit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+            सत्यापन हेतु भेजें (Submit for Review)
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Application Bar -->
   <nav class="bottom-app-bar">
     <div class="bottom-nav-item active" id="btnNavHome" onclick="switchMobileTab('home')">
       <span class="icon">🏛️</span>
@@ -272,9 +300,9 @@
     </div>
   </div>
 
-  <!-- In-Page Admin Desk -->
+  <!-- In-Page Admin Desk with Pending Citizen Approvals -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
-    <div class="modal-box" style="text-align: left; max-width: 650px;">
+    <div class="modal-box" style="text-align: left; max-width: 680px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
         <div>
@@ -284,13 +312,35 @@
         <button onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
+      <!-- Section A: Pending Citizen Submissions for Verification -->
+      <h4 style="margin-top:4px; font-size:13px; color:#c2410c;">
+        📥 नागरिकों द्वारा भेजे गए रिकॉर्ड (Pending Citizen Approvals)
+      </h4>
+      <div style="max-height:140px; overflow-y:auto; margin-top:6px; margin-bottom:16px;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead>
+            <tr style="background:#fef2f2; text-align:left;">
+              <th style="padding:5px; border:1px solid #e2e8f0;">स्थल</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">ज़िला</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">विवरण</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">कार्रवाई</th>
+            </tr>
+          </thead>
+          <tbody id="pendingCitizenTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Section B: Direct Manual Entry -->
+      <h4 style="font-size:13px; color:var(--primary-deep); border-top:1px solid var(--border-color); padding-top:10px;">
+        ➕ नया हेरिटेज या कॉलेज रिकॉर्ड जोड़ें
+      </h4>
       <form id="addRecordForm" onsubmit="handleAdminSubmit(event)">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
           <div>
             <label style="font-size:11px; font-weight:bold;">Category</label>
             <select id="recCat" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
               <option value="major">Major Heritage</option>
-              <option value="monument">Monument</option>
+              <option value="monument">Monument / College</option>
               <option value="gem">Undiscovered Gem</option>
               <option value="artisan">Artisan</option>
             </select>
@@ -305,8 +355,8 @@
             </select>
           </div>
           <div style="grid-column:1/-1;">
-            <label style="font-size:11px; font-weight:bold;">Heritage / Artisan Name</label>
-            <input type="text" id="recTitle" required placeholder="e.g. Langat Singh College" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <label style="font-size:11px; font-weight:bold;">Heritage / Institution Name</label>
+            <input type="text" id="recTitle" required placeholder="उदा. लंगट सिंह कॉलेज (LS College)" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
             <label style="font-size:11px; font-weight:bold;">Coordinates (Lat, Lng)</label>
@@ -326,14 +376,15 @@
         </button>
       </form>
 
+      <!-- Section C: Verified Active Records -->
       <h4 style="margin-top:14px; font-size:12px; border-top:1px solid var(--border-color); padding-top:8px;">Live Directory</h4>
-      <div style="max-height:140px; overflow-y:auto; margin-top:6px;">
+      <div style="max-height:120px; overflow-y:auto; margin-top:6px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#f8fafc; text-align:left;">
               <th style="padding:5px; border:1px solid var(--border-color);">Name</th>
               <th style="padding:5px; border:1px solid var(--border-color);">District</th>
-              <th style="padding:5px; border:1px solid var(--border-color);">Action</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">Action</th>
             </tr>
           </thead>
           <tbody id="inpageAdminTableBody"></tbody>
@@ -347,7 +398,6 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Pannellum JS for Interactive 360 Panorama Rotation inside Modal -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   
   <script type="module">
@@ -411,7 +461,6 @@
       }, 1600);
     }
 
-    // Direct Re-Select without page refresh
     function openLocationModalDirect() {
       document.getElementById("locationModal").style.display = "flex";
     }

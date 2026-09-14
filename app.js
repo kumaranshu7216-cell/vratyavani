@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI — In-App 360 Viewer, Re-selection & Risk Intelligence
+ * VratyaVani AI — Client Logic with Citizen Verification Desk & In-App 360 Rotation
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -16,7 +16,7 @@ const i18n = {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
     heroSub: "वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "प्रमुख धरोहर (Major)",
-    tabMonument: "स्मारक (Monuments)",
+    tabMonument: "स्मारक / संस्थान (Monuments)",
     tabGem: "छिपे रत्न (Undiscovered)",
     tabArtisan: "स्थानीय शिल्पी (Artisans)",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
@@ -34,7 +34,7 @@ const i18n = {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
     heroSub: "From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "Major Heritage",
-    tabMonument: "Monuments",
+    tabMonument: "Monuments / Colleges",
     tabGem: "Undiscovered Gems",
     tabArtisan: "Local Artisans",
     mapTitle: "📍 Live Heritage Map",
@@ -52,7 +52,7 @@ const i18n = {
     heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
     heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "ਮੁੱਖ ਵਿਰਾਸਤ",
-    tabMonument: "ਸਮਾਰਕ",
+    tabMonument: "ਸਮਾਰਕ / ਸੰਸਥਾਵਾਂ",
     tabGem: "ਅਣਗੌਲੇ ਰਤਨ",
     tabArtisan: "ਕਾਰੀਗਰ",
     mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
@@ -70,7 +70,7 @@ const i18n = {
     heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
     heroSub: "वैदिक जड़ से आधुनिक AI ले • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "खास धरोहर",
-    tabMonument: "स्मारक",
+    tabMonument: "स्मारक / कॉलेज",
     tabGem: "छुपल रतन",
     tabArtisan: "कारीगर",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
@@ -88,7 +88,7 @@ const i18n = {
     heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
     heroSub: "वैदिक जड़ सं आधुनिक AI धरि • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "प्रमुख धरोहर",
-    tabMonument: "स्मारक",
+    tabMonument: "स्मारक / संस्थान",
     tabGem: "लुकल रत्न",
     tabArtisan: "शिल्पी",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
@@ -242,7 +242,7 @@ function renderCards(preloadedItems) {
     const isArtisan = item.category === "artisan";
     const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
 
-    // Preservation Risk Score Intelligence[cite: 1]
+    // Preservation Risk Intelligence[cite: 1]
     const riskScore = item.category === 'gem' ? 'Risk: 8.8 (Urgent)' : (item.category === 'artisan' ? 'Risk: 7.5 (Endangered)' : 'Preserved (Low Risk)');
     const riskClass = (item.category === 'gem' || item.category === 'artisan') ? 'risk-high' : 'risk-mod';
 
@@ -250,7 +250,7 @@ function renderCards(preloadedItems) {
       <div class="heritage-card">
         <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;" title="Click to view 360 panorama">
           <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
-          <span class="btn-view360-badge">🌐 360° Touch View</span>
+          <span class="btn-view360-badge">🌐 360° View</span>
         </div>
         <div class="card-content">
           <div style="display:flex; align-items:center; margin-bottom:4px;">
@@ -271,7 +271,7 @@ function renderCards(preloadedItems) {
   });
 }
 
-// ---------------- VIHAAN PURKHA STYLE IN-APP 360° ROTATION VIEWER ---------------- //
+// ---------------- 360° IN-APP PANORAMA VIEWER ---------------- //
 
 function open360Viewer(itemId) {
   let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
@@ -289,19 +289,14 @@ function open360Viewer(itemId) {
   document.getElementById("panoTitle").innerText = `360° Panorama: ${locContent.title}`;
   document.getElementById("panoramaModal").style.display = "flex";
 
-  // Destroy previous viewer if exists
   if (pannellumViewerInstance) {
     try { pannellumViewerInstance.destroy(); } catch(e) {}
   }
 
-  // Load in-app 360° rotating panorama using pannellum
-  // Uses authentic high-res spherical image or direct equirectangular fallback
-  const panoImg = item.image;
-  
   setTimeout(() => {
     pannellumViewerInstance = pannellum.viewer('panoramaContainer', {
       type: 'equirectangular',
-      panorama: panoImg,
+      panorama: item.image,
       autoLoad: true,
       autoRotate: -2,
       compass: true
@@ -390,7 +385,79 @@ function closeQrModal(e) {
   }
 }
 
-// Admin Security Gate Handlers
+// ---------------- CITIZEN CONTRIBUTION LOGIC (LIVE CAMERA & GPS) ---------------- //
+
+function openCitizenModal() {
+  document.getElementById("citizenModal").style.display = "flex";
+}
+function closeCitizenModal(e) {
+  if (!e || e.target.id === "citizenModal" || e.target.classList.contains("close-modal")) {
+    document.getElementById("citizenModal").style.display = "none";
+  }
+}
+
+function detectLiveGPS() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        document.getElementById("citCoords").value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+        alert("GPS लोकेशन सफलतापूर्वक प्राप्त हो गई!");
+      },
+      () => alert("कृपया GPS अनुमति दें या मैन्युअली अक्षांश, देशांतर भरें।")
+    );
+  }
+}
+
+let citizenUploadedBase64 = null;
+function previewCitizenImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      citizenUploadedBase64 = e.target.result;
+      document.getElementById("citPreviewImg").src = citizenUploadedBase64;
+      document.getElementById("citImagePreviewBox").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleCitizenSubmit(e) {
+  e.preventDefault();
+
+  const title = document.getElementById("citTitle").value.trim();
+  const district = document.getElementById("citDistrict").value.trim().toLowerCase();
+  const coordsRaw = document.getElementById("citCoords").value.trim();
+  const story = document.getElementById("citStory").value.trim();
+
+  let coords = [26.1209, 85.3647];
+  if (coordsRaw.includes(",")) {
+    const parts = coordsRaw.split(",");
+    coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
+  }
+
+  const pendingItem = {
+    id: `pending_${Date.now()}`,
+    title: title,
+    district: district,
+    coords: coords,
+    story: story,
+    image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
+    submittedAt: new Date().toLocaleDateString()
+  };
+
+  const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
+  pendingQueue.unshift(pendingItem);
+  localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
+
+  alert(`🎉 धन्यवाद! "${title}" की जानकारी सुरक्षित दर्ज कर ली गई है। नोडल एडमिन के सत्यापन के बाद यह सार्वजनिक मैप पर प्रदर्शित होगी।`);
+  e.target.reset();
+  document.getElementById("citImagePreviewBox").style.display = "none";
+  closeCitizenModal();
+}
+
+// ---------------- ADMIN LOGIC & VERIFICATION DESK ---------------- //
+
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
@@ -420,6 +487,7 @@ function handleAdminLogin(e) {
 }
 
 function openAdminPanel() {
+  renderPendingCitizenTable();
   renderInpageAdminTable();
   document.getElementById("adminPanelModal").style.display = "flex";
 }
@@ -434,6 +502,69 @@ function logoutAdmin() {
   sessionStorage.removeItem("vratyavani_admin_auth");
   document.getElementById("adminPanelModal").style.display = "none";
   alert("Logged out!");
+}
+
+function renderPendingCitizenTable() {
+  const tbody = document.getElementById("pendingCitizenTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
+
+  if (pendingQueue.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding:8px;">कोई लंबित योगदान नहीं है।</td></tr>`;
+    return;
+  }
+
+  pendingQueue.forEach((item, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="padding:4px; border:1px solid #e2e8f0;"><strong>${item.title}</strong></td>
+      <td style="padding:4px; border:1px solid #e2e8f0;">${item.district}</td>
+      <td style="padding:4px; border:1px solid #e2e8f0;"><small>${item.story.substring(0, 30)}...</small></td>
+      <td style="padding:4px; border:1px solid #e2e8f0; display:flex; gap:4px;">
+        <button onclick="approveCitizenSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✓ Approve</button>
+        <button onclick="rejectCitizenSubmission(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function approveCitizenSubmission(index) {
+  const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
+  const approvedItem = pendingQueue.splice(index, 1)[0];
+
+  const liveRecord = {
+    id: `cit_${Date.now()}`,
+    category: "gem",
+    district: approvedItem.district,
+    coords: approvedItem.coords,
+    image: approvedItem.image,
+    source: "Community Verified",
+    content: {
+      "hi-IN": { title: approvedItem.title, desc: approvedItem.story, audio: approvedItem.story },
+      "en-IN": { title: approvedItem.title, desc: approvedItem.story, audio: approvedItem.story }
+    }
+  };
+
+  const customRecords = JSON.parse(localStorage.getItem("vratyavani_custom_records") || "[]");
+  customRecords.unshift(liveRecord);
+  localStorage.setItem("vratyavani_custom_records", JSON.stringify(customRecords));
+  localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
+
+  alert(`सत्यापित! "${approvedItem.title}" अब लाइव मैप और कार्ड्स में प्रदर्शित होगा।`);
+  renderPendingCitizenTable();
+  renderInpageAdminTable();
+  loadDistrictData(window.currentDistrict);
+}
+
+function rejectCitizenSubmission(index) {
+  if (!confirm("क्या आप इस सबमिशन को खारिज करना चाहते हैं?")) return;
+  const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
+  pendingQueue.splice(index, 1);
+  localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
+  renderPendingCitizenTable();
 }
 
 function renderInpageAdminTable() {
