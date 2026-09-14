@@ -11,13 +11,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Pannellum Library for In-App 360 Rotation -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body onload="startAppFlow()">
 
-  <!-- 1. Cinematic Splash Screen -->
+  <!-- 1. Splash Screen -->
   <div id="splashScreen">
     <div class="splash-logo-anim">🏛️</div>
     <h1 class="splash-title-anim">VRATYAVANI <span style="color:#d97706;">AI</span></h1>
@@ -26,7 +25,7 @@
   </div>
   <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-  <!-- 2. VratyaVani Shree Territory Modal -->
+  <!-- 2. Universal Pan-India Territory Setup Modal -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
@@ -36,40 +35,30 @@
         </div>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Configure territory and audio narration language</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Configure Pan-India territory and preferred dialect</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State</label>
-          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateChange(this.value)">
-            <option value="bihar" selected>Bihar</option>
-            <option value="up">Uttar Pradesh</option>
-            <option value="punjab">Punjab</option>
-          </select>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State (राज्य - 28 States & UTs)</label>
+          <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateSelectionChanged(this.value)"></select>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District</label>
-          <select id="selDistrict" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onDistrictModalChange(this.value)">
-            <option value="muzaffarpur" selected>Muzaffarpur (Tirhut)</option>
-            <option value="patna">Patna (Pataliputra)</option>
-          </select>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District (ज़िला - Select or Type)</label>
+          <input list="districtDatalist" id="selDistrictInput" placeholder="उदा. Muzaffarpur, Patna, Varanasi..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
+          <datalist id="districtDatalist"></datalist>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Zone / Village Cluster</label>
-          <select id="selVillage" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
-            <option value="all">Entire District Heritage Hub</option>
-            <option value="garhan">Garhan / Bochaha</option>
-            <option value="sikandarpur">Sikandarpur Lake</option>
-          </select>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Village / Heritage Cluster (गाँव / टोला / क्षेत्र)</label>
+          <input type="text" id="selVillageInput" placeholder="उदा. गरहन, सिकंदरपुर, दशाश्वमेध, या अपना गाँव..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Preferred Voice Guide Language</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Voice Guide Dialect (भाषा / बोली)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
+            <option value="hi-IN" selected>हिंदी (Hindi)</option>
+            <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
+            <option value="mai-IN">मैथिली (Maithili)</option>
+            <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
             <option value="en-IN">English</option>
-            <option value="hi-IN" selected>Hindi (हिंदी)</option>
-            <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
-            <option value="mai-IN">Maithili (मैथिली)</option>
-            <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
           </select>
         </div>
         <button onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
@@ -79,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Top App Navbar with Re-Select Trigger -->
+  <!-- Top App Navbar with Quick Switcher -->
   <header class="navbar">
     <div class="nav-brand">
       <div class="brand-logo-img">V</div>
@@ -97,20 +86,23 @@
     </div>
   </header>
 
-  <!-- Hero Header with Citizen Contribution Button -->
+  <!-- Hero Header with Radar Auto-Detect & Citizen Contribution -->
   <section class="hero-banner">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide</p>
     <div class="hero-badges">
-      <span>🏛️ 4-Tier Hub</span>
+      <span>🏛️ 28 States Active</span>
       <span>🎙️ Bhashini AI</span>
       <span>🔥 Firebase Cloud</span>
       <span>🛍️ Local Artisans</span>
       <span>⚠️ Risk Intelligence</span>
     </div>
-    <div style="margin-top: 12px;">
-      <button onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.3);">
-        ➕ धरोहर / लोक-गाथा योगदान (Contribute)
+    <div style="margin-top: 12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <button onclick="detectNearbyHeritageRadar()" style="background:#38bdf8; color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
+        📡 निकटतम धरोहर खोजें (Auto Radar)
+      </button>
+      <button onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
+        ➕ अपना गाँव / धरोहर जोड़ें (Citizen)
       </button>
     </div>
   </section>
@@ -119,23 +111,22 @@
   <main class="view-container" id="homeView">
     <div class="category-tabs">
       <button class="tab-btn active" id="tabMajor" onclick="filterCategory('major')">प्रमुख धरोहर (Major)</button>
-      <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक (Monuments)</button>
+      <button class="tab-btn" id="tabMonument" onclick="filterCategory('monument')">स्मारक / संस्थान (Monuments)</button>
       <button class="tab-btn" id="tabGem" onclick="filterCategory('gem')">छिपे रत्न (Undiscovered)</button>
       <button class="tab-btn" id="tabArtisan" onclick="filterCategory('artisan')">स्थानीय शिल्पी (Artisans)</button>
     </div>
 
     <div id="cardsGrid" class="cards-grid"></div>
 
-    <!-- Bhashini Voice Console -->
     <div class="voice-console">
       <div class="console-title">
         <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
           <option value="hi-IN">हिंदी (Hindi)</option>
-          <option value="en-IN">English</option>
           <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
           <option value="mai-IN">मैथिली (Maithili)</option>
           <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="en-IN">English</option>
         </select>
       </div>
       <div class="audio-now-playing" id="nowPlayingText">
@@ -160,7 +151,7 @@
     </a>
   </main>
 
-  <!-- Dedicated In-App 360° Panorama Modal -->
+  <!-- 360 Panorama Modal -->
   <div id="panoramaModal" class="modal-backdrop" onclick="closePanoramaModal(event)">
     <div class="modal-box modal-box-animated" style="background:#0f172a; color:#fff; max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -177,15 +168,15 @@
     </div>
   </div>
 
-  <!-- Citizen Contribution Modal (Live Camera & GPS) -->
+  <!-- Citizen Contribution Modal (Universal Pan-India Input) -->
   <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
-    <div class="modal-box modal-box-animated" style="text-align:left; max-width:460px;">
+    <div class="modal-box modal-box-animated" style="text-align:left; max-width:480px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ धरोहर / लोक-गाथा योगदान</h3>
         <span class="close-modal" onclick="closeCitizenModal()">&times;</span>
       </div>
       <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
-        आपके द्वारा सबमिट किया गया डेटा नोडल एडमिन के सत्यापन (Verification) के बाद लाइव होगा।
+        भारत के किसी भी राज्य, ज़िले या गाँव की धरोहर भेजें। नोडल एडमिन के सत्यापन के बाद यह लाइव होगी।
       </p>
 
       <form id="citizenForm" onsubmit="handleCitizenSubmit(event)">
@@ -193,25 +184,26 @@
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
             <div>
               <label style="font-size:10px; font-weight:700;">राज्य (State)</label>
-              <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;">
-                <option value="bihar">बिहार</option>
-                <option value="up">उत्तर प्रदेश</option>
-                <option value="punjab">पंजाब</option>
-              </select>
+              <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;"></select>
             </div>
             <div>
               <label style="font-size:10px; font-weight:700;">ज़िला (District)</label>
-              <input type="text" id="citDistrict" placeholder="उदा. मुजफ्फरपुर" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+              <input type="text" id="citDistrict" placeholder="उदा. मुंगेर / वैशाली / मुजफ्फरपुर" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
             </div>
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">धरोहर / स्थल का नाम</label>
-            <input type="text" id="citTitle" placeholder="धरोहर या लोक-तीर्थ का नाम" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">गाँव / टोला / मुहल्ला (Village / Cluster)</label>
+            <input type="text" id="citVillage" placeholder="उदा. गरहन, रामपुर, या अपना कस्बा" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या फ़ाइल)</label>
+            <label style="font-size:10px; font-weight:700;">धरोहर / संस्थान / शिल्पी का नाम</label>
+            <input type="text" id="citTitle" placeholder="उदा. प्राचीन सूर्य मंदिर / लंगट सिंह कॉलेज" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+          </div>
+
+          <div>
+            <label style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या गैलरी)</label>
             <input type="file" id="citPhotoInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
               <img id="citPreviewImg" src="" style="max-height:120px; border-radius:6px; border:1px solid var(--border-color);" />
@@ -222,14 +214,14 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <label style="font-size:10px; font-weight:700;">स्थान निर्देशांक (GPS)</label>
               <button type="button" onclick="detectLiveGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">
-                📍 लाइव लोकेशन लें
+                📍 लाइव GPS लें
               </button>
             </div>
             <input type="text" id="citCoords" placeholder="उदा. 26.1209, 85.3647" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; margin-top:3px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">मौखिक इतिहास / कहानी (अपनी भाषा में)</label>
+            <label style="font-size:10px; font-weight:700;">मौखिक इतिहास / कहानी (Oral Narrative)</label>
             <textarea id="citStory" rows="3" placeholder="यहाँ के बुजुर्गों की मान्यता, इतिहास या लोक-कथा लिखें..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
           </div>
 
@@ -300,7 +292,7 @@
     </div>
   </div>
 
-  <!-- In-Page Admin Desk with Pending Citizen Approvals -->
+  <!-- In-Page Admin Desk -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
     <div class="modal-box" style="text-align: left; max-width: 680px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
@@ -312,16 +304,15 @@
         <button onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
-      <!-- Section A: Pending Citizen Submissions for Verification -->
       <h4 style="margin-top:4px; font-size:13px; color:#c2410c;">
-        📥 नागरिकों द्वारा भेजे गए रिकॉर्ड (Pending Citizen Approvals)
+        📥 नागरिकों द्वारा भेजे गए रिकॉर्ड (Pending Approvals)
       </h4>
       <div style="max-height:140px; overflow-y:auto; margin-top:6px; margin-bottom:16px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#fef2f2; text-align:left;">
               <th style="padding:5px; border:1px solid #e2e8f0;">स्थल</th>
-              <th style="padding:5px; border:1px solid #e2e8f0;">ज़िला</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">ज़िला / गाँव</th>
               <th style="padding:5px; border:1px solid #e2e8f0;">विवरण</th>
               <th style="padding:5px; border:1px solid #e2e8f0;">कार्रवाई</th>
             </tr>
@@ -330,7 +321,6 @@
         </table>
       </div>
 
-      <!-- Section B: Direct Manual Entry -->
       <h4 style="font-size:13px; color:var(--primary-deep); border-top:1px solid var(--border-color); padding-top:10px;">
         ➕ नया हेरिटेज या कॉलेज रिकॉर्ड जोड़ें
       </h4>
@@ -340,23 +330,26 @@
             <label style="font-size:11px; font-weight:bold;">Category</label>
             <select id="recCat" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
               <option value="major">Major Heritage</option>
-              <option value="monument">Monument / College</option>
+              <option value="monument">Monument / Institution</option>
               <option value="gem">Undiscovered Gem</option>
               <option value="artisan">Artisan</option>
             </select>
           </div>
           <div>
-            <label style="font-size:11px; font-weight:bold;">District</label>
-            <select id="recDistrict" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;">
-              <option value="muzaffarpur">Muzaffarpur (Bihar)</option>
-              <option value="patna">Patna (Bihar)</option>
-              <option value="varanasi">Varanasi (UP)</option>
-              <option value="amritsar">Amritsar (Punjab)</option>
-            </select>
+            <label style="font-size:11px; font-weight:bold;">State (राज्य)</label>
+            <select id="recState" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;"></select>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold;">District (ज़िला)</label>
+            <input type="text" id="recDistrict" required placeholder="उदा. मुजफ्फरपुर / पटना" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:bold;">Village / Cluster (गाँव)</label>
+            <input type="text" id="recVillage" required placeholder="उदा. गरहन / कुम्रहार" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
             <label style="font-size:11px; font-weight:bold;">Heritage / Institution Name</label>
-            <input type="text" id="recTitle" required placeholder="उदा. लंगट सिंह कॉलेज (LS College)" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
+            <input type="text" id="recTitle" required placeholder="उदा. लंगट सिंह कॉलेज" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div>
             <label style="font-size:11px; font-weight:bold;">Coordinates (Lat, Lng)</label>
@@ -376,14 +369,13 @@
         </button>
       </form>
 
-      <!-- Section C: Verified Active Records -->
       <h4 style="margin-top:14px; font-size:12px; border-top:1px solid var(--border-color); padding-top:8px;">Live Directory</h4>
       <div style="max-height:120px; overflow-y:auto; margin-top:6px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#f8fafc; text-align:left;">
-              <th style="padding:5px; border:1px solid var(--border-color);">Name</th>
-              <th style="padding:5px; border:1px solid var(--border-color);">District</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">Name</th>
+              <th style="padding:5px; border:1px solid #e2e8f0;">District</th>
               <th style="padding:5px; border:1px solid #e2e8f0;">Action</th>
             </tr>
           </thead>
@@ -446,97 +438,5 @@
 
   <script src="data.js"></script>
   <script src="app.js"></script>
-
-  <script>
-    function startAppFlow() {
-      setTimeout(() => {
-        const splash = document.getElementById("splashScreen");
-        splash.style.opacity = "0";
-        splash.style.transform = "scale(1.08)";
-        setTimeout(() => {
-          splash.style.display = "none";
-          document.getElementById("locationModal").style.display = "flex";
-          onStateChange("bihar");
-        }, 700);
-      }, 1600);
-    }
-
-    function openLocationModalDirect() {
-      document.getElementById("locationModal").style.display = "flex";
-    }
-
-    function closeLocationModal() {
-      document.getElementById("locationModal").style.display = "none";
-    }
-
-    function onStateChange(stateVal) {
-      const distSel = document.getElementById("selDistrict");
-      distSel.innerHTML = "";
-
-      if (stateVal === "bihar") {
-        distSel.innerHTML = `
-          <option value="muzaffarpur" selected>Muzaffarpur (Tirhut)</option>
-          <option value="patna">Patna (Pataliputra)</option>
-        `;
-        onDistrictModalChange("muzaffarpur");
-      } else if (stateVal === "up") {
-        distSel.innerHTML = `<option value="varanasi" selected>Varanasi (Kashi)</option>`;
-        onDistrictModalChange("varanasi");
-      } else if (stateVal === "punjab") {
-        distSel.innerHTML = `<option value="amritsar" selected>Amritsar</option>`;
-        onDistrictModalChange("amritsar");
-      }
-    }
-
-    function onDistrictModalChange(distVal) {
-      const villageSel = document.getElementById("selVillage");
-      villageSel.innerHTML = "";
-      if (distVal === "muzaffarpur") {
-        villageSel.innerHTML = `<option value="all">Entire District Hub</option><option value="garhan">Garhan / Bochaha</option><option value="sikandarpur">Sikandarpur Lake</option>`;
-      } else if (distVal === "patna") {
-        villageSel.innerHTML = `<option value="all">Entire District Hub</option><option value="kumhrar">Kumhrar Heritage Zone</option>`;
-      } else if (distVal === "varanasi") {
-        villageSel.innerHTML = `<option value="all">Dashashwamedh & Corridor</option><option value="sarnath">Sarnath Cluster</option>`;
-      } else if (distVal === "amritsar") {
-        villageSel.innerHTML = `<option value="all">Golden Temple Complex</option><option value="heritage_street">Heritage Street</option>`;
-      }
-    }
-
-    function confirmLocationSelection() {
-      const dist = document.getElementById("selDistrict").value;
-      const lang = document.getElementById("selLang").value;
-      
-      document.getElementById("navDistrictLabel").innerText = dist.toUpperCase();
-      document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
-      document.getElementById("langSelect").value = lang;
-      
-      document.getElementById("locationModal").style.display = "none";
-      if (window.applyLanguage) window.applyLanguage(lang);
-      if (window.onDistrictChange) window.onDistrictChange(dist);
-    }
-
-    function onConsoleLangChange(lang) {
-      if (window.applyLanguage) window.applyLanguage(lang);
-    }
-
-    function switchMobileTab(tab) {
-      document.getElementById("btnNavHome").classList.remove("active");
-      document.getElementById("btnNavMap").classList.remove("active");
-
-      if (tab === 'home') {
-        document.getElementById("btnNavHome").classList.add("active");
-        document.getElementById("homeView").style.display = "block";
-        document.getElementById("mapView").style.display = "none";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (tab === 'map') {
-        document.getElementById("btnNavMap").classList.add("active");
-        document.getElementById("homeView").style.display = "none";
-        document.getElementById("mapView").style.display = "block";
-        if (window.mapInstance) {
-          setTimeout(() => { window.mapInstance.invalidateSize(); }, 200);
-        }
-      }
-    }
-  </script>
 </body>
 </html>

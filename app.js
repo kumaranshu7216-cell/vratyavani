@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI — Client Logic with Citizen Verification Desk & In-App 360 Rotation
+ * VratyaVani AI — Dynamic Pan-India Engine with Auto Radar
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -11,6 +11,104 @@ let activeAudioItem = null;
 let pannellumViewerInstance = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
+// State District Mapping for Auto-Suggestions
+const stateDistrictHints = {
+  bihar: ["Muzaffarpur", "Patna", "Gaya", "Nalanda", "Vaishali", "Bhagalpur", "Darbhanga", "Munger"],
+  up: ["Varanasi", "Ayodhya", "Mathura", "Prayagraj", "Lucknow", "Agra", "Gorakhpur"],
+  punjab: ["Amritsar", "Anandpur Sahib", "Patiala", "Ludhiana", "Jalandhar"],
+  rajasthan: ["Jaipur", "Udaipur", "Jodhpur", "Jaisalmer", "Pushkar"],
+  mp: ["Ujjain", "Khajuraho", "Gwalior", "Bhopal", "Indore"],
+  delhi: ["Central Delhi", "New Delhi", "South Delhi"]
+};
+
+function populatePanIndiaStateDropdowns() {
+  const dropdownIds = ['selState', 'citState', 'recState'];
+  dropdownIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = "";
+    allIndiaStates.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.code;
+      opt.innerText = s.name;
+      el.appendChild(opt);
+    });
+  });
+
+  onStateSelectionChanged('bihar');
+}
+
+window.onStateSelectionChanged = function(stateCode) {
+  const datalist = document.getElementById("districtDatalist");
+  if (!datalist) return;
+  datalist.innerHTML = "";
+
+  const hints = stateDistrictHints[stateCode] || ["City Center", "North District", "South District"];
+  hints.forEach(d => {
+    const opt = document.createElement("option");
+    opt.value = d;
+    datalist.appendChild(opt);
+  });
+
+  document.getElementById("selDistrictInput").value = hints[0];
+};
+
+function startAppFlow() {
+  populatePanIndiaStateDropdowns();
+  setTimeout(() => {
+    const splash = document.getElementById("splashScreen");
+    splash.style.opacity = "0";
+    splash.style.transform = "scale(1.08)";
+    setTimeout(() => {
+      splash.style.display = "none";
+      document.getElementById("locationModal").style.display = "flex";
+    }, 700);
+  }, 1400);
+}
+
+function openLocationModalDirect() {
+  document.getElementById("locationModal").style.display = "flex";
+}
+
+function closeLocationModal() {
+  document.getElementById("locationModal").style.display = "none";
+}
+
+function confirmLocationSelection() {
+  const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
+  const lang = document.getElementById("selLang").value;
+  const village = document.getElementById("selVillageInput").value.trim();
+
+  const distKey = rawDist || "muzaffarpur";
+
+  document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
+  document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
+  document.getElementById("langSelect").value = lang;
+
+  document.getElementById("locationModal").style.display = "none";
+  if (window.applyLanguage) window.applyLanguage(lang);
+  if (window.onDistrictChange) window.onDistrictChange(distKey);
+}
+
+// Vihaan Purkha Style Auto Heritage Radar Detector
+window.detectNearbyHeritageRadar = function() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        switchMobileTab('map');
+        window.mapInstance.flyTo([lat, lng], 13);
+        const userLocMarker = L.circleMarker([lat, lng], { radius: 9, color: '#38bdf8', fillColor: '#0284c7', fillOpacity: 0.8 }).addTo(window.mapInstance);
+        userLocMarker.bindPopup("📍 <strong>आपकी वर्तमान स्थिति (Current Radar Location)</strong>").openPopup();
+        alert("📡 रडार सक्रिय: आपकी लोकेशन मैप पर लोकेट कर दी गई है!");
+      },
+      () => alert("GPS एक्सेस की अनुमति दें।")
+    );
+  }
+};
+
+// Client Rendering Logic
 const i18n = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -28,13 +126,13 @@ const i18n = {
     btnPlay: "▶ चलाएं (Play)",
     btnStop: "⏹ चल रहा है...",
     btnReplay: "▶ पुनः सुनें",
-    emptyMsg: "इस श्रेणी में वर्तमान में कोई रिकॉर्ड नहीं है।"
+    emptyMsg: "इस ज़िले/श्रेणी में अभी रिकॉर्ड सत्यापित नहीं है। ➕ बटन से जोड़ें।"
   },
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
     heroSub: "From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide",
     tabMajor: "Major Heritage",
-    tabMonument: "Monuments / Colleges",
+    tabMonument: "Monuments / Institutions",
     tabGem: "Undiscovered Gems",
     tabArtisan: "Local Artisans",
     mapTitle: "📍 Live Heritage Map",
@@ -46,61 +144,7 @@ const i18n = {
     btnPlay: "▶ Play Audio",
     btnStop: "⏹ Playing...",
     btnReplay: "▶ Replay",
-    emptyMsg: "No records found in this category."
-  },
-  "pa-IN": {
-    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
-    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "ਮੁੱਖ ਵਿਰਾਸਤ",
-    tabMonument: "ਸਮਾਰਕ / ਸੰਸਥਾਵਾਂ",
-    tabGem: "ਅਣਗੌਲੇ ਰਤਨ",
-    tabArtisan: "ਕਾਰੀਗਰ",
-    mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
-    voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
-    nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
-    btnListen: "🎙️ AI ਸੁਣੋ",
-    btnMap: "📍 ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ",
-    btnView360: "🌐 360° ਦ੍ਰਿਸ਼",
-    btnPlay: "▶ ਚਲਾਓ (Play)",
-    btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
-    btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
-    emptyMsg: "ਇਸ ਸ਼੍ਰੇਣੀ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।"
-  },
-  "bho-IN": {
-    heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
-    heroSub: "वैदिक जड़ से आधुनिक AI ले • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "खास धरोहर",
-    tabMonument: "स्मारक / कॉलेज",
-    tabGem: "छुपल रतन",
-    tabArtisan: "कारीगर",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
-    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
-    btnListen: "🎙️ AI सुनीं",
-    btnMap: "📍 मैप पर देखीं",
-    btnView360: "🌐 360° दृश्य",
-    btnPlay: "▶ बजाईं (Play)",
-    btnStop: "⏹ बाजत बा...",
-    btnReplay: "▶ फेर से सुनीं",
-    emptyMsg: "ए श्रेणी में कवनो रेकॉर्ड नइखे।"
-  },
-  "mai-IN": {
-    heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
-    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "प्रमुख धरोहर",
-    tabMonument: "स्मारक / संस्थान",
-    tabGem: "लुकल रत्न",
-    tabArtisan: "शिल्पी",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
-    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
-    btnListen: "🎙️ AI सुनू",
-    btnMap: "📍 मैप पर देखू",
-    btnView360: "🌐 360° दृश्य",
-    btnPlay: "▶ बजाउ (Play)",
-    btnStop: "⏹ बाजि रहल अछि...",
-    btnReplay: "▶ पुनः सुनू",
-    emptyMsg: "एहि श्रेणी में कोनो रेकॉर्ड नहि अछि।"
+    emptyMsg: "No records found in this district. Click ➕ Contribute to add."
   }
 };
 
@@ -187,7 +231,7 @@ window.loadDistrictData = function(districtKey) {
     const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
     const merged = [...firebaseRecs, ...custom];
-    const matching = merged.filter(c => c.district === districtKey);
+    const matching = merged.filter(c => c.district.toLowerCase() === districtKey.toLowerCase());
     items = [...matching, ...items];
   } catch (e) {}
 
@@ -201,6 +245,7 @@ window.loadDistrictData = function(districtKey) {
       const marker = L.marker(item.coords).addTo(window.mapInstance);
       marker.bindPopup(`
         <strong>${locContent.title}</strong><br>
+        <small style="color:#c2410c;">${item.village || ''}</small><br>
         <button onclick="selectForVoice('${item.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
           🎙️ Audio
         </button>
@@ -227,7 +272,7 @@ function renderCards(preloadedItems) {
       const custom = getCustomRecords();
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
       const merged = [...firebaseRecs, ...custom];
-      items = [...merged.filter(c => c.district === window.currentDistrict), ...items];
+      items = [...merged.filter(c => c.district.toLowerCase() === window.currentDistrict.toLowerCase()), ...items];
     } catch(e) {}
   }
 
@@ -239,16 +284,13 @@ function renderCards(preloadedItems) {
   }
 
   filtered.forEach(item => {
-    const isArtisan = item.category === "artisan";
     const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
-
-    // Preservation Risk Intelligence[cite: 1]
-    const riskScore = item.category === 'gem' ? 'Risk: 8.8 (Urgent)' : (item.category === 'artisan' ? 'Risk: 7.5 (Endangered)' : 'Preserved (Low Risk)');
+    const riskScore = item.category === 'gem' ? 'Risk: 8.8 (Urgent)' : (item.category === 'artisan' ? 'Risk: 7.5 (Endangered)' : 'Preserved');
     const riskClass = (item.category === 'gem' || item.category === 'artisan') ? 'risk-high' : 'risk-mod';
 
     const cardHtml = `
       <div class="heritage-card">
-        <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;" title="Click to view 360 panorama">
+        <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;">
           <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
           <span class="btn-view360-badge">🌐 360° View</span>
         </div>
@@ -258,6 +300,7 @@ function renderCards(preloadedItems) {
             <span class="risk-badge ${riskClass}">${riskScore}</span>
           </div>
           <h4 class="card-title">${locContent.title}</h4>
+          ${item.village ? `<div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:4px;">📍 ${item.village}</div>` : ''}
           <p class="card-desc">${locContent.desc}</p>
           <div class="card-actions">
             <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">${t.btnListen}</button>
@@ -270,8 +313,6 @@ function renderCards(preloadedItems) {
     container.innerHTML += cardHtml;
   });
 }
-
-// ---------------- 360° IN-APP PANORAMA VIEWER ---------------- //
 
 function open360Viewer(itemId) {
   let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
@@ -385,8 +426,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- CITIZEN CONTRIBUTION LOGIC (LIVE CAMERA & GPS) ---------------- //
-
+// Citizen Contribution Logic
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
 }
@@ -401,9 +441,9 @@ function detectLiveGPS() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         document.getElementById("citCoords").value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
-        alert("GPS लोकेशन सफलतापूर्वक प्राप्त हो गई!");
+        alert("GPS लोकेशन प्राप्त हो गई!");
       },
-      () => alert("कृपया GPS अनुमति दें या मैन्युअली अक्षांश, देशांतर भरें।")
+      () => alert("कृपया GPS अनुमति दें।")
     );
   }
 }
@@ -427,6 +467,7 @@ function handleCitizenSubmit(e) {
 
   const title = document.getElementById("citTitle").value.trim();
   const district = document.getElementById("citDistrict").value.trim().toLowerCase();
+  const village = document.getElementById("citVillage").value.trim();
   const coordsRaw = document.getElementById("citCoords").value.trim();
   const story = document.getElementById("citStory").value.trim();
 
@@ -440,6 +481,7 @@ function handleCitizenSubmit(e) {
     id: `pending_${Date.now()}`,
     title: title,
     district: district,
+    village: village,
     coords: coords,
     story: story,
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
@@ -450,14 +492,13 @@ function handleCitizenSubmit(e) {
   pendingQueue.unshift(pendingItem);
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
 
-  alert(`🎉 धन्यवाद! "${title}" की जानकारी सुरक्षित दर्ज कर ली गई है। नोडल एडमिन के सत्यापन के बाद यह सार्वजनिक मैप पर प्रदर्शित होगी।`);
+  alert(`🎉 धन्यवाद! "${title}" (${village}) को सत्यापन हेतु भेज दिया गया है।`);
   e.target.reset();
   document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
 }
 
-// ---------------- ADMIN LOGIC & VERIFICATION DESK ---------------- //
-
+// Admin Desk Logic
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
@@ -520,8 +561,8 @@ function renderPendingCitizenTable() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td style="padding:4px; border:1px solid #e2e8f0;"><strong>${item.title}</strong></td>
-      <td style="padding:4px; border:1px solid #e2e8f0;">${item.district}</td>
-      <td style="padding:4px; border:1px solid #e2e8f0;"><small>${item.story.substring(0, 30)}...</small></td>
+      <td style="padding:4px; border:1px solid #e2e8f0;">${item.district} (${item.village || ''})</td>
+      <td style="padding:4px; border:1px solid #e2e8f0;"><small>${item.story.substring(0, 25)}...</small></td>
       <td style="padding:4px; border:1px solid #e2e8f0; display:flex; gap:4px;">
         <button onclick="approveCitizenSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✓ Approve</button>
         <button onclick="rejectCitizenSubmission(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✕</button>
@@ -539,6 +580,7 @@ function approveCitizenSubmission(index) {
     id: `cit_${Date.now()}`,
     category: "gem",
     district: approvedItem.district,
+    village: approvedItem.village,
     coords: approvedItem.coords,
     image: approvedItem.image,
     source: "Community Verified",
@@ -599,7 +641,8 @@ async function handleAdminSubmit(e) {
   e.preventDefault();
 
   const cat = document.getElementById("recCat").value;
-  const dist = document.getElementById("recDistrict").value;
+  const dist = document.getElementById("recDistrict").value.trim().toLowerCase();
+  const village = document.getElementById("recVillage").value.trim();
   const title = document.getElementById("recTitle").value.trim();
   const coordsRaw = document.getElementById("recCoords").value.trim();
   const image = document.getElementById("recImage").value.trim();
@@ -615,6 +658,7 @@ async function handleAdminSubmit(e) {
     id: `vv_${Date.now()}`,
     category: cat,
     district: dist,
+    village: village,
     coords: coords,
     image: image,
     source: "Firebase Cloud",
@@ -633,7 +677,7 @@ async function handleAdminSubmit(e) {
   customRecords.unshift(newRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`Published: ${title}`);
+  alert(`Published: ${title} (${village})`);
   e.target.reset();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
@@ -653,3 +697,22 @@ window.deleteCustomRecord = async function(recordIndex) {
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
+
+function switchMobileTab(tab) {
+  document.getElementById("btnNavHome").classList.remove("active");
+  document.getElementById("btnNavMap").classList.remove("active");
+
+  if (tab === 'home') {
+    document.getElementById("btnNavHome").classList.add("active");
+    document.getElementById("homeView").style.display = "block";
+    document.getElementById("mapView").style.display = "none";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else if (tab === 'map') {
+    document.getElementById("btnNavMap").classList.add("active");
+    document.getElementById("homeView").style.display = "none";
+    document.getElementById("mapView").style.display = "block";
+    if (window.mapInstance) {
+      setTimeout(() => { window.mapInstance.invalidateSize(); }, 200);
+    }
+  }
+}
