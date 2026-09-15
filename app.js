@@ -1,19 +1,18 @@
 /**
- * VratyaVani AI — Smart Proximity Radar & Geographic Engine
+ * VratyaVani AI — Unified Heritage & Living Culture Engine
  */
 
 window.currentDistrict = "muzaffarpur";
 window.currentLanguage = "en-IN";
-let currentCategory = "major";
 window.mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
+let activeAudioMode = "heritage"; // 'heritage' or 'culture'
 let pannellumViewerInstance = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
-// District Central Coords for Safe Fallback (Preventing ISP Geolocation Jumps)
 const districtCentres = {
-  muzaffarpur: [26.1209, 85.3647],
+  muzaffarpur: [26.1245, 85.3902],
   patna: [25.5941, 85.1376],
   varanasi: [25.3176, 82.9739],
   amritsar: [31.6340, 74.8723],
@@ -96,10 +95,9 @@ function confirmLocationSelection() {
   window.onDistrictChange(distKey);
 }
 
-// ---------------- SMART AUTO RADAR ENGINE (FIXED IP GEOLOCATION ISSUE) ---------------- //
-
+// Proximity Auto-Radar
 window.detectNearbyHeritageRadar = function() {
-  const fallbackCoords = districtCentres[window.currentDistrict] || [26.1209, 85.3647];
+  const fallbackCoords = districtCentres[window.currentDistrict] || [26.1245, 85.3902];
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
@@ -107,10 +105,7 @@ window.detectNearbyHeritageRadar = function() {
         let lat = pos.coords.latitude;
         let lng = pos.coords.longitude;
 
-        // Smart Verification: If laptop ISP jumps to another state (e.g., Guwahati lat ~26.18, lng ~91.73)
-        // while current district is Muzaffarpur (~85.36), lock safely to Bihar radar center
         if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
-          console.warn("ISP IP mislocated outside Bihar. Locking accurately to Muzaffarpur Radar.");
           lat = fallbackCoords[0];
           lng = fallbackCoords[1];
         }
@@ -127,17 +122,16 @@ window.detectNearbyHeritageRadar = function() {
             fillOpacity: 0.9
           }).addTo(window.mapInstance);
 
-          userLocMarker.bindPopup(`📍 <strong>Current Radar Position</strong><br><small>${window.currentDistrict.toUpperCase()}</small>`).openPopup();
-          alert(`📡 रडार सक्रिय: ${window.currentDistrict.toUpperCase()} में आपकी लोकेशन सटीकता से लोकेट कर दी गई है!`);
+          userLocMarker.bindPopup(`📍 <strong>Current Radar Location</strong><br><small>${window.currentDistrict.toUpperCase()}</small>`).openPopup();
+          alert(`📡 Radar Active: Located near ${window.currentDistrict.toUpperCase()} Heritage Cluster.`);
         }, 300);
       },
       () => {
-        // Safe GPS Permission Denied Fallback
         switchMobileTab('map');
         setTimeout(() => {
           window.mapInstance.invalidateSize();
           window.mapInstance.flyTo(fallbackCoords, 14);
-          alert(`📡 रडार: ${window.currentDistrict.toUpperCase()} हेरिटेज हब पर फोकस किया गया है।`);
+          alert(`📡 Radar: Centered on ${window.currentDistrict.toUpperCase()} heritage sanctum.`);
         }, 300);
       }
     );
@@ -147,113 +141,96 @@ window.detectNearbyHeritageRadar = function() {
   }
 };
 
-// ---------------- LANGUAGE SYNCHRONIZATION ---------------- //
-
 const i18n = {
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
-    heroSub: "From Vedic Roots to Modern AI • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "Major Heritage",
-    tabMonument: "Monuments / Institutions",
-    tabGem: "Undiscovered Gems",
-    tabArtisan: "Local Artisans",
-    mapTitle: "📍 Live Heritage Map",
+    heroSub: "From Vedic Roots to Modern AI • Unified Heritage Monuments & Living Traditions",
+    mapTitle: "📍 Live Heritage & Culture Map",
     voiceConsoleTitle: "🎙️ Bhashini AI Audio Guide",
-    nowPlayingDefault: "Select a heritage site to listen to the narrative...",
-    btnListen: "🎙️ AI Listen",
+    nowPlayingDefault: "Choose 'History' or 'Living Culture' to listen to the oral narrative...",
+    btnListenHist: "🏛️ History Audio",
+    btnListenCult: "🎭 Living Culture",
     btnMap: "📍 View on Map",
     btnView360: "🌐 360° View",
     btnPlay: "▶ Play Audio",
     btnStop: "⏹ Playing...",
     btnReplay: "▶ Replay",
     btnQr: "📲 Spot QR Code",
-    btnRadar: "📡 Find Nearby Heritage (Auto Radar)",
-    btnCitizen: "➕ Add Heritage / Village (Citizen)",
+    btnRadar: "📡 Find Nearby Radar",
+    btnCitizen: "➕ Add Heritage & Ritual (Citizen)",
     emptyMsg: `No records found in this district. <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">Click + Contribute to add</button>`
   },
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
-    heroSub: "वैदिक जड़ों से आधुनिक AI तक • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "प्रमुख धरोहर (Major)",
-    tabMonument: "स्मारक / संस्थान (Monuments)",
-    tabGem: "छिपे रत्न (Undiscovered)",
-    tabArtisan: "स्थानीय शिल्पी (Artisans)",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
+    heroSub: "वैदिक जड़ों से आधुनिक AI तक • एकीकृत धरोहर एवं जीवंत लोक-संस्कृति",
+    mapTitle: "📍 लाइव हेरिटेज व संस्कृति मैप (Map)",
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनें और अपनी बोली में इतिहास सुनें...",
-    btnListen: "🎙️ AI सुनें",
+    nowPlayingDefault: "इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...",
+    btnListenHist: "🏛️ इतिहास सुनें",
+    btnListenCult: "🎭 जीवंत परंपरा",
     btnMap: "📍 मैप देखें",
     btnView360: "🌐 360° दृश्य",
     btnPlay: "▶ चलाएं (Play)",
     btnStop: "⏹ चल रहा है...",
     btnReplay: "▶ पुनः सुनें",
     btnQr: "📲 ऑन-स्पॉट QR कोड",
-    btnRadar: "📡 निकटतम धरोहर खोजें (Auto Radar)",
-    btnCitizen: "➕ अपना गाँव / धरोहर जोड़ें (Citizen)",
-    emptyMsg: `इस ज़िले/श्रेणी में अभी रिकॉर्ड सत्यापित नहीं है। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">यहाँ + क्लिक कर जोड़ें</button>`
+    btnRadar: "📡 निकटतम रडार खोजें",
+    btnCitizen: "➕ धरोहर व संस्कृति जोड़ें",
+    emptyMsg: `इस ज़िले में अभी रिकॉर्ड नहीं है। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">यहाँ + क्लिक कर जोड़ें</button>`
   },
   "bho-IN": {
     heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
-    heroSub: "वैदिक जड़ से आधुनिक AI ले • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "खास धरोहर",
-    tabMonument: "स्मारक / कॉलेज",
-    tabGem: "छुपल रतन",
-    tabArtisan: "कारीगर",
+    heroSub: "वैदिक जड़ से आधुनिक AI ले • धरोहर आ जीवंत लोक-संस्कृति",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनीं आ अपनी बोली में इतिहास सुनीं...",
-    btnListen: "🎙️ AI सुनीं",
+    nowPlayingDefault: "इतिहास भा लोक-परंपरा चुनीं आ अपनी बोली में सुनीं...",
+    btnListenHist: "🏛️ इतिहास सुनीं",
+    btnListenCult: "🎭 रीत-रिवाज",
     btnMap: "📍 मैप पर देखीं",
     btnView360: "🌐 360° दृश्य",
     btnPlay: "▶ बजाईं (Play)",
     btnStop: "⏹ बाजत बा...",
     btnReplay: "▶ फेर से सुनीं",
     btnQr: "📲 QR कोड",
-    btnRadar: "📡 लगे के धरोहर खोजीं (Radar)",
-    btnCitizen: "➕ आपन गाँव / धरोहर जोड़ीं",
+    btnRadar: "📡 रडार से खोजीं",
+    btnCitizen: "➕ धरोहर जोड़ीं",
     emptyMsg: `ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ नया जोड़ीं</button>`
   },
   "mai-IN": {
     heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
-    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "प्रमुख धरोहर",
-    tabMonument: "स्मारक / संस्थान",
-    tabGem: "लुकल रत्न",
-    tabArtisan: "शिल्पी",
+    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • धरोहर एवं जीवित लोक-संस्कृति",
     mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
     voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "धरोहर चुनू आ अपन मैथिली में इतिहास सुनू...",
-    btnListen: "🎙️ AI सुनू",
+    nowPlayingDefault: "इतिहास वा संस्कृति चुनू आ अपन मैथिली में सुनू...",
+    btnListenHist: "🏛️ इतिहास सुनू",
+    btnListenCult: "🎭 जीवंत रीत",
     btnMap: "📍 मैप पर देखू",
     btnView360: "🌐 360° दृश्य",
     btnPlay: "▶ बजाउ (Play)",
     btnStop: "⏹ बाजि रहल अछि...",
     btnReplay: "▶ पुनः सुनू",
     btnQr: "📲 QR कोड",
-    btnRadar: "📡 निकटतम धरोहर ताकू",
-    btnCitizen: "➕ अपन गाम / धरोहर जोड़ू",
+    btnRadar: "📡 रडार सं ताकू",
+    btnCitizen: "➕ धरोहर जोड़ू",
     emptyMsg: `एहि श्रेणी में कोनो रेकॉर्ड नहि अछि। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ जोड़ू</button>`
   },
   "pa-IN": {
     heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
-    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • Dual-Mode Offline Heritage Map & Voice Guide",
-    tabMajor: "ਮੁੱਖ ਵਿਰਾਸਤ",
-    tabMonument: "ਸਮਾਰਕ / ਸੰਸਥਾਵਾਂ",
-    tabGem: "ਅਣਗੌਲੇ ਰਤਨ",
-    tabArtisan: "ਕਾਰੀਗਰ",
+    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • ਵਿਰਾਸਤ ਅਤੇ ਜਿਉਂਦੀ ਜਾਗਦੀ ਸੰਸਕ੍ਰਿਤੀ",
     mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
     voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
-    nowPlayingDefault: "ਵਿਰਾਸਤ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਇਤਿਹਾਸ ਸੁਣੋ...",
-    btnListen: "🎙️ AI ਸੁਣੋ",
+    nowPlayingDefault: "ਇਤਿਹਾਸ ਜਾਂ ਸੰਸਕ੍ਰਿਤੀ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਸੁਣੋ...",
+    btnListenHist: "🏛️ ਇਤਿਹਾਸ ਸੁਣੋ",
+    btnListenCult: "🎭 ਰੀਤਾਂ ਸੁਣੋ",
     btnMap: "📍 ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ",
     btnView360: "🌐 360° ਦ੍ਰਿਸ਼",
     btnPlay: "▶ ਚਲਾਓ (Play)",
     btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
     btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
     btnQr: "📲 QR ਕੋਡ",
-    btnRadar: "📡 ਨੇੜਲੀ ਵਿਰਾਸਤ ਲੱਭੋ",
-    btnCitizen: "➕ ਆਪਣਾ ਪਿੰਡ / ਵਿਰਾਸਤ ਜੋੜੋ",
-    emptyMsg: `ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ ਇੱਥੇ ਕਲਿੱਕ ਕਰਕੇ ਜੋੜੋ</button>`
+    btnRadar: "📡 ਨੇੜਲਾ ਰਡਾਰ",
+    btnCitizen: "➕ ਵਿਰਾਸਤ ਜੋੜੋ",
+    emptyMsg: `ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ ਜੋੜੋ</button>`
   }
 };
 
@@ -263,10 +240,6 @@ window.applyLanguage = function(langKey) {
 
   document.getElementById("heroTagline").innerText = t.heroTitle;
   document.getElementById("heroSubTagline").innerText = t.heroSub;
-  document.getElementById("tabMajor").innerText = t.tabMajor;
-  document.getElementById("tabMonument").innerText = t.tabMonument;
-  document.getElementById("tabGem").innerText = t.tabGem;
-  document.getElementById("tabArtisan").innerText = t.tabArtisan;
   document.getElementById("mapSectionTitle").innerText = t.mapTitle;
   document.getElementById("audioConsoleTitle").innerText = t.voiceConsoleTitle;
   document.getElementById("qrGuideBtn").innerText = t.btnQr;
@@ -288,8 +261,6 @@ function onConsoleLangChange(lang) {
   window.applyLanguage(lang);
 }
 
-// ---------------- MAP INITIALIZATION & CARD RENDERING ---------------- //
-
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
   loadDistrictData(window.currentDistrict);
@@ -297,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initMap() {
-  window.mapInstance = L.map('map').setView([26.1209, 85.3647], 13);
+  window.mapInstance = L.map('map').setView([26.1245, 85.3902], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap | VratyaVani AI'
   }).addTo(window.mapInstance);
@@ -310,13 +281,6 @@ function onDistrictChange(districtKey) {
   loadDistrictData(window.currentDistrict);
 }
 
-function filterCategory(catKey) {
-  currentCategory = catKey;
-  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-  event.target.classList.add("active");
-  renderCards();
-}
-
 function getCustomRecords() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -325,7 +289,7 @@ function getCustomRecords() {
 }
 
 window.loadDistrictData = function(districtKey) {
-  let items = heritageData[districtKey] ? [...heritageData[districtKey]] : [];
+  let items = unifiedHeritageCultureData[districtKey] ? [...unifiedHeritageCultureData[districtKey]] : [];
 
   try {
     const custom = getCustomRecords();
@@ -338,8 +302,7 @@ window.loadDistrictData = function(districtKey) {
   mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
   mapMarkers = [];
 
-  const centerCoords = items.length > 0 ? items[0].coords : (districtCentres[districtKey] || [26.1209, 85.3647]);
-
+  const centerCoords = items.length > 0 ? items[0].coords : (districtCentres[districtKey] || [26.1245, 85.3902]);
   window.mapInstance.flyTo(centerCoords, 13);
 
   if (items.length > 0) {
@@ -349,8 +312,11 @@ window.loadDistrictData = function(districtKey) {
       marker.bindPopup(`
         <strong>${locContent.title}</strong><br>
         <small style="color:#c2410c;">${item.village || ''}</small><br>
-        <button onclick="selectForVoice('${item.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
-          🎙️ Audio
+        <button onclick="selectUnifiedAudio('${item.id}', 'heritage')" style="margin-top:6px; padding:3px 6px; font-size:10px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+          🏛️ History
+        </button>
+        <button onclick="selectUnifiedAudio('${item.id}', 'culture')" style="margin-top:6px; padding:3px 6px; font-size:10px; background:#c026d3; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
+          🎭 Living Culture
         </button>
       `);
       mapMarkers.push(marker);
@@ -362,6 +328,8 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
+// ---------------- UNIFIED CARD RENDERING (HERITAGE + LIVING CULTURE TOGETHER) ---------------- //
+
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
@@ -370,7 +338,7 @@ function renderCards(preloadedItems) {
 
   let items = preloadedItems;
   if (!items) {
-    items = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
+    items = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
     try {
       const custom = getCustomRecords();
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
@@ -379,36 +347,53 @@ function renderCards(preloadedItems) {
     } catch(e) {}
   }
 
-  const filtered = items.filter(item => item.category === currentCategory);
-
-  if (filtered.length === 0) {
+  if (items.length === 0) {
     container.innerHTML = `<div style="color:var(--text-muted); padding:20px; text-align:center; grid-column:1/-1;">${t.emptyMsg}</div>`;
     return;
   }
 
-  filtered.forEach(item => {
+  items.forEach(item => {
     const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
-    const riskScore = item.category === 'gem' ? 'Risk: 8.8 (Urgent)' : (item.category === 'artisan' ? 'Risk: 7.5 (Endangered)' : 'Preserved');
-    const riskClass = (item.category === 'gem' || item.category === 'artisan') ? 'risk-high' : 'risk-mod';
 
     const cardHtml = `
-      <div class="heritage-card">
+      <div class="unified-card">
         <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;">
           <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
           <span class="btn-view360-badge">${t.btnView360}</span>
         </div>
-        <div class="card-content">
-          <div style="display:flex; align-items:center; margin-bottom:4px;">
-            <span class="card-tag">${item.category}</span>
-            <span class="risk-badge ${riskClass}">${riskScore}</span>
+        <div class="card-dual-content">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${locContent.title}</h4>
+            <span class="risk-badge ${item.riskClass || 'risk-mod'}">${item.riskScore || 'Active'}</span>
           </div>
-          <h4 class="card-title">${locContent.title}</h4>
-          ${item.village ? `<div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:4px;">📍 ${item.village}</div>` : ''}
-          <p class="card-desc">${locContent.desc}</p>
-          <div class="card-actions">
-            <button class="btn-sm btn-listen" onclick="selectForVoice('${item.id}')">${t.btnListen}</button>
+          ${item.village ? `<div style="font-size:11px; color:#c2410c; font-weight:700;">📍 ${item.village}</div>` : ''}
+          
+          <!-- Pillar 1: Tangible Heritage -->
+          <div class="heritage-block">
+            <strong>🏛️ Heritage Landmark:</strong> ${locContent.heritageDesc || locContent.desc}
+          </div>
+
+          <!-- Pillar 2: Intangible Living Culture & Rituals -->
+          <div class="culture-block">
+            <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || locContent.cultureRitual || 'Local oral folk practices & sacred community traditions.'}
+          </div>
+
+          <!-- Dual Audio Narrator Buttons -->
+          <div class="dual-audio-btns">
+            <button class="btn-audio-pill btn-audio-hist" onclick="selectUnifiedAudio('${item.id}', 'heritage')">
+              ${t.btnListenHist}
+            </button>
+            <button class="btn-audio-pill btn-audio-cult" onclick="selectUnifiedAudio('${item.id}', 'culture')">
+              ${t.btnListenCult}
+            </button>
+          </div>
+
+          <div class="card-actions" style="margin-top:6px;">
             <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
             <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${item.id}')">${t.btnView360}</button>
+            ${item.artisanPhone ? `
+              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I want to connect regarding your local craft on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">💬 Artisan</a>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -417,8 +402,65 @@ function renderCards(preloadedItems) {
   });
 }
 
+// ---------------- DUAL AUDIO SELECTOR ENGINE ---------------- //
+
+function selectUnifiedAudio(itemId, mode) {
+  let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
+  try {
+    const custom = getCustomRecords();
+    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+    allItems = [...firebaseRecs, ...custom, ...allItems];
+  } catch(e) {}
+
+  const found = allItems.find(i => i.id === itemId);
+  if (!found) return;
+
+  activeAudioItem = found;
+  activeAudioMode = mode;
+
+  const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["en-IN"] : { title: found.title, audio: found.bhashiniAudioText });
+
+  const textToPlay = (mode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture || locContent.audio) : (locContent.heritageAudio || locContent.heritageDesc || locContent.audio);
+  const badgeLabel = (mode === 'culture') ? "🎭 [Living Culture Narrative]" : "🏛️ [Heritage History]";
+
+  document.getElementById("nowPlayingText").innerHTML = `
+    <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
+    <em>"${textToPlay}"</em>
+  `;
+
+  const playBtn = document.getElementById("playAudioBtn");
+  playBtn.disabled = false;
+  const t = i18n[window.currentLanguage] || i18n["en-IN"];
+  playBtn.innerText = t.btnPlay;
+}
+
+function togglePlayVoice() {
+  if (!activeAudioItem) return;
+
+  const t = i18n[window.currentLanguage] || i18n["en-IN"];
+  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
+
+  const textToSpeak = (activeAudioMode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture || locContent.audio) : (locContent.heritageAudio || locContent.heritageDesc || locContent.audio);
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = window.currentLanguage;
+    utterance.rate = 0.92;
+
+    utterance.onstart = () => {
+      document.getElementById("playAudioBtn").innerText = t.btnStop;
+    };
+    utterance.onend = () => {
+      document.getElementById("playAudioBtn").innerText = t.btnReplay;
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 function open360Viewer(itemId) {
-  let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
+  let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   try {
     const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
@@ -466,53 +508,6 @@ function focusOnMapTab(lat, lng) {
   }, 250);
 }
 
-function selectForVoice(itemId) {
-  let allItems = heritageData[window.currentDistrict] ? [...heritageData[window.currentDistrict]] : [];
-  try {
-    const custom = getCustomRecords();
-    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
-    allItems = [...firebaseRecs, ...custom, ...allItems];
-  } catch(e) {}
-
-  const found = allItems.find(i => i.id === itemId);
-  if (!found) return;
-
-  activeAudioItem = found;
-  const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["en-IN"] : { title: found.title, audio: found.bhashiniAudioText });
-
-  document.getElementById("nowPlayingText").innerHTML = `
-    <strong>${locContent.title}</strong><br>
-    <em>"${locContent.audio}"</em>
-  `;
-  const playBtn = document.getElementById("playAudioBtn");
-  playBtn.disabled = false;
-  const t = i18n[window.currentLanguage] || i18n["en-IN"];
-  playBtn.innerText = t.btnPlay;
-}
-
-function togglePlayVoice() {
-  if (!activeAudioItem) return;
-
-  const t = i18n[window.currentLanguage] || i18n["en-IN"];
-  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
-
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(locContent.audio);
-    utterance.lang = window.currentLanguage;
-    utterance.rate = 0.92;
-
-    utterance.onstart = () => {
-      document.getElementById("playAudioBtn").innerText = t.btnStop;
-    };
-    utterance.onend = () => {
-      document.getElementById("playAudioBtn").innerText = t.btnReplay;
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }
-}
-
 function showQrModal() {
   const qrImg = document.getElementById("qrImage");
   if (activeAudioItem) {
@@ -530,7 +525,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- CITIZEN & ADMIN SUBMISSION LOGIC ---------------- //
+// ---------------- CITIZEN & ADMIN WORKFLOW ---------------- //
 
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
@@ -548,8 +543,8 @@ function detectLiveGPS() {
         let lat = pos.coords.latitude;
         let lng = pos.coords.longitude;
         if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
-          lat = 26.1209;
-          lng = 85.3647;
+          lat = 26.1245;
+          lng = 85.3902;
         }
         document.getElementById("citCoords").value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         alert("GPS Coordinates detected successfully!");
@@ -579,10 +574,11 @@ function handleCitizenSubmit(e) {
   const title = document.getElementById("citTitle").value.trim();
   const district = document.getElementById("citDistrict").value.trim().toLowerCase();
   const village = document.getElementById("citVillage").value.trim();
+  const ritual = document.getElementById("citRitual").value.trim();
   const coordsRaw = document.getElementById("citCoords").value.trim();
   const story = document.getElementById("citStory").value.trim();
 
-  let coords = [26.1209, 85.3647];
+  let coords = [26.1245, 85.3902];
   if (coordsRaw.includes(",")) {
     const parts = coordsRaw.split(",");
     coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
@@ -593,6 +589,7 @@ function handleCitizenSubmit(e) {
     title: title,
     district: district,
     village: village,
+    ritual: ritual,
     coords: coords,
     story: story,
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
@@ -603,7 +600,7 @@ function handleCitizenSubmit(e) {
   pendingQueue.unshift(pendingItem);
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
 
-  alert(`🎉 Thank you! "${title}" (${village}) submitted for Nodal Admin review.`);
+  alert(`🎉 धन्यवाद! "${title}" और "${ritual}" सत्यापन हेतु नोडल एडमिन को भेज दिया गया है।`);
   e.target.reset();
   document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
@@ -672,7 +669,7 @@ function renderPendingCitizenTable() {
     tr.innerHTML = `
       <td style="padding:4px; border:1px solid #e2e8f0;"><strong>${item.title}</strong></td>
       <td style="padding:4px; border:1px solid #e2e8f0;">${item.district} (${item.village || ''})</td>
-      <td style="padding:4px; border:1px solid #e2e8f0;"><small>${item.story.substring(0, 25)}...</small></td>
+      <td style="padding:4px; border:1px solid #e2e8f0;"><small>Tradition: ${item.ritual || 'Ritual'}<br>${item.story.substring(0, 20)}...</small></td>
       <td style="padding:4px; border:1px solid #e2e8f0; display:flex; gap:4px;">
         <button onclick="approveCitizenSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✓ Approve</button>
         <button onclick="rejectCitizenSubmission(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:3px 6px; border-radius:3px; font-weight:700; cursor:pointer;">✕</button>
@@ -688,15 +685,28 @@ function approveCitizenSubmission(index) {
 
   const liveRecord = {
     id: `cit_${Date.now()}`,
-    category: "gem",
     district: approvedItem.district,
     village: approvedItem.village,
     coords: approvedItem.coords,
     image: approvedItem.image,
     source: "Community Verified",
+    riskScore: "Living Community Heritage",
+    riskClass: "risk-mod",
     content: {
-      "hi-IN": { title: approvedItem.title, desc: approvedItem.story, audio: approvedItem.story },
-      "en-IN": { title: approvedItem.title, desc: approvedItem.story, audio: approvedItem.story }
+      "hi-IN": {
+        title: approvedItem.title,
+        heritageDesc: approvedItem.story,
+        livingCulture: approvedItem.ritual,
+        heritageAudio: approvedItem.story,
+        cultureAudio: approvedItem.ritual
+      },
+      "en-IN": {
+        title: approvedItem.title,
+        heritageDesc: approvedItem.story,
+        livingCulture: approvedItem.ritual,
+        heritageAudio: approvedItem.story,
+        cultureAudio: approvedItem.ritual
+      }
     }
   };
 
@@ -705,7 +715,7 @@ function approveCitizenSubmission(index) {
   localStorage.setItem("vratyavani_custom_records", JSON.stringify(customRecords));
   localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
 
-  alert(`Verified! "${approvedItem.title}" is now live on the map and cards.`);
+  alert(`सत्यापित! "${approvedItem.title}" अब लाइव मैप और मुख्य फीड में शामिल है।`);
   renderPendingCitizenTable();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
@@ -724,8 +734,8 @@ function renderInpageAdminTable() {
   tbody.innerHTML = "";
 
   let allRecords = [];
-  Object.keys(heritageData).forEach((dk) => {
-    heritageData[dk].forEach((item) => {
+  Object.keys(unifiedHeritageCultureData).forEach((dk) => {
+    unifiedHeritageCultureData[dk].forEach((item) => {
       allRecords.push({ ...item, isCustom: false });
     });
   });
@@ -750,15 +760,15 @@ function renderInpageAdminTable() {
 async function handleAdminSubmit(e) {
   e.preventDefault();
 
-  const cat = document.getElementById("recCat").value;
   const dist = document.getElementById("recDistrict").value.trim().toLowerCase();
   const village = document.getElementById("recVillage").value.trim();
   const title = document.getElementById("recTitle").value.trim();
+  const ritual = document.getElementById("recRitual").value.trim();
   const coordsRaw = document.getElementById("recCoords").value.trim();
   const image = document.getElementById("recImage").value.trim();
   const desc = document.getElementById("recDesc").value.trim();
 
-  let coords = [26.1209, 85.3647];
+  let coords = [26.1245, 85.3902];
   if (coordsRaw.includes(",")) {
     const parts = coordsRaw.split(",");
     coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
@@ -766,15 +776,28 @@ async function handleAdminSubmit(e) {
 
   const newRecord = {
     id: `vv_${Date.now()}`,
-    category: cat,
     district: dist,
     village: village,
     coords: coords,
     image: image,
     source: "Firebase Cloud",
+    riskScore: "Verified Heritage",
+    riskClass: "risk-mod",
     content: {
-      "en-IN": { title: title, desc: desc, audio: desc },
-      "hi-IN": { title: title, desc: desc, audio: desc }
+      "en-IN": {
+        title: title,
+        heritageDesc: desc,
+        livingCulture: ritual,
+        heritageAudio: desc,
+        cultureAudio: ritual
+      },
+      "hi-IN": {
+        title: title,
+        heritageDesc: desc,
+        livingCulture: ritual,
+        heritageAudio: desc,
+        cultureAudio: ritual
+      }
     }
   };
 
@@ -787,7 +810,7 @@ async function handleAdminSubmit(e) {
   customRecords.unshift(newRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`Published: ${title} (${village})`);
+  alert(`Published Unified Record: ${title}`);
   e.target.reset();
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
@@ -807,8 +830,6 @@ window.deleteCustomRecord = async function(recordIndex) {
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
-
-// ---------------- TAB NAVIGATION FIX ---------------- //
 
 function switchMobileTab(tab) {
   document.getElementById("btnNavHome").classList.remove("active");
