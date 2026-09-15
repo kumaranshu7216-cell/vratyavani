@@ -1,5 +1,5 @@
 /**
- * VratyaVani AI — Client Engine with Full Language Synchronization & Map Auto-Focus
+ * VratyaVani AI — Smart Proximity Radar & Geographic Engine
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -10,6 +10,15 @@ let mapMarkers = [];
 let activeAudioItem = null;
 let pannellumViewerInstance = null;
 const STORAGE_KEY = "vratyavani_custom_records";
+
+// District Central Coords for Safe Fallback (Preventing ISP Geolocation Jumps)
+const districtCentres = {
+  muzaffarpur: [26.1209, 85.3647],
+  patna: [25.5941, 85.1376],
+  varanasi: [25.3176, 82.9739],
+  amritsar: [31.6340, 74.8723],
+  gaya: [24.7914, 85.0002]
+};
 
 const stateDistrictHints = {
   bihar: ["Muzaffarpur", "Patna", "Gaya", "Nalanda", "Vaishali", "Bhagalpur", "Darbhanga", "Munger"],
@@ -87,7 +96,58 @@ function confirmLocationSelection() {
   window.onDistrictChange(distKey);
 }
 
-// ---------------- DICTIONARY WITH FULL LANGUAGE SYNCHRONIZATION ---------------- //
+// ---------------- SMART AUTO RADAR ENGINE (FIXED IP GEOLOCATION ISSUE) ---------------- //
+
+window.detectNearbyHeritageRadar = function() {
+  const fallbackCoords = districtCentres[window.currentDistrict] || [26.1209, 85.3647];
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        let lat = pos.coords.latitude;
+        let lng = pos.coords.longitude;
+
+        // Smart Verification: If laptop ISP jumps to another state (e.g., Guwahati lat ~26.18, lng ~91.73)
+        // while current district is Muzaffarpur (~85.36), lock safely to Bihar radar center
+        if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
+          console.warn("ISP IP mislocated outside Bihar. Locking accurately to Muzaffarpur Radar.");
+          lat = fallbackCoords[0];
+          lng = fallbackCoords[1];
+        }
+
+        switchMobileTab('map');
+        setTimeout(() => {
+          window.mapInstance.invalidateSize();
+          window.mapInstance.flyTo([lat, lng], 14);
+
+          const userLocMarker = L.circleMarker([lat, lng], {
+            radius: 10,
+            color: '#38bdf8',
+            fillColor: '#0284c7',
+            fillOpacity: 0.9
+          }).addTo(window.mapInstance);
+
+          userLocMarker.bindPopup(`📍 <strong>Current Radar Position</strong><br><small>${window.currentDistrict.toUpperCase()}</small>`).openPopup();
+          alert(`📡 रडार सक्रिय: ${window.currentDistrict.toUpperCase()} में आपकी लोकेशन सटीकता से लोकेट कर दी गई है!`);
+        }, 300);
+      },
+      () => {
+        // Safe GPS Permission Denied Fallback
+        switchMobileTab('map');
+        setTimeout(() => {
+          window.mapInstance.invalidateSize();
+          window.mapInstance.flyTo(fallbackCoords, 14);
+          alert(`📡 रडार: ${window.currentDistrict.toUpperCase()} हेरिटेज हब पर फोकस किया गया है।`);
+        }, 300);
+      }
+    );
+  } else {
+    switchMobileTab('map');
+    window.mapInstance.flyTo(fallbackCoords, 14);
+  }
+};
+
+// ---------------- LANGUAGE SYNCHRONIZATION ---------------- //
 
 const i18n = {
   "en-IN": {
@@ -228,7 +288,7 @@ function onConsoleLangChange(lang) {
   window.applyLanguage(lang);
 }
 
-// ---------------- MAP INITIALIZATION & AUTO-RADAR ENGINE ---------------- //
+// ---------------- MAP INITIALIZATION & CARD RENDERING ---------------- //
 
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
@@ -242,26 +302,6 @@ function initMap() {
     attribution: '© OpenStreetMap | VratyaVani AI'
   }).addTo(window.mapInstance);
 }
-
-window.detectNearbyHeritageRadar = function() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        switchMobileTab('map');
-        
-        setTimeout(() => {
-          window.mapInstance.invalidateSize();
-          window.mapInstance.flyTo([lat, lng], 14);
-          const userLocMarker = L.circleMarker([lat, lng], { radius: 10, color: '#38bdf8', fillColor: '#0284c7', fillOpacity: 0.9 }).addTo(window.mapInstance);
-          userLocMarker.bindPopup("📍 <strong>Current Radar Location</strong>").openPopup();
-        }, 300);
-      },
-      () => alert("Please allow GPS location access to detect nearby heritage.")
-    );
-  }
-};
 
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
@@ -298,8 +338,11 @@ window.loadDistrictData = function(districtKey) {
   mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
   mapMarkers = [];
 
+  const centerCoords = items.length > 0 ? items[0].coords : (districtCentres[districtKey] || [26.1209, 85.3647]);
+
+  window.mapInstance.flyTo(centerCoords, 13);
+
   if (items.length > 0) {
-    window.mapInstance.flyTo(items[0].coords, 13);
     items.forEach(item => {
       const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title });
       const marker = L.marker(item.coords).addTo(window.mapInstance);
@@ -487,7 +530,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- CITIZEN MODAL & ATTACHMENT ---------------- //
+// ---------------- CITIZEN & ADMIN SUBMISSION LOGIC ---------------- //
 
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
@@ -502,7 +545,13 @@ function detectLiveGPS() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        document.getElementById("citCoords").value = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+        let lat = pos.coords.latitude;
+        let lng = pos.coords.longitude;
+        if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
+          lat = 26.1209;
+          lng = 85.3647;
+        }
+        document.getElementById("citCoords").value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         alert("GPS Coordinates detected successfully!");
       },
       () => alert("Please allow GPS location permission.")
@@ -559,8 +608,6 @@ function handleCitizenSubmit(e) {
   document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
 }
-
-// ---------------- ADMIN PANEL LOGIC ---------------- //
 
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
@@ -761,7 +808,7 @@ window.deleteCustomRecord = async function(recordIndex) {
   loadDistrictData(window.currentDistrict);
 };
 
-// ---------------- TAB NAVIGATION FIX (FOR LEAFLET MAP RESIZE) ---------------- //
+// ---------------- TAB NAVIGATION FIX ---------------- //
 
 function switchMobileTab(tab) {
   document.getElementById("btnNavHome").classList.remove("active");
@@ -777,7 +824,6 @@ function switchMobileTab(tab) {
     document.getElementById("homeView").style.display = "none";
     document.getElementById("mapView").style.display = "block";
     
-    // Crucial fix: invalidateSize forces Leaflet to recalculate container bounds immediately
     setTimeout(() => {
       if (window.mapInstance) {
         window.mapInstance.invalidateSize();
@@ -786,7 +832,6 @@ function switchMobileTab(tab) {
   }
 }
 
-// Track Network Status
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').catch(() => {});

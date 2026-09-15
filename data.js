@@ -1,8 +1,7 @@
 /**
- * VratyaVani AI — Pan-India States, Hubs & Curated Heritage Dataset
+ * VratyaVani AI — Accurate Territory & Verified Heritage Dataset
  */
 
-// All States & UTs of India
 const allIndiaStates = [
   { code: "bihar", name: "Bihar (बिहार)" },
   { code: "up", name: "Uttar Pradesh (उत्तर प्रदेश)" },
@@ -26,15 +25,9 @@ const allIndiaStates = [
   { code: "ap", name: "Andhra Pradesh (आंध्र प्रदेश)" },
   { code: "haryana", name: "Haryana (हरियाणा)" },
   { code: "chhattisgarh", name: "Chhattisgarh (छत्तीसगढ़)" },
-  { code: "goa", name: "Goa (गोवा)" },
-  { code: "manipur", name: "Manipur (मणिपुर)" },
-  { code: "meghalaya", name: "Meghalaya (मेघालय)" },
-  { code: "mizoram", name: "Mizoram (मिज़ोरम)" },
-  { code: "nagaland", name: "Nagaland (नागालैंड)" },
-  { code: "tripura", name: "Tripura (त्रिपुरा)" }
+  { code: "goa", name: "Goa (गोवा)" }
 ];
 
-// Baseline Verified Dataset for Ready Demonstrations
 const heritageData = {
   muzaffarpur: [
     {
@@ -43,19 +36,20 @@ const heritageData = {
       state: "bihar",
       district: "muzaffarpur",
       districtName: "Muzaffarpur",
-      village: "Sikandarpur / Town Center",
-      coords: [26.1209, 85.3647],
+      // Corrected: Purani Bazar / Chhata Chowk
+      village: "Purani Bazar (पुरानी बाज़ार)",
+      coords: [26.1245, 85.3902],
       image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
       content: {
         "hi-IN": {
           title: "बाबा गरीबनाथ धाम (Baba Garibnath)",
-          desc: "उत्तर बिहार का देवघर माना जाने वाला ऐतिहासिक मनोकामना शिवधाम।",
+          desc: "उत्तर बिहार का देवघर माना जाने वाला ऐतिहासिक मनोकामना शिवधाम। पुरानी बाज़ार में स्थित।",
           audio: "बाबा गरीबनाथ धाम मुजफ्फरपुर का आध्यात्मिक हृदय है। जनश्रुति के अनुसार यहाँ स्थापित मनोकामना लिंग भक्तों की हर पुकार सुनता है।"
         },
         "en-IN": {
           title: "Baba Garibnath Dham",
-          desc: "Known as the Deoghar of North Bihar, a sacred historic Shiva pilgrimage.",
-          audio: "Welcome to Baba Garibnath Dham, the spiritual heart of Muzaffarpur."
+          desc: "Known as the Deoghar of North Bihar, situated at Purani Bazar, historic Shiva pilgrimage.",
+          audio: "Welcome to Baba Garibnath Dham, located in Purani Bazar, the spiritual sanctum of Muzaffarpur."
         }
       }
     },
@@ -65,7 +59,7 @@ const heritageData = {
       state: "bihar",
       district: "muzaffarpur",
       districtName: "Muzaffarpur",
-      village: "Sikandarpur Lake Sector",
+      village: "Sikandarpur Lake Sector (सिकंदरपुर झील)",
       coords: [26.1315, 85.3850],
       image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
       content: {
@@ -76,7 +70,7 @@ const heritageData = {
         },
         "en-IN": {
           title: "Sikandarpur Lake Waterfront",
-          desc: "Scenic eco-heritage waterbody connected to the historic Burhi Gandak.",
+          desc: "Scenic eco-heritage waterbody connected to the historic Burhi Gandak river.",
           audio: "Sikandarpur lake is an eco-cultural waterbody in Tirhut."
         }
       }
@@ -89,7 +83,7 @@ const heritageData = {
       state: "bihar",
       district: "patna",
       districtName: "Patna",
-      village: "Kumhrar Heritage Zone",
+      village: "Kumhrar Heritage Zone (कुम्रहार)",
       coords: [25.5992, 85.1843],
       image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
       content: {
@@ -113,7 +107,7 @@ const heritageData = {
       state: "up",
       district: "varanasi",
       districtName: "Varanasi",
-      village: "Dashashwamedh Ghat",
+      village: "Dashashwamedh Ghat (दशाश्वमेध घाट)",
       coords: [25.3109, 83.0107],
       image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80",
       content: {
@@ -137,7 +131,7 @@ const heritageData = {
       state: "punjab",
       district: "amritsar",
       districtName: "Amritsar",
-      village: "Golden Temple Complex",
+      village: "Golden Temple Complex (ਹਰਿਮੰਦਰ ਸਾਹਿਬ)",
       coords: [31.6200, 74.8765],
       image: "https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=800&q=80",
       content: {
