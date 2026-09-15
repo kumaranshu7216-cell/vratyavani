@@ -1,5 +1,6 @@
 /**
- * VratyaVani AI — Client Engine with Stable Radar, Real Sanctum Photos & State Festival Sync
+ * VratyaVani AI — Dual-Engine Heritage & Living Culture Controller
+ * Full Camera/File Upload Support, Landmark Mapping & Direct Image Override
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -26,13 +27,12 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// Purge any stale browser cache storing the wrong van image
+// Purge old bad cache once to ensure correct images appear
 function purgeCorruptImageCache() {
   try {
     const localRecs = localStorage.getItem("vratyavani_firebase_records");
-    if (localRecs && localRecs.includes("photo-1527786356703-4b100091cd2c")) {
+    if (localRecs && (localRecs.includes("photo-1527786356703-4b100091cd2c") || localRecs.includes("photo-1464822759023-fed622ff2c3b"))) {
       localStorage.removeItem("vratyavani_firebase_records");
-      localStorage.removeItem(STORAGE_KEY);
     }
   } catch(e) {}
 }
@@ -93,7 +93,6 @@ function closeLocationModal() {
   document.getElementById("locationModal").style.display = "none";
 }
 
-// Transparent State Festival Wallpaper Engine
 function applyStateFestivalTheme(stateKey) {
   window.currentState = stateKey;
   const theme = stateFestivals[stateKey] || stateFestivals["bihar"];
@@ -125,7 +124,6 @@ function confirmLocationSelection() {
   window.onDistrictChange(distKey);
 }
 
-// Stable Proximity Radar
 window.detectNearbyHeritageRadar = function() {
   const currentKey = window.currentDistrict.toLowerCase();
   const fallbackCoords = districtCentres[currentKey] || [26.1245, 85.3902];
@@ -188,60 +186,6 @@ const i18n = {
     btnRadar: "📡 निकटतम रडार खोजें",
     btnCitizen: "➕ धरोहर व संस्कृति जोड़ें",
     emptyMsg: `इस ज़िले में अभी रिकॉर्ड नहीं है। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">यहाँ + क्लिक कर जोड़ें</button>`
-  },
-  "bho-IN": {
-    heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
-    heroSub: "वैदिक जड़ से आधुनिक AI ले • धरोहर आ जीवंत लोक-संस्कृति",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
-    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "इतिहास भा लोक-परंपरा चुनीं आ अपनी बोली में सुनीं...",
-    btnListenHist: "🏛️ इतिहास सुनीं",
-    btnListenCult: "🎭 रीत-रिवाज",
-    btnMap: "📍 मैप पर देखीं",
-    btnView360: "🌐 360° दृश्य",
-    btnPlay: "▶ बजाईं (Play)",
-    btnStop: "⏹ बाजत बा...",
-    btnReplay: "▶ फेर से सुनीं",
-    btnQr: "📲 QR कोड",
-    btnRadar: "📡 रडार से खोजीं",
-    btnCitizen: "➕ धरोहर जोड़ीं",
-    emptyMsg: `ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ नया जोड़ीं</button>`
-  },
-  "mai-IN": {
-    heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
-    heroSub: "वैदिक जड़ सं आधुनिक AI धरि • धरोहर एवं जीवित लोक-संस्कृति",
-    mapTitle: "📍 लाइव हेरिटेज मैप (Map)",
-    voiceConsoleTitle: "🎙️ भाषिणी AI ऑडियो गाइड",
-    nowPlayingDefault: "इतिहास वा संस्कृति चुनू आ अपन मैथिली में सुनू...",
-    btnListenHist: "🏛️ इतिहास सुनू",
-    btnListenCult: "🎭 जीवंत रीत",
-    btnMap: "📍 मैप पर देखू",
-    btnView360: "🌐 360° दृश्य",
-    btnPlay: "▶ बजाउ (Play)",
-    btnStop: "⏹ बाजि रहल अछि...",
-    btnReplay: "▶ पुनः सुनू",
-    btnQr: "📲 QR कोड",
-    btnRadar: "📡 रडार सं ताकू",
-    btnCitizen: "➕ धरोहर जोड़ू",
-    emptyMsg: `एहि श्रेणी में कोनो रेकॉर्ड नहि अछि। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ जोड़ू</button>`
-  },
-  "pa-IN": {
-    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
-    heroSub: "ਵੈਦਿਕ ਜੜ੍ਹਾਂ ਤੋਂ ਆਧੁਨਿਕ AI ਤੱਕ • ਵਿਰਾਸਤ ਅਤੇ ਜਿਉਂਦੀ ਜਾਗਦੀ ਸੰਸਕ੍ਰਿਤੀ",
-    mapTitle: "📍 ਲਾਈਵ ਨਕਸ਼ਾ (Map)",
-    voiceConsoleTitle: "🎙️ ਭਾਸ਼ਿਣੀ AI ਆਡੀਓ ਗਾਈਡ",
-    nowPlayingDefault: "ਇਤਿਹਾਸ ਜਾਂ ਸੰਸਕ੍ਰਿਤੀ ਚੁਣੋ ਅਤੇ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ ਸੁਣੋ...",
-    btnListenHist: "🏛️ ਇਤਿਹਾਸ ਸੁਣੋ",
-    btnListenCult: "🎭 ਰੀਤਾਂ ਸੁਣੋ",
-    btnMap: "📍 ਨਕਸ਼ੇ ਤੇ ਵੇਖੋ",
-    btnView360: "🌐 360° ਦ੍ਰਿਸ਼",
-    btnPlay: "▶ ਚਲਾਓ (Play)",
-    btnStop: "⏹ ਚੱਲ ਰਿਹਾ ਹੈ...",
-    btnReplay: "▶ ਮੁੜ ਸੁਣੋ",
-    btnQr: "📲 QR ਕੋਡ",
-    btnRadar: "📡 ਨੇੜਲਾ ਰਡਾਰ",
-    btnCitizen: "➕ ਵਿਰਾਸਤ ਜੋੜੋ",
-    emptyMsg: `ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ। <button onclick="openCitizenModal()" style="background:#d97706; color:#000; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin-left:6px;">+ ਜੋੜੋ</button>`
   }
 };
 
@@ -308,7 +252,9 @@ window.loadDistrictData = function(districtKey) {
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
     const merged = [...firebaseRecs, ...custom];
     const matching = merged.filter(c => c.district.toLowerCase() === districtKey.toLowerCase());
-    items = [...matching, ...items];
+    
+    // Custom/Admin items take priority (allows override of base items)
+    items = [...matching, ...items.filter(base => !matching.some(m => m.id === base.id || m.title === base.title))];
   } catch (e) {}
 
   mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
@@ -323,7 +269,7 @@ window.loadDistrictData = function(districtKey) {
       const marker = L.marker(item.coords).addTo(window.mapInstance);
       marker.bindPopup(`
         <strong>${locContent.title}</strong><br>
-        <small style="color:#c2410c;">${item.village || ''}</small><br>
+        <small style="color:#c2410c;">${item.landmark ? '📍 ' + item.landmark : (item.village || '')}</small><br>
         <button onclick="selectUnifiedAudio('${item.id}', 'heritage')" style="margin-top:6px; padding:3px 6px; font-size:10px; background:#d97706; color:#000; border:none; border-radius:4px; font-weight:bold; cursor:pointer;">
           🏛️ History
         </button>
@@ -340,7 +286,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// Unified Card Rendering with Strict Image Verification
+// Render Cards with Landmark Details & Safe Photos
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
@@ -366,12 +312,10 @@ function renderCards(preloadedItems) {
   items.forEach(item => {
     const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
 
-    // Explicitly lock genuine image URLs
     let displayImage = item.image;
-    if (item.id === "muz_1") {
-      displayImage = "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
-    } else if (item.id === "var_1") {
-      displayImage = "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80";
+    // Default fallback check
+    if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
+      displayImage = (item.district === "varanasi") ? "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80" : "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     }
 
     const cardHtml = `
@@ -385,14 +329,17 @@ function renderCards(preloadedItems) {
             <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${locContent.title}</h4>
             <span class="risk-badge ${item.riskClass || 'risk-mod'}">${item.riskScore || 'Active'}</span>
           </div>
-          ${item.village ? `<div style="font-size:11px; color:#c2410c; font-weight:700;">📍 ${item.village}</div>` : ''}
+          
+          <div style="font-size:11px; color:#c2410c; font-weight:700;">
+            📍 ${item.village || ''} ${item.landmark ? `• Landmark: ${item.landmark}` : ''}
+          </div>
           
           <div class="heritage-block">
             <strong>🏛️ Heritage Landmark:</strong> ${locContent.heritageDesc || locContent.desc}
           </div>
 
           <div class="culture-block">
-            <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || locContent.cultureRitual || 'Local sacred oral traditions.'}
+            <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || 'Local sacred oral traditions.'}
           </div>
 
           <div class="dual-audio-btns">
@@ -422,8 +369,7 @@ function selectUnifiedAudio(itemId, mode) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   try {
     const custom = getCustomRecords();
-    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
-    allItems = [...firebaseRecs, ...custom, ...allItems];
+    allItems = [...custom, ...allItems];
   } catch(e) {}
 
   const found = allItems.find(i => i.id === itemId);
@@ -477,8 +423,7 @@ function open360Viewer(itemId) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   try {
     const custom = getCustomRecords();
-    const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
-    allItems = [...firebaseRecs, ...custom, ...allItems];
+    allItems = [...custom, ...allItems];
   } catch(e) {}
 
   const item = allItems.find(i => i.id === itemId);
@@ -494,7 +439,7 @@ function open360Viewer(itemId) {
     pannellumViewerInstance = null;
   }
 
-  let panoPhoto = (item.id === "muz_1") ? "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80" : "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80";
+  let panoPhoto = item.image;
 
   setTimeout(() => {
     try {
@@ -546,7 +491,8 @@ function closeQrModal(e) {
   }
 }
 
-// Citizen & Admin Workflow
+// ---------------- CITIZEN WORKFLOW ---------------- //
+
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
 }
@@ -594,6 +540,7 @@ function handleCitizenSubmit(e) {
   const title = document.getElementById("citTitle").value.trim();
   const district = document.getElementById("citDistrict").value.trim().toLowerCase();
   const village = document.getElementById("citVillage").value.trim();
+  const landmark = document.getElementById("citLandmark").value.trim();
   const ritual = document.getElementById("citRitual").value.trim();
   const coordsRaw = document.getElementById("citCoords").value.trim();
   const story = document.getElementById("citStory").value.trim();
@@ -609,6 +556,7 @@ function handleCitizenSubmit(e) {
     title: title,
     district: district,
     village: village,
+    landmark: landmark,
     ritual: ritual,
     coords: coords,
     story: story,
@@ -625,6 +573,22 @@ function handleCitizenSubmit(e) {
   document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
 }
+
+// ---------------- ADMIN PANEL WITH FILE/CAMERA UPLOAD ---------------- //
+
+let adminUploadedBase64 = null;
+window.previewAdminImage = function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      adminUploadedBase64 = e.target.result;
+      document.getElementById("adminPreviewImg").src = adminUploadedBase64;
+      document.getElementById("adminImagePreviewBox").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
 function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
@@ -707,6 +671,7 @@ function approveCitizenSubmission(index) {
     id: `cit_${Date.now()}`,
     district: approvedItem.district,
     village: approvedItem.village,
+    landmark: approvedItem.landmark || "",
     coords: approvedItem.coords,
     image: approvedItem.image,
     source: "Community Verified",
@@ -777,16 +742,21 @@ function renderInpageAdminTable() {
   });
 }
 
+// Admin Submission: Allows Direct File Upload, Landmark and Image Override
 async function handleAdminSubmit(e) {
   e.preventDefault();
 
   const dist = document.getElementById("recDistrict").value.trim().toLowerCase();
   const village = document.getElementById("recVillage").value.trim();
+  const landmark = document.getElementById("recLandmark").value.trim();
   const title = document.getElementById("recTitle").value.trim();
   const ritual = document.getElementById("recRitual").value.trim();
   const coordsRaw = document.getElementById("recCoords").value.trim();
-  const image = document.getElementById("recImage").value.trim();
+  const urlImage = document.getElementById("recImage").value.trim();
   const desc = document.getElementById("recDesc").value.trim();
+
+  // Pick uploaded camera/file image FIRST, else fallback to URL
+  const finalImage = adminUploadedBase64 || urlImage || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
 
   let coords = [26.1245, 85.3902];
   if (coordsRaw.includes(",")) {
@@ -795,13 +765,14 @@ async function handleAdminSubmit(e) {
   }
 
   const newRecord = {
-    id: `vv_${Date.now()}`,
+    id: `adm_${Date.now()}`,
     district: dist,
     village: village,
+    landmark: landmark,
     coords: coords,
-    image: image,
-    source: "Firebase Cloud",
-    riskScore: "Verified Heritage",
+    image: finalImage,
+    source: "Admin Verified Override",
+    riskScore: "Verified Landmark",
     riskClass: "risk-mod",
     content: {
       "en-IN": {
@@ -827,11 +798,21 @@ async function handleAdminSubmit(e) {
   }
 
   const customRecords = getCustomRecords();
-  customRecords.unshift(newRecord);
+  
+  // If record with same title exists, override it
+  const existingIdx = customRecords.findIndex(c => c.title && c.title.toLowerCase() === title.toLowerCase());
+  if (existingIdx !== -1) {
+    customRecords[existingIdx] = newRecord;
+  } else {
+    customRecords.unshift(newRecord);
+  }
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`Published Unified Record: ${title}`);
+  alert(`🎉 प्रकाशित: "${title}" की नई फ़ोटो व लैंडमार्क सुरक्षित कर लाइव कर दिया गया है!`);
   e.target.reset();
+  adminUploadedBase64 = null;
+  document.getElementById("adminImagePreviewBox").style.display = "none";
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 }
