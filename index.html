@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -35,7 +35,7 @@
         </div>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Configure Pan-India territory and preferred dialect</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">राज्य और स्थानीय बोली का चयन करें</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -54,8 +54,8 @@
         <div>
           <label style="font-size:11px; font-weight:700; color:#fed7aa;">Voice Guide Dialect (भाषा / बोली)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
-            <option value="en-IN" selected>English</option>
-            <option value="hi-IN">हिंदी (Hindi)</option>
+            <option value="hi-IN" selected>हिंदी (Hindi)</option>
+            <option value="en-IN">English</option>
             <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
             <option value="mai-IN">मैथिली (Maithili)</option>
             <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
@@ -80,7 +80,7 @@
 
     <div class="nav-controls">
       <button class="btn-reselect" onclick="openLocationModalDirect()">
-        📍 <span id="navDistrictLabel">Muzaffarpur</span> • <span id="navLangLabel">EN</span>
+        📍 <span id="navDistrictLabel">MUZAFFARPUR</span> • <span id="navLangLabel">HI</span>
       </button>
       <span id="networkStatusBadge" class="network-badge online">● Online</span>
     </div>
@@ -99,10 +99,10 @@
     </div>
     <div style="margin-top: 12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
       <button id="btnRadarTrigger" onclick="detectNearbyHeritageRadar()" style="background:#38bdf8; color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
-        📡 Find Nearby Radar
+        📡 निकटतम रडार खोजें
       </button>
       <button id="btnCitizenTrigger" onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
-        ➕ Add Heritage & Ritual (Citizen)
+        ➕ धरोहर व संस्कृति जोड़ें
       </button>
     </div>
   </section>
@@ -116,19 +116,19 @@
       <div class="console-title">
         <span id="audioConsoleTitle">🎙️ भाषिणी AI ऑडियो गाइड</span>
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
-          <option value="en-IN" selected>English</option>
-          <option value="hi-IN">हिंदी (Hindi)</option>
+          <option value="hi-IN" selected>हिंदी (Hindi)</option>
+          <option value="en-IN">English</option>
           <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
           <option value="mai-IN">मैथिली (Maithili)</option>
           <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
         </select>
       </div>
       <div class="audio-now-playing" id="nowPlayingText">
-        Choose 'History' or 'Living Culture' to listen to the oral narrative...
+        इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...
       </div>
       <div class="audio-controls">
-        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Audio</button>
-        <button id="qrGuideBtn" onclick="showQrModal()">📲 Spot QR Code</button>
+        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ चलाएं (Play)</button>
+        <button id="qrGuideBtn" onclick="showQrModal()">📲 ऑन-स्पॉट QR कोड</button>
       </div>
     </div>
   </main>
@@ -136,7 +136,7 @@
   <!-- MAP VIEW -->
   <main class="view-container" id="mapView">
     <div class="map-header">
-      <h3 id="mapSectionTitle">📍 Live Heritage & Culture Map</h3>
+      <h3 id="mapSectionTitle">📍 लाइव हेरिटेज व संस्कृति मैप (Map)</h3>
       <span id="currentDistrictBadge">MUZAFFARPUR</span>
     </div>
     <div id="map"></div>
@@ -297,7 +297,7 @@
     </div>
   </div>
 
-  <!-- In-Page Admin Desk (With File Upload & Landmark Input) -->
+  <!-- In-Page Admin Desk -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
     <div class="modal-box" style="text-align: left; max-width: 680px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
@@ -309,7 +309,6 @@
         <button onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
-      <!-- Pending Citizen Approvals -->
       <h4 style="margin-top:4px; font-size:13px; color:#c2410c;">
         📥 Pending Citizen Approvals (Heritage & Living Culture)
       </h4>
@@ -327,7 +326,6 @@
         </table>
       </div>
 
-      <!-- Direct Admin Creation & Image Override -->
       <h4 style="font-size:13px; color:var(--primary-deep); border-top:1px solid var(--border-color); padding-top:10px;">
         ➕ Add / Update Verified Record (With File/Camera Upload)
       </h4>
@@ -350,7 +348,7 @@
             <input type="text" id="recLandmark" placeholder="e.g. Near Chhata Chowk" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
-            <label style="font-size:11px; font-weight:bold;">Heritage Site Name (Or Existing Name to Update)</label>
+            <label style="font-size:11px; font-weight:bold;">Heritage Site Name</label>
             <input type="text" id="recTitle" required placeholder="e.g. Baba Garibnath Dham" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           <div style="grid-column:1/-1;">
@@ -362,7 +360,6 @@
             <input type="text" id="recCoords" required placeholder="26.1245, 85.3902" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
           </div>
           
-          <!-- Live Photo or File Upload Option for Admin -->
           <div>
             <label style="font-size:11px; font-weight:bold;">Upload Image (कैमरा या फ़ाइल)</label>
             <input type="file" id="recPhotoFile" accept="image/*" capture="environment" onchange="previewAdminImage(event)" style="width:100%; font-size:11px; padding:4px;" />
@@ -373,7 +370,7 @@
             <input type="url" id="recImage" placeholder="https://..." style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
             <div id="adminImagePreviewBox" style="display:none; margin-top:6px;">
               <img id="adminPreviewImg" src="" style="max-height:100px; border-radius:6px; border:1px solid #cbd5e1;" />
-              <small style="display:block; color:#15803d; font-weight:bold;">✓ Selected image ready to be saved</small>
+              <small style="display:block; color:#15803d; font-weight:bold;">✓ फ़ोटो सफलतापूर्वक चुनी गई</small>
             </div>
           </div>
 
@@ -410,9 +407,10 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   
+  <!-- Firebase Module Script (Named Document Architecture) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -428,6 +426,19 @@
 
     try { enableIndexedDbPersistence(db); } catch (err) {}
 
+    // नाम से दस्तावेज सुरक्षित करने वाला फंक्शन
+    window.saveToFirestoreNamed = async function(docNameId, recordData) {
+      try {
+        const cleanDocId = docNameId.trim().replace(/[^a-zA-Z0-9_\u0900-\u097F]/g, "_");
+        const docRef = doc(db, "heritage_records", cleanDocId);
+        await setDoc(docRef, recordData, { merge: true });
+        return cleanDocId;
+      } catch (e) {
+        console.error("Firestore Save Error:", e);
+        return null;
+      }
+    };
+
     window.syncCloudHeritage = async function() {
       try {
         const querySnapshot = await getDocs(collection(db, "heritage_records"));
@@ -438,13 +449,6 @@
           if (window.loadDistrictData) window.loadDistrictData(window.currentDistrict);
         }
       } catch (e) {}
-    };
-
-    window.saveToFirestore = async function(record) {
-      try {
-        const docRef = await addDoc(collection(db, "heritage_records"), record);
-        return docRef.id;
-      } catch (e) { return null; }
     };
 
     window.deleteFromFirestore = async function(docId) {

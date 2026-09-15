@@ -1,6 +1,6 @@
 /**
- * VratyaVani AI — Fully Hardened Production Controller
- * Fixes: LocalStorage Quota Crash, Silent Field Errors, Strict Deduplication, Instant Publish
+ * VratyaVani AI — Unified Heritage & Living Culture Engine
+ * Deduplication Filter, Safe Named Firestore Engine & Smooth Radar
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -27,34 +27,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// ---------------- 1. फ़ोटो को ऑटो-कंप्रेस करने का इंजन (ताकि LocalStorage कभी क्रैश न हो) ---------------- //
-function compressImageToDataURL(base64Str, maxWidth = 640, quality = 0.6) {
-  return new Promise((resolve) => {
-    if (!base64Str || !base64Str.startsWith("data:image")) {
-      return resolve(base64Str);
-    }
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-      if (width > maxWidth) {
-        height = Math.round((height * maxWidth) / width);
-        width = maxWidth;
-      }
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      // 50KB-150KB का लाइटवेट जेपेग बनाकर देगा
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.onerror = () => resolve(base64Str);
-  });
-}
-
-// ---------------- 2. डुप्लीकेट्स को हमेशा के लिए साफ़ करने का फ़ंक्शन ---------------- //
+// पुराने डुप्लीकेट्स को हटाने वाला क्लीनर
 function cleanStorageDuplicates() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -64,11 +37,8 @@ function cleanStorageDuplicates() {
         const seen = new Set();
         const unique = [];
         for (let r of records) {
-          // टाइटल या आईडी के आधार पर केवल एक ही रिकॉर्ड रहने दें
-          const normTitle = (r.content && r.content["hi-IN"] && r.content["hi-IN"].title) 
-            || (r.content && r.content["en-IN"] && r.content["en-IN"].title) 
-            || r.title || r.id;
-          const key = (r.district || "").toLowerCase() + "_" + (normTitle || "").toLowerCase().trim();
+          const title = (r.name) || (r.content && r.content["hi-IN"] && r.content["hi-IN"].title) || (r.content && r.content["en-IN"] && r.content["en-IN"].title) || r.title || r.id;
+          const key = (r.district || "") + "_" + title.trim().toLowerCase();
           if (!seen.has(key)) {
             seen.add(key);
             unique.push(r);
@@ -125,21 +95,18 @@ function startAppFlow() {
       splash.style.transform = "scale(1.08)";
       setTimeout(() => {
         splash.style.display = "none";
-        const locModal = document.getElementById("locationModal");
-        if (locModal) locModal.style.display = "flex";
+        document.getElementById("locationModal").style.display = "flex";
       }, 700);
     }
-  }, 600);
+  }, 800);
 }
 
 function openLocationModalDirect() {
-  const locModal = document.getElementById("locationModal");
-  if (locModal) locModal.style.display = "flex";
+  document.getElementById("locationModal").style.display = "flex";
 }
 
 function closeLocationModal() {
-  const locModal = document.getElementById("locationModal");
-  if (locModal) locModal.style.display = "none";
+  document.getElementById("locationModal").style.display = "none";
 }
 
 function applyStateFestivalTheme(stateKey) {
@@ -158,25 +125,18 @@ function applyStateFestivalTheme(stateKey) {
 }
 
 function confirmLocationSelection() {
-  const stateEl = document.getElementById("selState");
-  const distEl = document.getElementById("selDistrictInput");
-  const langEl = document.getElementById("selLang");
-
-  const selectedState = stateEl ? stateEl.value : "bihar";
-  const rawDist = distEl ? distEl.value.trim().toLowerCase() : "muzaffarpur";
-  const lang = langEl ? langEl.value : "hi-IN";
+  const selectedState = document.getElementById("selState").value;
+  const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
+  const lang = document.getElementById("selLang").value;
   const distKey = rawDist || "muzaffarpur";
 
-  const lblDist = document.getElementById("navDistrictLabel");
-  if (lblDist) lblDist.innerText = distKey.toUpperCase();
-  const lblLang = document.getElementById("navLangLabel");
-  if (lblLang) lblLang.innerText = lang.split('-')[0].toUpperCase();
-  const selConsole = document.getElementById("langSelect");
-  if (selConsole) selConsole.value = lang;
+  document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
+  document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
+  document.getElementById("langSelect").value = lang;
 
   applyStateFestivalTheme(selectedState);
-  closeLocationModal();
 
+  document.getElementById("locationModal").style.display = "none";
   window.applyLanguage(lang);
   window.onDistrictChange(distKey);
 }
@@ -188,7 +148,6 @@ window.detectNearbyHeritageRadar = function() {
   switchMobileTab('map');
 
   setTimeout(() => {
-    if (!window.mapInstance) return;
     window.mapInstance.invalidateSize();
     window.mapInstance.setView(fallbackCoords, 14, { animate: true, duration: 1.0 });
 
@@ -204,7 +163,7 @@ window.detectNearbyHeritageRadar = function() {
       weight: 3
     }).addTo(window.mapInstance);
 
-    window.userRadarMarker.bindPopup(`📍 <strong>रडार फोकस</strong><br><span style="color:#d97706; font-weight:bold;">${currentKey.toUpperCase()}</span>`).openPopup();
+    window.userRadarMarker.bindPopup(`📍 <strong>Current Radar Focus</strong><br><span style="color:#d97706; font-weight:bold;">${currentKey.toUpperCase()}</span>`).openPopup();
   }, 200);
 };
 
@@ -291,8 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initMap() {
-  const mapEl = document.getElementById('map');
-  if (!mapEl) return;
   window.mapInstance = L.map('map').setView([26.1245, 85.3902], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap | VratyaVani AI'
@@ -301,10 +258,8 @@ function initMap() {
 
 function onDistrictChange(districtKey) {
   window.currentDistrict = districtKey;
-  const bDist = document.getElementById("currentDistrictBadge");
-  if (bDist) bDist.innerText = districtKey.toUpperCase();
-  const navDist = document.getElementById("navDistrictLabel");
-  if (navDist) navDist.innerText = districtKey.toUpperCase();
+  document.getElementById("currentDistrictBadge").innerText = districtKey.toUpperCase();
+  document.getElementById("navDistrictLabel").innerText = districtKey.toUpperCase();
   loadDistrictData(window.currentDistrict);
 }
 
@@ -315,52 +270,42 @@ function getCustomRecords() {
   } catch (e) { return []; }
 }
 
-// ---------------- 3. ZERO-DUPLICATE LOAD DATA ---------------- //
+// डुप्लीकेट-प्रूफ डेटा लोडिंग इंजन
 window.loadDistrictData = function(districtKey) {
-  const cleanKey = (districtKey || "muzaffarpur").trim().toLowerCase();
-  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[cleanKey]) 
-    ? [...unifiedHeritageCultureData[cleanKey]] 
-    : [];
+  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[districtKey]) ? [...unifiedHeritageCultureData[districtKey]] : [];
 
   let mergedMap = new Map();
 
-  // 1. बेस डेटा भरें
+  // 1. बेस आइटम्स जोड़ें
   baseItems.forEach(item => {
     mergedMap.set(item.id, item);
   });
 
-  // 2. एडमिन/कस्टम रिकॉर्ड्स से ओवरराइड करें
+  // 2. कस्टम व फ़ायरबेस रिकॉर्ड्स से ओवरराइड करें (बिना डुप्लीकेट)
   try {
     const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
     const stored = [...firebaseRecs, ...custom];
 
     stored.forEach(c => {
-      if (c.district && c.district.toLowerCase() === cleanKey) {
-        // यदि गरीबनाथ है तो सीधे muz_1 को ओवरराइड करे
-        const cTitle = (c.content && c.content["en-IN"] && c.content["en-IN"].title) || c.title || "";
-        const id = (cleanKey === "muzaffarpur" && cTitle.toLowerCase().includes("garibnath")) 
-          ? "muz_1" 
-          : (c.id || `custom_${cTitle}`);
-        mergedMap.set(id, { ...c, id: id });
+      if (c.district && c.district.toLowerCase() === districtKey.toLowerCase()) {
+        const idKey = (districtKey === "muzaffarpur" && (c.name || "").toLowerCase().includes("garibnath")) ? "muz_1" : (c.id || c.name);
+        mergedMap.set(idKey, { ...c, id: idKey });
       }
     });
   } catch (e) {}
 
   const items = Array.from(mergedMap.values());
 
-  if (window.mapInstance) {
-    mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
-    mapMarkers = [];
+  mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
+  mapMarkers = [];
 
-    const centerCoords = items.length > 0 ? items[0].coords : (districtCentres[cleanKey] || [26.1245, 85.3902]);
-    window.mapInstance.flyTo(centerCoords, 13);
+  const centerCoords = items.length > 0 ? items[0].coords : (districtCentres[districtKey] || [26.1245, 85.3902]);
+  window.mapInstance.flyTo(centerCoords, 13);
 
+  if (items.length > 0) {
     items.forEach(item => {
-      const locContent = (item.content && item.content[window.currentLanguage]) 
-        ? item.content[window.currentLanguage] 
-        : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.title });
-
+      const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.name || item.title });
       const marker = L.marker(item.coords).addTo(window.mapInstance);
       marker.bindPopup(`
         <strong>${locContent.title}</strong><br>
@@ -375,16 +320,13 @@ window.loadDistrictData = function(districtKey) {
       mapMarkers.push(marker);
     });
 
-    const gBtn = document.getElementById("btnDirectGoogleMaps");
-    if (gBtn && items.length > 0) {
-      gBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${items[0].coords[0]},${items[0].coords[1]}`;
-    }
+    document.getElementById("btnDirectGoogleMaps").href = `https://www.google.com/maps/dir/?api=1&destination=${items[0].coords[0]},${items[0].coords[1]}`;
   }
 
   renderCards(items);
 };
 
-// ---------------- 4. स्वच्छ कार्ड रेंडरिंग ---------------- //
+// रेंडर कार्ड्स
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -403,9 +345,8 @@ function renderCards(preloadedItems) {
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
       [...firebaseRecs, ...custom].forEach(c => {
         if (c.district && c.district.toLowerCase() === window.currentDistrict.toLowerCase()) {
-          const cTitle = (c.content && c.content["en-IN"] && c.content["en-IN"].title) || c.title || "";
-          const id = (window.currentDistrict === "muzaffarpur" && cTitle.toLowerCase().includes("garibnath")) ? "muz_1" : (c.id || c.title);
-          map.set(id, c);
+          const idKey = (window.currentDistrict === "muzaffarpur" && (c.name || "").toLowerCase().includes("garibnath")) ? "muz_1" : (c.id || c.name);
+          map.set(idKey, { ...c, id: idKey });
         }
       });
     } catch(e) {}
@@ -418,15 +359,11 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    const locContent = (item.content && item.content[window.currentLanguage]) 
-      ? item.content[window.currentLanguage] 
-      : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.title, desc: item.desc });
+    const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.name || item.title, desc: item.story || item.desc });
 
-    let displayImage = item.image;
+    let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
-      displayImage = (item.district === "varanasi") 
-        ? "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80" 
-        : "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
+      displayImage = (item.district === "varanasi") ? "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80" : "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     }
 
     const cardHtml = `
@@ -446,7 +383,7 @@ function renderCards(preloadedItems) {
           </div>
           
           <div class="heritage-block">
-            <strong>🏛️ धरोहर परिचय:</strong> ${locContent.heritageDesc || locContent.desc || ''}
+            <strong>🏛️ धरोहर परिचय:</strong> ${locContent.heritageDesc || locContent.desc || item.story || ''}
           </div>
 
           <div class="culture-block">
@@ -487,22 +424,15 @@ function selectUnifiedAudio(itemId, mode) {
   activeAudioItem = found;
   activeAudioMode = mode;
 
-  const locContent = (found.content && found.content[window.currentLanguage]) 
-    ? found.content[window.currentLanguage] 
-    : (found.content ? found.content["hi-IN"] || found.content["en-IN"] : { title: found.title, audio: found.bhashiniAudioText });
+  const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["hi-IN"] || found.content["en-IN"] : { title: found.name || found.title, audio: found.bhashiniAudioText });
 
-  const textToPlay = (mode === 'culture') 
-    ? (locContent.cultureAudio || locContent.livingCulture) 
-    : (locContent.heritageAudio || locContent.heritageDesc);
+  const textToPlay = (mode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc || found.story);
   const badgeLabel = (mode === 'culture') ? "🎭 [जीवंत संस्कृति]" : "🏛️ [इतिहास]";
 
-  const np = document.getElementById("nowPlayingText");
-  if (np) {
-    np.innerHTML = `
-      <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
-      <em>"${textToPlay}"</em>
-    `;
-  }
+  document.getElementById("nowPlayingText").innerHTML = `
+    <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
+    <em>"${textToPlay}"</em>
+  `;
 
   const playBtn = document.getElementById("playAudioBtn");
   if (playBtn) {
@@ -516,13 +446,9 @@ function togglePlayVoice() {
   if (!activeAudioItem) return;
 
   const t = i18n[window.currentLanguage] || i18n["en-IN"];
-  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) 
-    ? activeAudioItem.content[window.currentLanguage] 
-    : (activeAudioItem.content ? activeAudioItem.content["hi-IN"] || activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
+  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["hi-IN"] || activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
 
-  const textToSpeak = (activeAudioMode === 'culture') 
-    ? (locContent.cultureAudio || locContent.livingCulture) 
-    : (locContent.heritageAudio || locContent.heritageDesc);
+  const textToSpeak = (activeAudioMode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc || activeAudioItem.story);
 
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -531,12 +457,10 @@ function togglePlayVoice() {
     utterance.rate = 0.92;
 
     utterance.onstart = () => {
-      const btn = document.getElementById("playAudioBtn");
-      if (btn) btn.innerText = t.btnStop;
+      document.getElementById("playAudioBtn").innerText = t.btnStop;
     };
     utterance.onend = () => {
-      const btn = document.getElementById("playAudioBtn");
-      if (btn) btn.innerText = t.btnReplay;
+      document.getElementById("playAudioBtn").innerText = t.btnReplay;
     };
 
     window.speechSynthesis.speak(utterance);
@@ -551,21 +475,17 @@ function open360Viewer(itemId) {
   const item = allItems.find(i => i.id === itemId);
   if (!item) return;
 
-  const locContent = (item.content && item.content[window.currentLanguage]) 
-    ? item.content[window.currentLanguage] 
-    : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.title });
+  const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["hi-IN"] || item.content["en-IN"] : { title: item.name || item.title });
 
-  const pTitle = document.getElementById("panoTitle");
-  if (pTitle) pTitle.innerText = `360° View: ${locContent.title}`;
-  const pModal = document.getElementById("panoramaModal");
-  if (pModal) pModal.style.display = "flex";
+  document.getElementById("panoTitle").innerText = `360° View: ${locContent.title}`;
+  document.getElementById("panoramaModal").style.display = "flex";
 
   if (pannellumViewerInstance) {
     try { pannellumViewerInstance.destroy(); } catch(e) {}
     pannellumViewerInstance = null;
   }
 
-  let panoPhoto = item.image;
+  let panoPhoto = item.imageUrl || item.image;
 
   setTimeout(() => {
     try {
@@ -584,8 +504,7 @@ function open360Viewer(itemId) {
 
 function closePanoramaModal(e) {
   if (!e || e.target.id === "panoramaModal" || e.target.classList.contains("close-modal")) {
-    const pModal = document.getElementById("panoramaModal");
-    if (pModal) pModal.style.display = "none";
+    document.getElementById("panoramaModal").style.display = "none";
     if (pannellumViewerInstance) {
       try { pannellumViewerInstance.destroy(); } catch(e) {}
     }
@@ -595,36 +514,111 @@ function closePanoramaModal(e) {
 function focusOnMapTab(lat, lng) {
   switchMobileTab('map');
   setTimeout(() => {
-    if (!window.mapInstance) return;
     window.mapInstance.invalidateSize();
     window.mapInstance.flyTo([lat, lng], 15);
-    const gBtn = document.getElementById("btnDirectGoogleMaps");
-    if (gBtn) gBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    document.getElementById("btnDirectGoogleMaps").href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   }, 250);
 }
 
 function showQrModal() {
   const qrImg = document.getElementById("qrImage");
-  if (!qrImg) return;
   if (activeAudioItem) {
-    const mh = document.getElementById("modalHeritageTitle");
-    if (mh) mh.innerText = `QR Guide`;
+    document.getElementById("modalHeritageTitle").innerText = `QR Guide`;
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://www.google.com/maps/dir/?api=1&destination=${activeAudioItem.coords[0]},${activeAudioItem.coords[1]}`;
   } else {
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://vratyavani.ai/spot/muzaffarpur`;
   }
-  const qm = document.getElementById("qrModal");
-  if (qm) qm.style.display = "flex";
+  document.getElementById("qrModal").style.display = "flex";
 }
 
 function closeQrModal(e) {
   if (!e || e.target.id === "qrModal" || e.target.classList.contains("close-modal")) {
-    const qm = document.getElementById("qrModal");
-    if (qm) qm.style.display = "none";
+    document.getElementById("qrModal").style.display = "none";
   }
 }
 
-// ---------------- 5. एडमिन ऑथ और सबमिट इंजन (BULLETPROOF & CRASH-FREE) ---------------- //
+// ---------------- CITIZEN & ADMIN WORKFLOW ---------------- //
+
+function openCitizenModal() {
+  document.getElementById("citizenModal").style.display = "flex";
+}
+function closeCitizenModal(e) {
+  if (!e || e.target.id === "citizenModal" || e.target.classList.contains("close-modal")) {
+    document.getElementById("citizenModal").style.display = "none";
+  }
+}
+
+function detectLiveGPS() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        let lat = pos.coords.latitude;
+        let lng = pos.coords.longitude;
+        if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
+          lat = 26.1245;
+          lng = 85.3902;
+        }
+        document.getElementById("citCoords").value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        alert("GPS Coordinates detected successfully!");
+      },
+      () => alert("Please allow GPS location permission.")
+    );
+  }
+}
+
+let citizenUploadedBase64 = null;
+function previewCitizenImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      citizenUploadedBase64 = e.target.result;
+      document.getElementById("citPreviewImg").src = citizenUploadedBase64;
+      document.getElementById("citImagePreviewBox").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function handleCitizenSubmit(e) {
+  e.preventDefault();
+
+  const title = document.getElementById("citTitle").value.trim();
+  const district = document.getElementById("citDistrict").value.trim().toLowerCase();
+  const village = document.getElementById("citVillage").value.trim();
+  const landmark = document.getElementById("citLandmark") ? document.getElementById("citLandmark").value.trim() : "";
+  const ritual = document.getElementById("citRitual").value.trim();
+  const coordsRaw = document.getElementById("citCoords").value.trim();
+  const story = document.getElementById("citStory").value.trim();
+
+  let coords = [26.1245, 85.3902];
+  if (coordsRaw.includes(",")) {
+    const parts = coordsRaw.split(",");
+    coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
+  }
+
+  const pendingItem = {
+    id: `pending_${Date.now()}`,
+    title: title,
+    district: district,
+    village: village,
+    landmark: landmark,
+    ritual: ritual,
+    coords: coords,
+    story: story,
+    image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80",
+    submittedAt: new Date().toLocaleDateString()
+  };
+
+  const pendingQueue = JSON.parse(localStorage.getItem("vratyavani_pending_submissions") || "[]");
+  pendingQueue.unshift(pendingItem);
+  localStorage.setItem("vratyavani_pending_submissions", JSON.stringify(pendingQueue));
+
+  alert(`🎉 धन्यवाद! "${title}" और "${ritual}" सत्यापन हेतु नोडल एडमिन को भेज दिया गया है।`);
+  e.target.reset();
+  document.getElementById("citImagePreviewBox").style.display = "none";
+  closeCitizenModal();
+}
 
 let adminUploadedBase64 = null;
 window.previewAdminImage = function(event) {
@@ -646,15 +640,13 @@ function openLoginModal() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
     openAdminPanel();
   } else {
-    const lm = document.getElementById("loginModal");
-    if (lm) lm.style.display = "flex";
+    document.getElementById("loginModal").style.display = "flex";
   }
 }
 
 function closeLoginModal(e) {
   if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) {
-    const lm = document.getElementById("loginModal");
-    if (lm) lm.style.display = "none";
+    document.getElementById("loginModal").style.display = "none";
   }
 }
 
@@ -665,8 +657,7 @@ function handleAdminLogin(e) {
 
   if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
-    const lm = document.getElementById("loginModal");
-    if (lm) lm.style.display = "none";
+    document.getElementById("loginModal").style.display = "none";
     openAdminPanel();
   } else {
     alert("Invalid Credentials! User: admin, Pass: Admin@2026");
@@ -675,21 +666,18 @@ function handleAdminLogin(e) {
 
 function openAdminPanel() {
   renderInpageAdminTable();
-  const ap = document.getElementById("adminPanelModal");
-  if (ap) ap.style.display = "flex";
+  document.getElementById("adminPanelModal").style.display = "flex";
 }
 
 function closeAdminPanelModal(e) {
   if (!e || e.target.id === "adminPanelModal" || e.target.classList.contains("close-modal")) {
-    const ap = document.getElementById("adminPanelModal");
-    if (ap) ap.style.display = "none";
+    document.getElementById("adminPanelModal").style.display = "none";
   }
 }
 
 function logoutAdmin() {
   sessionStorage.removeItem("vratyavani_admin_auth");
-  const ap = document.getElementById("adminPanelModal");
-  if (ap) ap.style.display = "none";
+  document.getElementById("adminPanelModal").style.display = "none";
   alert("Logged out!");
 }
 
@@ -704,81 +692,96 @@ function renderInpageAdminTable() {
 
   const customRecords = getCustomRecords();
   customRecords.forEach(c => {
-    map.set(c.id || c.title, { ...c, isCustom: true });
+    const idKey = c.id || c.name || c.title;
+    map.set(idKey, { ...c, isCustom: true });
   });
 
   const allRecords = Array.from(map.values());
 
   allRecords.forEach((item, index) => {
-    const title = (item.content && item.content["hi-IN"]) ? item.content["hi-IN"].title : (item.content && item.content["en-IN"] ? item.content["en-IN"].title : item.title);
+    const title = (item.content && item.content["hi-IN"]) ? item.content["hi-IN"].title : (item.name || item.title);
     const row = document.createElement("tr");
     row.innerHTML = `
       <td style="padding:4px; border:1px solid #e2e8f0;"><strong>${title}</strong></td>
       <td style="padding:4px; border:1px solid #e2e8f0;">${item.district}</td>
       <td style="padding:4px; border:1px solid #e2e8f0;">
-        ${item.isCustom ? `<button onclick="deleteCustomRecord(${index})" style="background:#fee2e2; color:#b91c1c; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">Del</button>` : `<span style="color:#94a3b8;">Core</span>`}
+        ${item.isCustom ? `<button onclick="deleteCustomRecord('${item.id}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:2px 5px; border-radius:3px; cursor:pointer;">Del</button>` : `<span style="color:#94a3b8;">Core</span>`}
       </td>
     `;
     tbody.appendChild(row);
   });
 }
 
-// ---------------- 6. VERIFY & PUBLISH LIVE ENGINE (CRASH-PROOF & FAST) ---------------- //
+function compressImage(base64Str, maxWidth = 800, quality = 0.7) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(base64Str);
+  });
+}
+
+// ---------------- VERIFY & PUBLISH LIVE (CRASH-PROOF & NAMED FIRESTORE) ---------------- //
+
 async function handleAdminSubmit(e) {
-  if (e && e.preventDefault) e.preventDefault();
+  e.preventDefault();
 
   try {
-    const distEl = document.getElementById("recDistrict");
-    const villageEl = document.getElementById("recVillage");
-    const landmarkEl = document.getElementById("recLandmark");
-    const titleEl = document.getElementById("recTitle");
-    const ritualEl = document.getElementById("recRitual");
-    const coordsEl = document.getElementById("recCoords");
-    const urlImageEl = document.getElementById("recImage");
-    const descEl = document.getElementById("recDesc");
+    const stateVal = (document.getElementById("recState") ? document.getElementById("recState").value : window.currentState || "bihar").trim();
+    const dist = (document.getElementById("recDistrict").value || "muzaffarpur").trim().toLowerCase();
+    const village = (document.getElementById("recVillage").value || "").trim();
+    const landmark = (document.getElementById("recLandmark") ? document.getElementById("recLandmark").value : "").trim();
+    const title = (document.getElementById("recTitle").value || "").trim();
+    const ritual = (document.getElementById("recRitual").value || "").trim();
+    const coordsRaw = (document.getElementById("recCoords").value || "").trim();
+    const urlImage = (document.getElementById("recImage") ? document.getElementById("recImage").value : "").trim();
+    const desc = (document.getElementById("recDesc").value || "").trim();
 
-    const dist = distEl ? distEl.value.trim().toLowerCase() : "muzaffarpur";
-    const village = villageEl ? villageEl.value.trim() : "";
-    const landmark = landmarkEl ? landmarkEl.value.trim() : "";
-    const title = titleEl ? titleEl.value.trim() : "Heritage Site";
-    const ritual = ritualEl ? ritualEl.value.trim() : "";
-    const coordsRaw = coordsEl ? coordsEl.value.trim() : "";
-    const urlImage = urlImageEl ? urlImageEl.value.trim() : "";
-    const desc = descEl ? descEl.value.trim() : "";
-
-    // 1. फ़ोटो चुनाव व ऑटो कम्प्रेशन
-    let rawImage = adminUploadedBase64 || urlImage || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
-    let finalImage = rawImage;
+    let finalImage = adminUploadedBase64 || urlImage || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     if (adminUploadedBase64 && adminUploadedBase64.startsWith("data:image")) {
-      finalImage = await compressImageToDataURL(adminUploadedBase64, 640, 0.65);
+      finalImage = await compressImage(adminUploadedBase64, 800, 0.65);
     }
 
-    // 2. कोऑर्डिनेट्स पार्सिंग
     let coords = [26.1245, 85.3902];
-    if (coordsRaw && coordsRaw.includes(",")) {
+    if (coordsRaw.includes(",")) {
       const parts = coordsRaw.split(",");
-      const lat = parseFloat(parts[0].trim());
-      const lng = parseFloat(parts[1].trim());
-      if (!isNaN(lat) && !isNaN(lng)) {
-        coords = [lat, lng];
-      }
+      coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
     }
 
-    // 3. ID लॉकिंग (गरीबनाथ को हमेशा muz_1 पर लॉक रखें ताकि डुप्लीकेट न बने)
-    const isGaribnath = (dist === "muzaffarpur" && title.toLowerCase().includes("garibnath"));
-    const targetId = isGaribnath ? "muz_1" : `rec_${Date.now()}`;
+    // डॉक्यूमेंट आईडी सीधे नाम से बनेगी
+    const cleanDocName = title.trim().replace(/\s+/g, "_");
+    const targetId = (dist === "muzaffarpur" && title.toLowerCase().includes("garibnath")) ? "muz_1" : cleanDocName;
 
     const newRecord = {
       id: targetId,
+      name: title,
+      state: stateVal,
       district: dist,
       village: village,
       landmark: landmark,
       coords: coords,
       image: finalImage,
-      source: "Admin Verified",
-      riskScore: "Preserved (Active)",
+      imageUrl: finalImage,
+      story: desc,
+      livingCulture: ritual,
+      category: "धार्मिक स्थल / हेरिटेज",
+      riskScore: "Verified Landmark",
       riskClass: "risk-mod",
       artisanPhone: "919876543210",
+      createdAt: new Date().toLocaleString(),
       content: {
         "en-IN": {
           title: title,
@@ -797,77 +800,66 @@ async function handleAdminSubmit(e) {
       }
     };
 
-    // 4. पुराने सभी डुप्लीकेट्स हटाकर केवल एक साफ़ रिकॉर्ड रखें
+    // 1. Firebase में नाम से सुरक्षित करें
+    if (window.saveToFirestoreNamed) {
+      await window.saveToFirestoreNamed(cleanDocName, newRecord);
+    }
+
+    // 2. LocalStorage अपडेट करें (डुप्लीकेट हटाकर)
     let customRecords = getCustomRecords();
-    customRecords = customRecords.filter(c => {
-      const cTitle = (c.content && c.content["hi-IN"] && c.content["hi-IN"].title) 
-        || (c.content && c.content["en-IN"] && c.content["en-IN"].title) 
-        || c.title || "";
-      const isSame = (c.id === targetId) || (cTitle.toLowerCase().trim() === title.toLowerCase().trim());
-      return !isSame;
-    });
+    customRecords = customRecords.filter(c => c.id !== targetId && (c.name || "").toLowerCase() !== title.toLowerCase());
     customRecords.unshift(newRecord);
 
-    // 5. सेफ़ LocalStorage राइट
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
-    } catch (quotaErr) {
-      // यदि अभी भी स्टोरेज भरा हो तो कैश खाली करके तुरंत सेव करें
+    } catch (storageErr) {
       localStorage.removeItem("vratyavani_firebase_records");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
     }
 
-    // 6. फ़ायरबेस सिंक (बैकग्राउंड में बिना रुकावट)
-    if (window.saveToFirestore) {
-      window.saveToFirestore(newRecord).catch(() => {});
-    }
-
-    alert(`🎉 प्रकाशित: "${title}" का विवरण सफलतापूर्वक अपडेट हो गया है!`);
-
-    // फ़ॉर्म साफ़ और क्लोज़
-    const addForm = document.getElementById("addRecordForm");
-    if (addForm) addForm.reset();
+    alert(`🎉 प्रकाशित: "${title}" अब Firebase में सीधे नाम (${cleanDocName}) और State (${stateVal}) के साथ सुरक्षित हो गया है!`);
+    
+    e.target.reset();
     adminUploadedBase64 = null;
     const pBox = document.getElementById("adminImagePreviewBox");
     if (pBox) pBox.style.display = "none";
-
+    
     closeAdminPanelModal();
     loadDistrictData(window.currentDistrict);
 
   } catch (err) {
-    console.error("Critical Admin Submit Error:", err);
+    console.error("Admin submit error:", err);
     alert("सबमिट करने में त्रुटि: " + err.message);
   }
 }
 
-window.deleteCustomRecord = async function(recordIndex) {
-  if (!confirm("क्या आप इसे हटाना चाहते हैं?")) return;
-  const customRecords = getCustomRecords();
-  customRecords.splice(recordIndex, 1);
+window.deleteCustomRecord = async function(docId) {
+  if (!confirm("क्या आप इस रिकॉर्ड को हटाना चाहते हैं?")) return;
+  let customRecords = getCustomRecords();
+  customRecords = customRecords.filter(c => c.id !== docId);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
+
+  if (window.deleteFromFirestore) {
+    await window.deleteFromFirestore(docId);
+  }
+
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
 
-// ---------------- 7. मोबाइल टैब नेविगेशन ---------------- //
 function switchMobileTab(tab) {
-  const bHome = document.getElementById("btnNavHome");
-  const bMap = document.getElementById("btnNavMap");
-  const hView = document.getElementById("homeView");
-  const mView = document.getElementById("mapView");
-
-  if (bHome) bHome.classList.remove("active");
-  if (bMap) bMap.classList.remove("active");
+  document.getElementById("btnNavHome").classList.remove("active");
+  document.getElementById("btnNavMap").classList.remove("active");
 
   if (tab === 'home') {
-    if (bHome) bHome.classList.add("active");
-    if (hView) hView.style.display = "block";
-    if (mView) mView.style.display = "none";
+    document.getElementById("btnNavHome").classList.add("active");
+    document.getElementById("homeView").style.display = "block";
+    document.getElementById("mapView").style.display = "none";
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else if (tab === 'map') {
-    if (bMap) bMap.classList.add("active");
-    if (hView) hView.style.display = "none";
-    if (mView) mView.style.display = "block";
+    document.getElementById("btnNavMap").classList.add("active");
+    document.getElementById("homeView").style.display = "none";
+    document.getElementById("mapView").style.display = "block";
 
     setTimeout(() => {
       if (window.mapInstance) {
@@ -875,6 +867,12 @@ function switchMobileTab(tab) {
       }
     }, 150);
   }
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
 
 function updateNetworkStatus() {
