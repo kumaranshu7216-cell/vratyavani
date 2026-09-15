@@ -1,5 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
+ * Real Proximity Fallback, Dual Audio Player & Citizen Workflow
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -7,7 +8,7 @@ window.currentLanguage = "en-IN";
 window.mapInstance = null;
 let mapMarkers = [];
 let activeAudioItem = null;
-let activeAudioMode = "heritage"; // 'heritage' or 'culture'
+let activeAudioMode = "heritage";
 let pannellumViewerInstance = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 
@@ -64,12 +65,14 @@ function startAppFlow() {
   populatePanIndiaStateDropdowns();
   setTimeout(() => {
     const splash = document.getElementById("splashScreen");
-    splash.style.opacity = "0";
-    splash.style.transform = "scale(1.08)";
-    setTimeout(() => {
-      splash.style.display = "none";
-      document.getElementById("locationModal").style.display = "flex";
-    }, 700);
+    if (splash) {
+      splash.style.opacity = "0";
+      splash.style.transform = "scale(1.08)";
+      setTimeout(() => {
+        splash.style.display = "none";
+        document.getElementById("locationModal").style.display = "flex";
+      }, 700);
+    }
   }, 1200);
 }
 
@@ -95,50 +98,31 @@ function confirmLocationSelection() {
   window.onDistrictChange(distKey);
 }
 
-// Proximity Auto-Radar
+// Fixed Safe Proximity Radar Engine
 window.detectNearbyHeritageRadar = function() {
-  const fallbackCoords = districtCentres[window.currentDistrict] || [26.1245, 85.3902];
+  const currentKey = window.currentDistrict.toLowerCase();
+  const fallbackCoords = districtCentres[currentKey] || [26.1245, 85.3902];
 
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        let lat = pos.coords.latitude;
-        let lng = pos.coords.longitude;
+  switchMobileTab('map');
 
-        if (window.currentDistrict === "muzaffarpur" && (lng > 88.0 || lng < 83.0)) {
-          lat = fallbackCoords[0];
-          lng = fallbackCoords[1];
-        }
+  setTimeout(() => {
+    window.mapInstance.invalidateSize();
+    window.mapInstance.setView(fallbackCoords, 14, { animate: true, duration: 1.2 });
 
-        switchMobileTab('map');
-        setTimeout(() => {
-          window.mapInstance.invalidateSize();
-          window.mapInstance.flyTo([lat, lng], 14);
+    if (window.userRadarMarker) {
+      window.mapInstance.removeLayer(window.userRadarMarker);
+    }
 
-          const userLocMarker = L.circleMarker([lat, lng], {
-            radius: 10,
-            color: '#38bdf8',
-            fillColor: '#0284c7',
-            fillOpacity: 0.9
-          }).addTo(window.mapInstance);
+    window.userRadarMarker = L.circleMarker(fallbackCoords, {
+      radius: 11,
+      color: '#0284c7',
+      fillColor: '#38bdf8',
+      fillOpacity: 0.9,
+      weight: 3
+    }).addTo(window.mapInstance);
 
-          userLocMarker.bindPopup(`📍 <strong>Current Radar Location</strong><br><small>${window.currentDistrict.toUpperCase()}</small>`).openPopup();
-          alert(`📡 Radar Active: Located near ${window.currentDistrict.toUpperCase()} Heritage Cluster.`);
-        }, 300);
-      },
-      () => {
-        switchMobileTab('map');
-        setTimeout(() => {
-          window.mapInstance.invalidateSize();
-          window.mapInstance.flyTo(fallbackCoords, 14);
-          alert(`📡 Radar: Centered on ${window.currentDistrict.toUpperCase()} heritage sanctum.`);
-        }, 300);
-      }
-    );
-  } else {
-    switchMobileTab('map');
-    window.mapInstance.flyTo(fallbackCoords, 14);
-  }
+    window.userRadarMarker.bindPopup(`📍 <strong>Current Radar Focus</strong><br><span style="color:#d97706; font-weight:bold;">${currentKey.toUpperCase()}</span>`).openPopup();
+  }, 200);
 };
 
 const i18n = {
@@ -328,7 +312,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- UNIFIED CARD RENDERING (HERITAGE + LIVING CULTURE TOGETHER) ---------------- //
+// ---------------- UNIFIED CARD RENDERING (HERITAGE + LIVING CULTURE) ---------------- //
 
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
@@ -368,17 +352,14 @@ function renderCards(preloadedItems) {
           </div>
           ${item.village ? `<div style="font-size:11px; color:#c2410c; font-weight:700;">📍 ${item.village}</div>` : ''}
           
-          <!-- Pillar 1: Tangible Heritage -->
           <div class="heritage-block">
             <strong>🏛️ Heritage Landmark:</strong> ${locContent.heritageDesc || locContent.desc}
           </div>
 
-          <!-- Pillar 2: Intangible Living Culture & Rituals -->
           <div class="culture-block">
             <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || locContent.cultureRitual || 'Local oral folk practices & sacred community traditions.'}
           </div>
 
-          <!-- Dual Audio Narrator Buttons -->
           <div class="dual-audio-btns">
             <button class="btn-audio-pill btn-audio-hist" onclick="selectUnifiedAudio('${item.id}', 'heritage')">
               ${t.btnListenHist}
@@ -402,7 +383,7 @@ function renderCards(preloadedItems) {
   });
 }
 
-// ---------------- DUAL AUDIO SELECTOR ENGINE ---------------- //
+// ---------------- DUAL AUDIO SELECTOR & PLAYER ENGINE ---------------- //
 
 function selectUnifiedAudio(itemId, mode) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
@@ -459,6 +440,8 @@ function togglePlayVoice() {
   }
 }
 
+// ---------------- STABLE 360 PANORAMA VIEWER ---------------- //
+
 function open360Viewer(itemId) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   try {
@@ -472,22 +455,29 @@ function open360Viewer(itemId) {
 
   const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title });
 
-  document.getElementById("panoTitle").innerText = `360° Panorama: ${locContent.title}`;
+  document.getElementById("panoTitle").innerText = `360° View: ${locContent.title}`;
   document.getElementById("panoramaModal").style.display = "flex";
 
   if (pannellumViewerInstance) {
     try { pannellumViewerInstance.destroy(); } catch(e) {}
+    pannellumViewerInstance = null;
   }
 
   setTimeout(() => {
-    pannellumViewerInstance = pannellum.viewer('panoramaContainer', {
-      type: 'equirectangular',
-      panorama: item.image,
-      autoLoad: true,
-      autoRotate: -2,
-      compass: true
-    });
-  }, 150);
+    try {
+      pannellumViewerInstance = pannellum.viewer('panoramaContainer', {
+        type: 'equirectangular',
+        panorama: item.image,
+        autoLoad: true,
+        autoRotate: -1.5,
+        showZoomCtrl: true,
+        showFullscreenCtrl: true,
+        compass: false
+      });
+    } catch (err) {
+      console.error("360 Load error:", err);
+    }
+  }, 200);
 }
 
 function closePanoramaModal(e) {
@@ -525,7 +515,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- CITIZEN & ADMIN WORKFLOW ---------------- //
+// ---------------- CITIZEN & ADMIN SUBMISSION ENGINE ---------------- //
 
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
@@ -844,7 +834,7 @@ function switchMobileTab(tab) {
     document.getElementById("btnNavMap").classList.add("active");
     document.getElementById("homeView").style.display = "none";
     document.getElementById("mapView").style.display = "block";
-    
+
     setTimeout(() => {
       if (window.mapInstance) {
         window.mapInstance.invalidateSize();
