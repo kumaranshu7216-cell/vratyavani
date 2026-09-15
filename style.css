@@ -197,31 +197,30 @@ body {
   padding: 12px;
 }
 
-.category-tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-  overflow-x: auto;
+/* State Cultural Background Wallpaper */
+#homeView {
+  position: relative;
+  min-height: 80vh;
+  border-radius: 14px;
+  overflow: hidden;
 }
-.category-tabs::-webkit-scrollbar { display: none; }
 
-.tab-btn {
-  padding: 6px 12px;
-  border: 1px solid var(--border-color);
-  background: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 11px;
-  color: var(--text-muted);
-  white-space: nowrap;
+#homeView::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+  transition: background-image 0.8s ease-in-out;
 }
-.tab-btn.active, .tab-btn:hover {
-  background: var(--primary-deep);
-  color: #fff;
-  border-color: var(--primary-deep);
+
+.cards-grid, .voice-console {
+  position: relative;
+  z-index: 1;
 }
 
 .cards-grid {
@@ -233,12 +232,13 @@ body {
   .cards-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 }
 
-.heritage-card {
-  background: var(--card-bg);
+/* Unified Card Styling */
+.unified-card {
+  background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
 }
@@ -246,13 +246,13 @@ body {
 .card-image-wrap {
   position: relative;
   width: 100%;
-  height: 180px;
+  height: 200px;
 }
-.card-image-wrap img {
+.heritage-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-color: #e2e8f0;
+  background-color: #cbd5e1;
 }
 .btn-view360-badge {
   position: absolute;
@@ -272,32 +272,59 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.card-content {
-  padding: 12px;
+.card-dual-content {
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  gap: 8px;
 }
-.card-tag {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--accent-terracotta);
-  margin-bottom: 2px;
+
+.heritage-block {
+  border-left: 3px solid var(--primary-deep);
+  padding-left: 10px;
+  font-size: 12px;
+  color: #334155;
 }
+.culture-block {
+  border-left: 3px solid #c026d3;
+  background: #fdf4ff;
+  padding: 8px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: 11px;
+  color: #701a75;
+  line-height: 1.4;
+}
+
 .risk-badge {
   font-size: 9px;
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 4px;
   text-transform: uppercase;
-  margin-left: auto;
 }
 .risk-high { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
 .risk-mod { background: #fef3c7; color: #92400e; border: 1px solid #fde047; }
 
-.card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.card-desc { font-size: 12px; color: var(--text-muted); flex-grow: 1; margin-bottom: 10px; }
+.dual-audio-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+}
+.btn-audio-pill {
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.btn-audio-hist { background: #fef3c7; color: #92400e; }
+.btn-audio-cult { background: #fae8ff; color: #86198f; }
 
 .card-actions { display: flex; gap: 6px; }
 .btn-sm {
@@ -315,8 +342,8 @@ body {
   justify-content: center;
   gap: 4px;
 }
-.btn-listen { background: #fef3c7; color: #92400e; }
 .btn-locate { background: #e0e7ff; color: #3730a3; }
+.btn-artisan-wa { background: #dcfce7; color: #166534; }
 
 /* Map View */
 #mapView { display: none; }
@@ -448,7 +475,7 @@ body {
   padding: 18px;
   border-radius: 14px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   position: relative;
   max-height: 90vh;
   overflow-y: auto;

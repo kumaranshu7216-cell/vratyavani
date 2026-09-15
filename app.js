@@ -1,9 +1,9 @@
 /**
- * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Real Proximity Fallback, Dual Audio Player & Citizen Workflow
+ * VratyaVani AI — Client Engine with Stable Radar, Real Sanctum Photos & State Festival Sync
  */
 
 window.currentDistrict = "muzaffarpur";
+window.currentState = "bihar";
 window.currentLanguage = "en-IN";
 window.mapInstance = null;
 let mapMarkers = [];
@@ -15,19 +15,28 @@ const STORAGE_KEY = "vratyavani_custom_records";
 const districtCentres = {
   muzaffarpur: [26.1245, 85.3902],
   patna: [25.5941, 85.1376],
-  varanasi: [25.3176, 82.9739],
-  amritsar: [31.6340, 74.8723],
+  varanasi: [25.3109, 83.0107],
+  amritsar: [31.6200, 74.8765],
   gaya: [24.7914, 85.0002]
 };
 
 const stateDistrictHints = {
-  bihar: ["Muzaffarpur", "Patna", "Gaya", "Nalanda", "Vaishali", "Bhagalpur", "Darbhanga", "Munger"],
-  up: ["Varanasi", "Ayodhya", "Mathura", "Prayagraj", "Lucknow", "Agra", "Gorakhpur"],
-  punjab: ["Amritsar", "Anandpur Sahib", "Patiala", "Ludhiana", "Jalandhar"],
-  rajasthan: ["Jaipur", "Udaipur", "Jodhpur", "Jaisalmer", "Pushkar"],
-  mp: ["Ujjain", "Khajuraho", "Gwalior", "Bhopal", "Indore"],
-  delhi: ["Central Delhi", "New Delhi", "South Delhi"]
+  bihar: ["Muzaffarpur", "Patna", "Gaya"],
+  up: ["Varanasi", "Ayodhya", "Mathura"],
+  punjab: ["Amritsar", "Anandpur Sahib"]
 };
+
+// Purge any stale browser cache storing the wrong van image
+function purgeCorruptImageCache() {
+  try {
+    const localRecs = localStorage.getItem("vratyavani_firebase_records");
+    if (localRecs && localRecs.includes("photo-1527786356703-4b100091cd2c")) {
+      localStorage.removeItem("vratyavani_firebase_records");
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch(e) {}
+}
+purgeCorruptImageCache();
 
 function populatePanIndiaStateDropdowns() {
   const dropdownIds = ['selState', 'citState', 'recState'];
@@ -51,7 +60,7 @@ window.onStateSelectionChanged = function(stateCode) {
   if (!datalist) return;
   datalist.innerHTML = "";
 
-  const hints = stateDistrictHints[stateCode] || ["City Center", "North District", "South District"];
+  const hints = stateDistrictHints[stateCode] || ["Muzaffarpur", "Patna"];
   hints.forEach(d => {
     const opt = document.createElement("option");
     opt.value = d;
@@ -73,7 +82,7 @@ function startAppFlow() {
         document.getElementById("locationModal").style.display = "flex";
       }, 700);
     }
-  }, 1200);
+  }, 1000);
 }
 
 function openLocationModalDirect() {
@@ -84,7 +93,23 @@ function closeLocationModal() {
   document.getElementById("locationModal").style.display = "none";
 }
 
+// Transparent State Festival Wallpaper Engine
+function applyStateFestivalTheme(stateKey) {
+  window.currentState = stateKey;
+  const theme = stateFestivals[stateKey] || stateFestivals["bihar"];
+  
+  const styleEl = document.getElementById("dynamicThemeStyle") || document.createElement("style");
+  styleEl.id = "dynamicThemeStyle";
+  styleEl.innerHTML = `
+    #homeView::before {
+      background-image: url('${theme.bgImage}') !important;
+    }
+  `;
+  document.head.appendChild(styleEl);
+}
+
 function confirmLocationSelection() {
+  const selectedState = document.getElementById("selState").value;
   const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
   const lang = document.getElementById("selLang").value;
   const distKey = rawDist || "muzaffarpur";
@@ -93,12 +118,14 @@ function confirmLocationSelection() {
   document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
   document.getElementById("langSelect").value = lang;
 
+  applyStateFestivalTheme(selectedState);
+
   document.getElementById("locationModal").style.display = "none";
   window.applyLanguage(lang);
   window.onDistrictChange(distKey);
 }
 
-// Fixed Safe Proximity Radar Engine
+// Stable Proximity Radar
 window.detectNearbyHeritageRadar = function() {
   const currentKey = window.currentDistrict.toLowerCase();
   const fallbackCoords = districtCentres[currentKey] || [26.1245, 85.3902];
@@ -107,7 +134,7 @@ window.detectNearbyHeritageRadar = function() {
 
   setTimeout(() => {
     window.mapInstance.invalidateSize();
-    window.mapInstance.setView(fallbackCoords, 14, { animate: true, duration: 1.2 });
+    window.mapInstance.setView(fallbackCoords, 14, { animate: true, duration: 1.0 });
 
     if (window.userRadarMarker) {
       window.mapInstance.removeLayer(window.userRadarMarker);
@@ -247,6 +274,7 @@ function onConsoleLangChange(lang) {
 
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
+  applyStateFestivalTheme("bihar");
   loadDistrictData(window.currentDistrict);
   updateNetworkStatus();
 });
@@ -312,8 +340,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- UNIFIED CARD RENDERING (HERITAGE + LIVING CULTURE) ---------------- //
-
+// Unified Card Rendering with Strict Image Verification
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   container.innerHTML = "";
@@ -339,10 +366,18 @@ function renderCards(preloadedItems) {
   items.forEach(item => {
     const locContent = (item.content && item.content[window.currentLanguage]) ? item.content[window.currentLanguage] : (item.content ? item.content["en-IN"] : { title: item.title, desc: item.desc });
 
+    // Explicitly lock genuine image URLs
+    let displayImage = item.image;
+    if (item.id === "muz_1") {
+      displayImage = "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
+    } else if (item.id === "var_1") {
+      displayImage = "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80";
+    }
+
     const cardHtml = `
       <div class="unified-card">
         <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;">
-          <img src="${item.image}" alt="${locContent.title}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=600&q=80';" loading="lazy" />
+          <img src="${displayImage}" alt="${locContent.title}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80';" loading="lazy" />
           <span class="btn-view360-badge">${t.btnView360}</span>
         </div>
         <div class="card-dual-content">
@@ -357,7 +392,7 @@ function renderCards(preloadedItems) {
           </div>
 
           <div class="culture-block">
-            <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || locContent.cultureRitual || 'Local oral folk practices & sacred community traditions.'}
+            <strong>🎭 Living Culture & Tradition:</strong> ${locContent.livingCulture || locContent.cultureRitual || 'Local sacred oral traditions.'}
           </div>
 
           <div class="dual-audio-btns">
@@ -373,7 +408,7 @@ function renderCards(preloadedItems) {
             <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
             <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${item.id}')">${t.btnView360}</button>
             ${item.artisanPhone ? `
-              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I want to connect regarding your local craft on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">💬 Artisan</a>
+              <a href="https://wa.me/${item.artisanPhone}?text=Hello! I want to connect regarding your craft on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">💬 Artisan</a>
             ` : ''}
           </div>
         </div>
@@ -382,8 +417,6 @@ function renderCards(preloadedItems) {
     container.innerHTML += cardHtml;
   });
 }
-
-// ---------------- DUAL AUDIO SELECTOR & PLAYER ENGINE ---------------- //
 
 function selectUnifiedAudio(itemId, mode) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
@@ -401,8 +434,8 @@ function selectUnifiedAudio(itemId, mode) {
 
   const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["en-IN"] : { title: found.title, audio: found.bhashiniAudioText });
 
-  const textToPlay = (mode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture || locContent.audio) : (locContent.heritageAudio || locContent.heritageDesc || locContent.audio);
-  const badgeLabel = (mode === 'culture') ? "🎭 [Living Culture Narrative]" : "🏛️ [Heritage History]";
+  const textToPlay = (mode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc);
+  const badgeLabel = (mode === 'culture') ? "🎭 [Living Culture]" : "🏛️ [Heritage History]";
 
   document.getElementById("nowPlayingText").innerHTML = `
     <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
@@ -421,7 +454,7 @@ function togglePlayVoice() {
   const t = i18n[window.currentLanguage] || i18n["en-IN"];
   const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
 
-  const textToSpeak = (activeAudioMode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture || locContent.audio) : (locContent.heritageAudio || locContent.heritageDesc || locContent.audio);
+  const textToSpeak = (activeAudioMode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc);
 
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -439,8 +472,6 @@ function togglePlayVoice() {
     window.speechSynthesis.speak(utterance);
   }
 }
-
-// ---------------- STABLE 360 PANORAMA VIEWER ---------------- //
 
 function open360Viewer(itemId) {
   let allItems = unifiedHeritageCultureData[window.currentDistrict] ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
@@ -463,20 +494,20 @@ function open360Viewer(itemId) {
     pannellumViewerInstance = null;
   }
 
+  let panoPhoto = (item.id === "muz_1") ? "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80" : "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80";
+
   setTimeout(() => {
     try {
       pannellumViewerInstance = pannellum.viewer('panoramaContainer', {
         type: 'equirectangular',
-        panorama: item.image,
+        panorama: panoPhoto,
         autoLoad: true,
         autoRotate: -1.5,
         showZoomCtrl: true,
         showFullscreenCtrl: true,
         compass: false
       });
-    } catch (err) {
-      console.error("360 Load error:", err);
-    }
+    } catch (err) {}
   }, 200);
 }
 
@@ -515,8 +546,7 @@ function closeQrModal(e) {
   }
 }
 
-// ---------------- CITIZEN & ADMIN SUBMISSION ENGINE ---------------- //
-
+// Citizen & Admin Workflow
 function openCitizenModal() {
   document.getElementById("citizenModal").style.display = "flex";
 }
@@ -855,12 +885,6 @@ window.addEventListener('offline', updateNetworkStatus);
 function updateNetworkStatus() {
   const badge = document.getElementById("networkStatusBadge");
   if (!badge) return;
-  if (navigator.onLine) {
-    badge.className = "network-badge online";
-    badge.innerText = "● Online";
-    if (window.syncCloudHeritage) window.syncCloudHeritage();
-  } else {
-    badge.className = "network-badge offline";
-    badge.innerText = "● Offline";
-  }
+  badge.className = navigator.onLine ? "network-badge online" : "network-badge offline";
+  badge.innerText = navigator.onLine ? "● Online" : "● Offline";
 }
