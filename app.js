@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Final Unified Fix: Dynamic 360 Photo Sync, Correct Audio Binding & Multi-Language UI
+ * Final Resolved Architecture: Dynamic Multi-Language Cards, 360 Photo Sync & Instant TTS Audio
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -27,7 +27,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// ---------------- 5-LANGUAGE UI TRANSLATION DICTIONARY ---------------- //
+// ---------------- UI MULTI-LANGUAGE STRINGS ---------------- //
 const uiStrings = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -86,7 +86,7 @@ const uiStrings = {
     btnRadar: "📡 ਨੇੜਲਾ ਰਡਾਰ",
     btnCitizen: "➕ ਵਿਰਾਸਤ ਜੋੜੋ",
     emptyMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
-    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣकारी:",
+    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
     cultureLabel: "🎭 ਜਿਉਂਦੀ ਪਰੰਪਰਾ:"
   },
   "bho-IN": {
@@ -140,7 +140,7 @@ function cleanStorageDuplicates() {
         const seen = new Set();
         const unique = [];
         for (let r of records) {
-          const title = r.name || (r.content && (r.content["hi-IN"] || r.content["en-IN"])?.title) || r.title || r.id;
+          const title = r.name || r.title || (r.content && (r.content["hi-IN"] || r.content["en-IN"])?.title) || r.id;
           const key = (r.district || "") + "_" + String(title).trim().toLowerCase();
           if (!seen.has(key)) {
             seen.add(key);
@@ -232,8 +232,10 @@ function confirmLocationSelection() {
   const lang = document.getElementById("selLang").value;
   const distKey = rawDist || "muzaffarpur";
 
+  window.currentLanguage = lang;
   document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
   document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
+  
   const consoleLangSelect = document.getElementById("langSelect");
   if (consoleLangSelect) consoleLangSelect.value = lang;
 
@@ -375,11 +377,14 @@ window.loadDistrictData = function(districtKey) {
 
   if (items.length > 0) {
     items.forEach(item => {
-      const langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || item.content?.["en-IN"] || {
-        title: item.name || item.title || "Heritage Site",
-        heritageDesc: item.story || item.desc || "Historical monument.",
-        livingCulture: item.livingCulture || "Local sacred ritual."
-      };
+      let langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || item.content?.["en-IN"];
+      if (!langContent || !langContent.title) {
+        langContent = {
+          title: item.name || item.title || "Heritage Site",
+          heritageDesc: item.story || item.desc || "Historical monument.",
+          livingCulture: item.livingCulture || "Local sacred ritual."
+        };
+      }
 
       const marker = L.marker(item.coords).addTo(window.mapInstance);
       marker.bindPopup(`
@@ -404,7 +409,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- RENDER CARDS (FIXED UNIQUE ID BINDING) ---------------- //
+// ---------------- RENDER CARDS WITH ROBUST LANGUAGE & ID SYNC ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -442,11 +447,15 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    let langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || item.content?.["en-IN"] || {
-      title: item.name || item.title || "Heritage Site",
-      heritageDesc: item.story || item.desc || "Historical monument.",
-      livingCulture: item.livingCulture || "Local sacred ritual."
-    };
+    // Exact language lookup with robust fallback to hi-IN or en-IN or direct properties
+    let langContent = item.content?.[window.currentLanguage];
+    if (!langContent || !langContent.title) {
+      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || {
+        title: item.name || item.title || "Heritage Site",
+        heritageDesc: item.story || item.desc || "Historical monument.",
+        livingCulture: item.livingCulture || "Local sacred ritual."
+      };
+    }
 
     let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
@@ -502,7 +511,7 @@ function renderCards(preloadedItems) {
   });
 }
 
-// ---------------- 1-CLICK INSTANT AUDIO & 360 PHOTO SYNC ENGINE ---------------- //
+// ---------------- 1-CLICK INSTANT AUDIO & 360 PHOTO SYNC ---------------- //
 
 function selectUnifiedAudio(itemId, mode) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
@@ -510,21 +519,24 @@ function selectUnifiedAudio(itemId, mode) {
   let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
   let allItems = [...firebaseRecs, ...custom, ...baseItems];
 
-  const found = allItems.find(i => (i.id === itemId || i.name === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
+  const found = allItems.find(i => (i.id === itemId || i.name === itemId || i.title === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!found) return;
 
   activeAudioItem = found;
   activeAudioMode = mode;
 
-  const langContent = found.content?.[window.currentLanguage] || found.content?.["hi-IN"] || found.content?.["en-IN"] || {
-    title: found.name || found.title,
-    heritageDesc: found.story || found.desc,
-    livingCulture: found.livingCulture
-  };
+  let langContent = found.content?.[window.currentLanguage];
+  if (!langContent || !langContent.title) {
+    langContent = found.content?.["hi-IN"] || found.content?.["en-IN"] || {
+      title: found.name || found.title,
+      heritageDesc: found.story || found.desc,
+      livingCulture: found.livingCulture
+    };
+  }
 
   const textToPlay = (mode === 'culture') 
-    ? (langContent.cultureAudio || langContent.livingCulture || found.livingCulture) 
-    : (langContent.heritageAudio || langContent.heritageDesc || found.story);
+    ? (langContent.cultureAudio || langContent.livingCulture || found.livingCulture || "Local cultural ritual.") 
+    : (langContent.heritageAudio || langContent.heritageDesc || found.story || found.desc || "Historical monument overview.");
     
   const badgeLabel = (mode === 'culture') ? "🎭 [जीवंत संस्कृति]" : "🏛️ [इतिहास]";
 
@@ -597,18 +609,18 @@ function togglePlayVoice() {
   } else {
     const langContent = activeAudioItem.content?.[window.currentLanguage] || activeAudioItem.content?.["hi-IN"] || activeAudioItem.content?.["en-IN"] || {};
     const textToSpeak = (activeAudioMode === 'culture') ? (langContent.cultureAudio || langContent.livingCulture) : (langContent.heritageAudio || langContent.heritageDesc);
-    playAudioDirectly(textToSpeak);
+    playAudioDirectly(textToSpeak || "Information not available.");
   }
 }
 
-// 360° Viewer with Admin Uploaded Image Sync
+// 360 Viewer with exact item match
 function open360Viewer(itemId) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
   let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
   let allItems = [...firebaseRecs, ...custom, ...baseItems];
 
-  const item = allItems.find(i => (i.id === itemId || i.name === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
+  const item = allItems.find(i => (i.id === itemId || i.name === itemId || i.title === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!item) return;
 
   const langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || { title: item.name || item.title };
