@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Deduplication Filter, Safe Named Firestore Engine & Smooth Radar
+ * Features: 1-Click Instant Audio Play, Smooth Auto-Scroll, Deduplication & Named Firestore
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -27,7 +27,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// पुराने डुप्लीकेट्स को हटाने वाला क्लीनर
+// Purane duplicates ko clean karne ka logic
 function cleanStorageDuplicates() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -270,18 +270,18 @@ function getCustomRecords() {
   } catch (e) { return []; }
 }
 
-// डुप्लीकेट-प्रूफ डेटा लोडिंग इंजन
+// Deduplication Logic: Ek card do baar load nahi hoga
 window.loadDistrictData = function(districtKey) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[districtKey]) ? [...unifiedHeritageCultureData[districtKey]] : [];
 
   let mergedMap = new Map();
 
-  // 1. बेस आइटम्स जोड़ें
+  // 1. Base Items add karein
   baseItems.forEach(item => {
     mergedMap.set(item.id, item);
   });
 
-  // 2. कस्टम व फ़ायरबेस रिकॉर्ड्स से ओवरराइड करें (बिना डुप्लीकेट)
+  // 2. Custom/Firebase records se override karein
   try {
     const custom = getCustomRecords();
     const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
@@ -289,8 +289,14 @@ window.loadDistrictData = function(districtKey) {
 
     stored.forEach(c => {
       if (c.district && c.district.toLowerCase() === districtKey.toLowerCase()) {
-        const idKey = (districtKey === "muzaffarpur" && (c.name || "").toLowerCase().includes("garibnath")) ? "muz_1" : (c.id || c.name);
-        mergedMap.set(idKey, { ...c, id: idKey });
+        const titleLower = (c.name || (c.content && c.content["hi-IN"] && c.content["hi-IN"].title) || "").toLowerCase();
+        if (titleLower.includes("garibnath") || titleLower.includes("गरीबनाथ")) {
+          mergedMap.delete("muz_1");
+          mergedMap.set("muz_1", { ...c, id: "muz_1" });
+        } else {
+          const uniqueId = c.id || c.name || `rec_${Date.now()}`;
+          mergedMap.set(uniqueId, c);
+        }
       }
     });
   } catch (e) {}
@@ -326,7 +332,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// रेंडर कार्ड्स
+// Render Cards
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -345,8 +351,13 @@ function renderCards(preloadedItems) {
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
       [...firebaseRecs, ...custom].forEach(c => {
         if (c.district && c.district.toLowerCase() === window.currentDistrict.toLowerCase()) {
-          const idKey = (window.currentDistrict === "muzaffarpur" && (c.name || "").toLowerCase().includes("garibnath")) ? "muz_1" : (c.id || c.name);
-          map.set(idKey, { ...c, id: idKey });
+          const titleLower = (c.name || (c.content && c.content["hi-IN"] && c.content["hi-IN"].title) || "").toLowerCase();
+          if (titleLower.includes("garibnath") || titleLower.includes("गरीबनाथ")) {
+            map.delete("muz_1");
+            map.set("muz_1", { ...c, id: "muz_1" });
+          } else {
+            map.set(c.id || c.name, c);
+          }
         }
       });
     } catch(e) {}
@@ -413,6 +424,8 @@ function renderCards(preloadedItems) {
   });
 }
 
+// ---------------- 1-CLICK INSTANT AUTO-PLAY & AUTO-SCROLL ENGINE ---------------- //
+
 function selectUnifiedAudio(itemId, mode) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
@@ -424,46 +437,102 @@ function selectUnifiedAudio(itemId, mode) {
   activeAudioItem = found;
   activeAudioMode = mode;
 
-  const locContent = (found.content && found.content[window.currentLanguage]) ? found.content[window.currentLanguage] : (found.content ? found.content["hi-IN"] || found.content["en-IN"] : { title: found.name || found.title, audio: found.bhashiniAudioText });
+  const locContent = (found.content && found.content[window.currentLanguage]) 
+    ? found.content[window.currentLanguage] 
+    : (found.content ? (found.content["hi-IN"] || found.content["en-IN"]) : { title: found.name || found.title, audio: found.bhashiniAudioText });
 
-  const textToPlay = (mode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc || found.story);
+  const textToPlay = (mode === 'culture') 
+    ? (locContent.cultureAudio || locContent.livingCulture) 
+    : (locContent.heritageAudio || locContent.heritageDesc || found.story);
+    
   const badgeLabel = (mode === 'culture') ? "🎭 [जीवंत संस्कृति]" : "🏛️ [इतिहास]";
 
-  document.getElementById("nowPlayingText").innerHTML = `
-    <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
-    <em>"${textToPlay}"</em>
-  `;
+  // Console box mein text set karein
+  const nowPlayingEl = document.getElementById("nowPlayingText");
+  if (nowPlayingEl) {
+    nowPlayingEl.innerHTML = `
+      <strong>${locContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
+      <em>"${textToPlay}"</em>
+    `;
+  }
+
+  // 1. Screen ko smooth scroll karke audio player console par le jayein
+  const consoleBox = document.querySelector(".voice-console");
+  if (consoleBox) {
+    consoleBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // 2. Turant automatic audio play shuru karein bina alag se play dabaye
+  playAudioDirectly(textToPlay);
+}
+
+// Direct Speech Synthesis Player Function
+function playAudioDirectly(textToSpeak) {
+  if (!('speechSynthesis' in window)) {
+    alert("Aapke browser mein TTS audio support nahi hai.");
+    return;
+  }
+
+  // Pehle se chal rahe kisi bhi audio ko rokein
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(textToSpeak);
+  utterance.lang = window.currentLanguage || 'hi-IN';
+  utterance.rate = 0.93;
+  utterance.pitch = 1.0;
 
   const playBtn = document.getElementById("playAudioBtn");
-  if (playBtn) {
-    playBtn.disabled = false;
-    const t = i18n[window.currentLanguage] || i18n["en-IN"];
-    playBtn.innerText = t.btnPlay;
-  }
+
+  utterance.onstart = () => {
+    if (playBtn) {
+      playBtn.disabled = false;
+      playBtn.innerText = "⏹ चल रहा है...";
+      playBtn.style.background = "#ef4444";
+      playBtn.style.color = "#ffffff";
+    }
+  };
+
+  utterance.onend = () => {
+    if (playBtn) {
+      playBtn.innerText = "▶ पुनः सुनें (Replay)";
+      playBtn.style.background = "var(--accent-gold)";
+      playBtn.style.color = "#000000";
+    }
+  };
+
+  utterance.onerror = (e) => {
+    console.error("Speech Error:", e);
+    if (playBtn) {
+      playBtn.innerText = "▶ चलाएं (Play)";
+      playBtn.style.background = "var(--accent-gold)";
+      playBtn.style.color = "#000000";
+    }
+  };
+
+  window.speechSynthesis.speak(utterance);
 }
 
 function togglePlayVoice() {
   if (!activeAudioItem) return;
 
-  const t = i18n[window.currentLanguage] || i18n["en-IN"];
-  const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) ? activeAudioItem.content[window.currentLanguage] : (activeAudioItem.content ? activeAudioItem.content["hi-IN"] || activeAudioItem.content["en-IN"] : { audio: activeAudioItem.bhashiniAudioText });
-
-  const textToSpeak = (activeAudioMode === 'culture') ? (locContent.cultureAudio || locContent.livingCulture) : (locContent.heritageAudio || locContent.heritageDesc || activeAudioItem.story);
-
-  if ('speechSynthesis' in window) {
+  if (window.speechSynthesis.speaking) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = window.currentLanguage;
-    utterance.rate = 0.92;
+    const playBtn = document.getElementById("playAudioBtn");
+    if (playBtn) {
+      playBtn.innerText = "▶ चलाएं (Play)";
+      playBtn.style.background = "var(--accent-gold)";
+      playBtn.style.color = "#000000";
+    }
+  } else {
+    const locContent = (activeAudioItem.content && activeAudioItem.content[window.currentLanguage]) 
+      ? activeAudioItem.content[window.currentLanguage] 
+      : (activeAudioItem.content ? (activeAudioItem.content["hi-IN"] || activeAudioItem.content["en-IN"]) : { audio: activeAudioItem.bhashiniAudioText });
 
-    utterance.onstart = () => {
-      document.getElementById("playAudioBtn").innerText = t.btnStop;
-    };
-    utterance.onend = () => {
-      document.getElementById("playAudioBtn").innerText = t.btnReplay;
-    };
+    const textToSpeak = (activeAudioMode === 'culture') 
+      ? (locContent.cultureAudio || locContent.livingCulture) 
+      : (locContent.heritageAudio || locContent.heritageDesc || activeAudioItem.story);
 
-    window.speechSynthesis.speak(utterance);
+    playAudioDirectly(textToSpeak);
   }
 }
 
@@ -734,7 +803,7 @@ function compressImage(base64Str, maxWidth = 800, quality = 0.7) {
   });
 }
 
-// ---------------- VERIFY & PUBLISH LIVE (CRASH-PROOF & NAMED FIRESTORE) ---------------- //
+// ---------------- VERIFY & PUBLISH LIVE ENGINE ---------------- //
 
 async function handleAdminSubmit(e) {
   e.preventDefault();
@@ -761,7 +830,6 @@ async function handleAdminSubmit(e) {
       coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
     }
 
-    // डॉक्यूमेंट आईडी सीधे नाम से बनेगी
     const cleanDocName = title.trim().replace(/\s+/g, "_");
     const targetId = (dist === "muzaffarpur" && title.toLowerCase().includes("garibnath")) ? "muz_1" : cleanDocName;
 
@@ -800,12 +868,12 @@ async function handleAdminSubmit(e) {
       }
     };
 
-    // 1. Firebase में नाम से सुरक्षित करें
+    // 1. Firebase mein Named doc save karein
     if (window.saveToFirestoreNamed) {
       await window.saveToFirestoreNamed(cleanDocName, newRecord);
     }
 
-    // 2. LocalStorage अपडेट करें (डुप्लीकेट हटाकर)
+    // 2. LocalStorage update karein
     let customRecords = getCustomRecords();
     customRecords = customRecords.filter(c => c.id !== targetId && (c.name || "").toLowerCase() !== title.toLowerCase());
     customRecords.unshift(newRecord);
@@ -817,7 +885,7 @@ async function handleAdminSubmit(e) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
     }
 
-    alert(`🎉 प्रकाशित: "${title}" अब Firebase में सीधे नाम (${cleanDocName}) और State (${stateVal}) के साथ सुरक्षित हो गया है!`);
+    alert(`🎉 प्रकाशित: "${title}" सुरक्षित हो गया है!`);
     
     e.target.reset();
     adminUploadedBase64 = null;
