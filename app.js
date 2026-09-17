@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Complete Multi-Language UI Translation & Offline Map Fallback
+ * Final Unified Fix: Dynamic 360 Photo Sync, Correct Audio Binding & Multi-Language UI
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -86,7 +86,7 @@ const uiStrings = {
     btnRadar: "📡 ਨੇੜਲਾ ਰਡਾਰ",
     btnCitizen: "➕ ਵਿਰਾਸਤ ਜੋੜੋ",
     emptyMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
-    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
+    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣकारी:",
     cultureLabel: "🎭 ਜਿਉਂਦੀ ਪਰੰਪਰਾ:"
   },
   "bho-IN": {
@@ -269,7 +269,6 @@ window.detectNearbyHeritageRadar = function() {
   }, 200);
 };
 
-// ---------------- APPLY LANGUAGE TRANSLATIONS ---------------- //
 window.applyLanguage = function(langKey) {
   window.currentLanguage = langKey;
   const t = uiStrings[langKey] || uiStrings["hi-IN"];
@@ -313,19 +312,14 @@ document.addEventListener("DOMContentLoaded", () => {
   updateNetworkStatus();
 });
 
-// ---------------- MAP INITIALIZATION WITH OFFLINE TILE FALLBACK ---------------- //
 function initMap() {
   window.mapInstance = L.map('map').setView([26.1245, 85.3902], 13);
-  
-  // OpenStreetMap with error fallback so map never goes completely blank offline
   const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap | VratyaVani AI'
   }).addTo(window.mapInstance);
 
-  tileLayer.on('tileerror', function() {
-    // Offline fallback styling or silent catch
-  });
+  tileLayer.on('tileerror', function() {});
 }
 
 function onDistrictChange(districtKey) {
@@ -410,7 +404,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// Render Cards with Dynamic Multi-Language Strings
+// ---------------- RENDER CARDS (FIXED UNIQUE ID BINDING) ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -448,26 +442,22 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    // 1. Try exact language match
-    let langContent = item.content?.[window.currentLanguage];
-    
-    // 2. If not found in Punjabi/Maithili/Bhojpuri, fallback to Hindi or English
-    if (!langContent || !langContent.title) {
-      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || {
-        title: item.name || item.title || "Heritage Site",
-        heritageDesc: item.story || item.desc || "Historical monument.",
-        livingCulture: item.livingCulture || "Local sacred ritual."
-      };
-    }
+    let langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || item.content?.["en-IN"] || {
+      title: item.name || item.title || "Heritage Site",
+      heritageDesc: item.story || item.desc || "Historical monument.",
+      livingCulture: item.livingCulture || "Local sacred ritual."
+    };
 
     let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
-      displayImage = (item.district === "varanasi") ? "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80" : "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
+      displayImage = "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     }
+
+    const itemId = item.id || item.name || "item_" + Math.random();
 
     const cardHtml = `
       <div class="unified-card">
-        <div class="card-image-wrap" onclick="open360Viewer('${item.id}')" style="cursor:pointer;">
+        <div class="card-image-wrap" onclick="open360Viewer('${itemId}')" style="cursor:pointer;">
           <img src="${displayImage}" alt="${langContent.title}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80';" loading="lazy" />
           <span class="btn-view360-badge">🌐 360° View</span>
         </div>
@@ -490,17 +480,17 @@ function renderCards(preloadedItems) {
           </div>
 
           <div class="dual-audio-btns">
-            <button class="btn-audio-pill btn-audio-hist" onclick="selectUnifiedAudio('${item.id}', 'heritage')">
+            <button class="btn-audio-pill btn-audio-hist" onclick="selectUnifiedAudio('${itemId}', 'heritage')">
               ${t.btnListenHist}
             </button>
-            <button class="btn-audio-pill btn-audio-cult" onclick="selectUnifiedAudio('${item.id}', 'culture')">
+            <button class="btn-audio-pill btn-audio-cult" onclick="selectUnifiedAudio('${itemId}', 'culture')">
               ${t.btnListenCult}
             </button>
           </div>
 
           <div class="card-actions" style="margin-top:6px;">
             <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
-            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${item.id}')">360°</button>
+            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${itemId}')">360°</button>
             ${item.artisanPhone ? `
               <a href="https://wa.me/${item.artisanPhone}?text=Hello! I want to connect regarding your craft on VratyaVani AI." target="_blank" class="btn-sm btn-artisan-wa">💬 Artisan</a>
             ` : ''}
@@ -512,14 +502,15 @@ function renderCards(preloadedItems) {
   });
 }
 
-// ---------------- 1-CLICK INSTANT AUTO-PLAY ---------------- //
+// ---------------- 1-CLICK INSTANT AUDIO & 360 PHOTO SYNC ENGINE ---------------- //
 
 function selectUnifiedAudio(itemId, mode) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
-  let allItems = [...custom, ...baseItems];
+  let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+  let allItems = [...firebaseRecs, ...custom, ...baseItems];
 
-  const found = allItems.find(i => i.id === itemId);
+  const found = allItems.find(i => (i.id === itemId || i.name === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!found) return;
 
   activeAudioItem = found;
@@ -532,8 +523,8 @@ function selectUnifiedAudio(itemId, mode) {
   };
 
   const textToPlay = (mode === 'culture') 
-    ? (langContent.cultureAudio || langContent.livingCulture) 
-    : (langContent.heritageAudio || langContent.heritageDesc);
+    ? (langContent.cultureAudio || langContent.livingCulture || found.livingCulture) 
+    : (langContent.heritageAudio || langContent.heritageDesc || found.story);
     
   const badgeLabel = (mode === 'culture') ? "🎭 [जीवंत संस्कृति]" : "🏛️ [इतिहास]";
 
@@ -610,12 +601,14 @@ function togglePlayVoice() {
   }
 }
 
+// 360° Viewer with Admin Uploaded Image Sync
 function open360Viewer(itemId) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
-  let allItems = [...custom, ...baseItems];
+  let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
+  let allItems = [...firebaseRecs, ...custom, ...baseItems];
 
-  const item = allItems.find(i => i.id === itemId);
+  const item = allItems.find(i => (i.id === itemId || i.name === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!item) return;
 
   const langContent = item.content?.[window.currentLanguage] || item.content?.["hi-IN"] || { title: item.name || item.title };
@@ -629,6 +622,9 @@ function open360Viewer(itemId) {
   }
 
   let panoPhoto = item.imageUrl || item.image;
+  if (!panoPhoto) {
+    panoPhoto = "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
+  }
 
   setTimeout(() => {
     try {
@@ -641,7 +637,9 @@ function open360Viewer(itemId) {
         showFullscreenCtrl: true,
         compass: false
       });
-    } catch (err) {}
+    } catch (err) {
+      console.error("Pannellum load error:", err);
+    }
   }, 200);
 }
 
