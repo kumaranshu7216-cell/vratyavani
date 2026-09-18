@@ -293,7 +293,6 @@ window.applyLanguage = function(langKey) {
   const playBtn = document.getElementById("playAudioBtn");
   if (playBtn) playBtn.innerText = t.btnPlay;
 
-  // Update Citizen Modal Labels dynamically based on language
   updateCitizenModalLabels(langKey);
 
   if (!activeAudioItem) {
@@ -436,7 +435,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- RENDER CARDS WITH SMART DYNAMIC TRANSLATION FALLBACK ---------------- //
+// ---------------- RENDER CARDS WITH UNIVERSAL MULTI-LANGUAGE AUTO-FALLBACK ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -469,21 +468,31 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    // 1. Exact language match check
+    // 1. Check exact language
     let langContent = item.content?.[currentLang];
     
-    // 2. If custom record has only English/Hindi, fallback and adapt gracefully across languages
+    // 2. If not found, gracefully fallback to any available content (Hindi, English, or root properties)
     if (!langContent || !langContent.title) {
-      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || {
-        title: item.name || item.title || "Heritage Site",
-        heritageDesc: item.story || item.desc || "Historical monument overview.",
-        livingCulture: item.livingCulture || "Local sacred tradition."
-      };
+      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || item.content?.[Object.keys(item.content || {})[0]] || {};
     }
 
     const titleText = langContent?.title || item.name || item.title || "Heritage Site";
-    const heritageDescText = langContent?.heritageDesc || langContent?.heritageAudio || item.story || item.desc || "Historical monument overview.";
-    const livingCultureText = langContent?.livingCulture || langContent?.cultureAudio || item.livingCulture || "Local sacred tradition.";
+    
+    // Smart text adaptation for title and descriptions across custom entries
+    let heritageDescText = langContent?.heritageDesc || langContent?.heritageAudio || item.story || item.desc || "Historical monument overview.";
+    let livingCultureText = langContent?.livingCulture || langContent?.cultureAudio || item.livingCulture || "Local sacred tradition.";
+
+    // If viewing in Punjabi/Bhojpuri/Maithili and custom record only has English/Hindi, apply intelligent contextual text rendering
+    if (currentLang === "pa-IN" && !item.content?.[currentLang]) {
+      heritageDescText = "ਵਿਰਾਸਤੀ ਸਥਾਨ ਅਤੇ ਇਤਿਹਾਸਕ ਮਹੱਤਤਾ: " + heritageDescText;
+      livingCultureText = "ਸਥਾਨਕ ਜਿਉਂਦੀ ਪਰੰਪਰਾ ਅਤੇ ਰੀਤਾਂ: " + livingCultureText;
+    } else if (currentLang === "bho-IN" && !item.content?.[currentLang]) {
+      heritageDescText = "ऐतिहासिक धरोहर आ महत्व: " + heritageDescText;
+      livingCultureText = "स्थानीय जीवंत परंपरा: " + livingCultureText;
+    } else if (currentLang === "mai-IN" && !item.content?.[currentLang]) {
+      heritageDescText = "ऐतिहासिक धरोहर एवं महत्त्व: " + heritageDescText;
+      livingCultureText = "जीवित लोक-संस्कृति एवं परंपरा: " + livingCultureText;
+    }
 
     let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
@@ -553,7 +562,7 @@ function selectUnifiedAudio(itemId, mode) {
   activeAudioItem = found;
   activeAudioMode = mode;
 
-  let langContent = found.content?.[window.currentLanguage] || found.content?.["hi-IN"] || found.content?.["en-IN"];
+  let langContent = found.content?.[window.currentLanguage] || found.content?.["hi-IN"] || found.content?.["en-IN"] || {};
   const titleText = langContent?.title || found.name || found.title || "Heritage Site";
 
   const textToPlay = (mode === 'culture') 
