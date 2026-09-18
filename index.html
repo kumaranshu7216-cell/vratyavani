@@ -16,13 +16,13 @@
 </head>
 <body onload="startAppFlow()">
 
-  <!-- 1. आकर्षक एनिमेटेड स्प्लैश स्क्रीन (Wix स्टाइल 'V' लोगो और हेरिटेज टेक्स्ट) -->
+  <!-- 1. आकर्षक एनिमेटेड स्प्लैश स्क्रीन (English 'VratyaVani AI' Logo & Animation) -->
   <div id="splashScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #1e1b4b, #31103c, #0f172a); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, transform 0.8s ease;">
     <div style="position: relative; width: 85px; height: 85px; background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(217, 119, 6, 0.45); animation: pulseLogo 2s infinite ease-in-out;">
       <span style="font-size: 50px; font-weight: 900; color: #ffffff; font-family: 'Cinzel', serif; letter-spacing: -2px; text-shadow: 0 2px 5px rgba(0,0,0,0.3);">V</span>
     </div>
     <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; margin-top: 18px; font-family: 'Cinzel', serif; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(255,255,255,0.2);">
-      व्रत्यवाणी AI
+      VratyaVani AI
     </h1>
     <div style="margin-top: 6px; overflow: hidden; border-right: 2px solid #f59e0b; white-space: nowrap; animation: typing 2.2s steps(28, end), blink-caret 0.75s step-end infinite;">
       <p style="color: #cbd5e1; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-family: sans-serif; margin: 0;">
@@ -184,7 +184,7 @@
     </div>
   </div>
 
-  <!-- Citizen Contribution Modal -->
+  <!-- Citizen Contribution Modal (Dynamic Multi-Language Support) -->
   <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
     <div class="modal-box modal-box-animated" style="text-align:left; max-width:480px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -199,38 +199,38 @@
         <div style="display:flex; flex-direction:column; gap:8px;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
             <div>
-              <label style="font-size:10px; font-weight:700;">राज्य</label>
+              <label id="lblCitState" style="font-size:10px; font-weight:700;">राज्य</label>
               <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;"></select>
             </div>
             <div>
-              <label style="font-size:10px; font-weight:700;">ज़िला</label>
+              <label id="lblCitDist" style="font-size:10px; font-weight:700;">ज़िला</label>
               <input type="text" id="citDistrict" placeholder="उदा. मुजफ्फरपुर" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
             </div>
           </div>
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
             <div>
-              <label style="font-size:10px; font-weight:700;">गाँव / क्षेत्र (Village / Area)</label>
+              <label id="lblCitVillage" style="font-size:10px; font-weight:700;">गाँव / क्षेत्र (Village / Area)</label>
               <input type="text" id="citVillage" placeholder="उदा. पुरानी बाज़ार" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
             </div>
             <div>
-              <label style="font-size:10px; font-weight:700;">प्रसिद्ध लैंडमार्क (Landmark)</label>
+              <label id="lblCitLandmark" style="font-size:10px; font-weight:700;">प्रसिद्ध लैंडमार्क (Landmark)</label>
               <input type="text" id="citLandmark" placeholder="उदा. छाता चौक के समीप" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
             </div>
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">धरोहर का नाम (Place / Temple)</label>
+            <label id="lblCitTitle" style="font-size:10px; font-weight:700;">धरोहर का नाम (Place / Temple)</label>
             <input type="text" id="citTitle" placeholder="उदा. बाबा गरीबनाथ मंदिर / सूर्य कुंड" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">जुड़ी हुई जीवंत संस्कृति / परंपरा (Living Tradition & Ritual)</label>
+            <label id="lblCitRitual" style="font-size:10px; font-weight:700;">जुड़ी हुई जीवंत संस्कृति / परंपरा (Living Tradition & Ritual)</label>
             <input type="text" id="citRitual" placeholder="उदा. सावन कांवर डाक-बम यात्रा / पारंपरिक लोकगीत" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या गैलरी)</label>
+            <label id="lblCitPhoto" style="font-size:10px; font-weight:700;">फोटो जोड़ें (लाइव कैमरा या गैलरी)</label>
             <input type="file" id="citPhotoInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
               <img id="citPreviewImg" src="" style="max-height:120px; border-radius:6px; border:1px solid var(--border-color);" />
@@ -239,7 +239,7 @@
 
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label style="font-size:10px; font-weight:700;">स्थान निर्देशांक (GPS)</label>
+              <label id="lblCitCoords" style="font-size:10px; font-weight:700;">स्थान निर्देशांक (GPS)</label>
               <button type="button" onclick="detectLiveGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">
                 📍 ऑटो GPS लें
               </button>
@@ -248,11 +248,11 @@
           </div>
 
           <div>
-            <label style="font-size:10px; font-weight:700;">मौखिक इतिहास / लोक-गाथा (Oral Narrative)</label>
+            <label id="lblCitStory" style="font-size:10px; font-weight:700;">मौखिक इतिहास / लोक-गाथा (Oral Narrative)</label>
             <textarea id="citStory" rows="3" placeholder="यहाँ के बुजुर्गों से सुनी मान्यता, लोकगीत के बोल या इतिहास लिखें..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
           </div>
 
-          <button type="submit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+          <button type="submit" id="btnCitSubmit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
             सत्यापन हेतु भेजें (Submit for Review)
           </button>
         </div>
