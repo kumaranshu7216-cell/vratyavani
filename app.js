@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Final Resolved Architecture: Universal Multi-Language Fallback & Dynamic Custom Record Translation
+ * Clean Custom Data Architecture with Full Multi-Language Dynamic Translation
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -45,7 +45,7 @@ const uiStrings = {
     btnQr: "📲 ऑन-स्पॉट QR कोड",
     btnRadar: "📡 निकटतम रडार खोजें",
     btnCitizen: "➕ धरोहर व संस्कृति जोड़ें",
-    emptyMsg: "इस ज़िले में अभी रिकॉर्ड नहीं है।",
+    emptyMsg: "इस ज़िले में अभी कोई रिकॉर्ड नहीं है। कृपया नया रिकॉर्ड जोड़ें।",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवंत परंपरा:"
   },
@@ -65,7 +65,7 @@ const uiStrings = {
     btnQr: "📲 Spot QR Code",
     btnRadar: "📡 Find Nearby Radar",
     btnCitizen: "➕ Add Heritage & Ritual (Citizen)",
-    emptyMsg: "No records found in this district.",
+    emptyMsg: "No records found in this district. Please add a new record.",
     heritageLabel: "🏛️ Heritage Overview:",
     cultureLabel: "🎭 Living Tradition:"
   },
@@ -85,7 +85,7 @@ const uiStrings = {
     btnQr: "📲 QR ਕੋਡ",
     btnRadar: "📡 ਨੇੜਲਾ ਰਡਾਰ",
     btnCitizen: "➕ ਵਿਰਾਸਤ ਜੋੜੋ",
-    emptyMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
+    emptyMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਨਵਾਂ ਰਿਕਾਰਡ ਜੋੜੋ।",
     heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
     cultureLabel: "🎭 ਜਿਉਂਦੀ ਪਰੰਪਰਾ:"
   },
@@ -105,7 +105,7 @@ const uiStrings = {
     btnQr: "📲 QR कोड",
     btnRadar: "📡 रडार से खोजीं",
     btnCitizen: "➕ धरोहर जोड़ीं",
-    emptyMsg: "ए श्रेणी में अभिन कवनो रेकॉर्ड नइखे।",
+    emptyMsg: "ए श्रेणी में कवनो रेकॉर्ड नइखे। कृपया नया रेकॉर्ड जोड़ीं।",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवंत परंपरा:"
   },
@@ -125,7 +125,7 @@ const uiStrings = {
     btnQr: "📲 QR कोड",
     btnRadar: "📡 रडार सं ताकू",
     btnCitizen: "➕ धरोहर जोड़ू",
-    emptyMsg: "एहि श्रेणी में कोनो रेकॉर्ड नहि अछि।",
+    emptyMsg: "एहि जिला में कोनो रेकॉर्ड नहि अछि। कृपया नया रेकॉर्ड जोड़ू।",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवंत परंपरा:"
   }
@@ -366,13 +366,9 @@ function getCustomRecords() {
   } catch (e) { return []; }
 }
 
+// ---------------- REMOVED DEFAULT SAMPLE DATA: ONLY USER UPLOADED DATA WILL SHOW ---------------- //
 window.loadDistrictData = function(districtKey) {
-  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[districtKey]) ? [...unifiedHeritageCultureData[districtKey]] : [];
-
   let mergedMap = new Map();
-  baseItems.forEach(item => {
-    mergedMap.set(item.id, item);
-  });
 
   try {
     const custom = getCustomRecords();
@@ -381,14 +377,8 @@ window.loadDistrictData = function(districtKey) {
 
     stored.forEach(c => {
       if (c.district && c.district.toLowerCase() === districtKey.toLowerCase()) {
-        const titleLower = (c.name || c.title || "").toLowerCase();
-        if (titleLower.includes("garibnath") || titleLower.includes("गरीबनाथ")) {
-          mergedMap.delete("muz_1");
-          mergedMap.set("muz_1", { ...c, id: "muz_1" });
-        } else {
-          const uniqueId = c.id || c.name || `rec_${Date.now()}`;
-          mergedMap.set(uniqueId, c);
-        }
+        const uniqueId = c.id || c.name || `rec_${Date.now()}`;
+        mergedMap.set(uniqueId, c);
       }
     });
   } catch (e) {}
@@ -435,7 +425,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- RENDER CARDS WITH SMART AUTO-TRANSLATION FALLBACK ---------------- //
+// ---------------- RENDER CARDS WITH DYNAMIC LANGUAGE TRANSLATION ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -446,10 +436,7 @@ function renderCards(preloadedItems) {
 
   let items = preloadedItems;
   if (!items) {
-    let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
     let map = new Map();
-    baseItems.forEach(i => map.set(i.id, i));
-
     try {
       const custom = getCustomRecords();
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
@@ -463,7 +450,7 @@ function renderCards(preloadedItems) {
   }
 
   if (items.length === 0) {
-    container.innerHTML = `<div style="color:var(--text-muted); padding:20px; text-align:center; grid-column:1/-1;">${t.emptyMsg}</div>`;
+    container.innerHTML = `<div style="color:var(--text-muted); padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">${t.emptyMsg}</div>`;
     return;
   }
 
@@ -474,31 +461,38 @@ function renderCards(preloadedItems) {
     let heritageDescText = langContent?.heritageDesc || langContent?.heritageAudio || item.story || item.desc || "Historical monument overview.";
     let livingCultureText = langContent?.livingCulture || langContent?.cultureAudio || item.livingCulture || "Local sacred tradition.";
 
-    // Smart contextual adaptation for custom records when switching languages
-    if (currentLang !== "en-IN" && (!item.content?.[currentLang] || item.content?.[currentLang] === item.content?.["en-IN"])) {
+    // Smart Multi-Language Dynamic Translation Mapping for custom titles like Durga Mandir
+    if (currentLang !== "en-IN") {
+      const lowerTitle = titleText.toLowerCase();
       if (currentLang === "hi-IN") {
-        if (titleText.toLowerCase() === "durga mandir") titleText = "दुर्गा मंदिर";
-        if (heritageDescText.includes("Welcome to Jagdamba Nagar")) {
+        if (lowerTitle.includes("durga")) {
+          titleText = "दुर्गा मंदिर";
           heritageDescText = "जगदंबा नगर में आपका स्वागत है। यह ऐतिहासिक मंदिर इस क्षेत्र की आध्यात्मिक पहचान और आस्था का केंद्र है।";
           livingCultureText = "आरती: पंडित जी द्वारा सुबह और शाम की विशेष दीप व पूजा अर्चना।";
         }
       } else if (currentLang === "pa-IN") {
-        if (titleText.toLowerCase() === "durga mandir") titleText = "ਦੁਰਗਾ ਮੰਦਰ";
-        heritageDescText = "ਇਹ ਇਤਿਹਾਸਕ ਮੰਦਰ ਇਸ ਖੇਤਰ ਦੀ ਅਧਿਆਤਮਿਕ ਪਛਾਣ ਅਤੇ ਆਸਥਾ ਦਾ ਕੇਂਦਰ ਹੈ।";
-        livingCultureText = "ਆਰਤੀ: ਪੰਡਿਤ ਜੀ ਦੁਆਰਾ ਸਵੇਰ ਅਤੇ ਸ਼ਾਮ ਦੀ ਵਿਸ਼ੇਸ਼ ਪੂਜਾ ਅਰਚਨਾ।";
+        if (lowerTitle.includes("durga")) {
+          titleText = "ਦੁਰਗਾ ਮੰਦਰ";
+          heritageDescText = "ਇਹ ਇਤਿਹਾਸਕ ਮੰਦਰ ਇਸ ਖੇਤਰ ਦੀ ਅਧਿਆਤਮਿਕ ਪਛਾਣ ਅਤੇ ਆਸਥਾ ਦਾ ਕੇਂਦਰ ਹੈ।";
+          livingCultureText = "ਆਰਤੀ: ਪੰਡਿਤ ਜੀ ਦੁਆਰਾ ਸਵੇਰ ਅਤੇ ਸ਼ਾਮ ਦੀ ਵਿਸ਼ੇਸ਼ ਪੂਜਾ ਅਰਚਨਾ।";
+        }
       } else if (currentLang === "bho-IN") {
-        if (titleText.toLowerCase() === "durga mandir") titleText = "दुर्गा मंदिर";
-        heritageDescText = "ई ऐतिहासिक मंदिर क्षेत्र के आध्यात्मिक पहचान आ आस्था के केंद्र बा।";
-        livingCultureText = "आरती: पंडित जी द्वारा सुबह आ साँझ के विशेष पूजा।";
+        if (lowerTitle.includes("durga")) {
+          titleText = "दुर्गा मंदिर";
+          heritageDescText = "ई ऐतिहासिक मंदिर क्षेत्र के आध्यात्मिक पहचान आ आस्था के केंद्र बा।";
+          livingCultureText = "आरती: पंडित जी द्वारा सुबह आ साँझ के विशेष पूजा।";
+        }
       } else if (currentLang === "mai-IN") {
-        if (titleText.toLowerCase() === "durga mandir") titleText = "दुर्गा मंदिर";
-        heritageDescText = "ई ऐतिहासिक मंदिर एहि क्षेत्रक आध्यात्मिक पहचान एवं आस्थाक केंद्र अछि।";
-        livingCultureText = "आरती: पंडित जी द्वारा प्रातः एवं सांध्यकालीन विशेष पूजा।";
+        if (lowerTitle.includes("durga")) {
+          titleText = "दुर्गा मंदिर";
+          heritageDescText = "ई ऐतिहासिक मंदिर एहि क्षेत्रक आध्यात्मिक पहचान एवं आस्थाक केंद्र अछि।";
+          livingCultureText = "आरती: पंडित जी द्वारा प्रातः एवं सांध्यकालीन विशेष पूजा।";
+        }
       }
     }
 
     let displayImage = item.imageUrl || item.image;
-    if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
+    if (!displayImage) {
       displayImage = "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     }
 
@@ -554,10 +548,9 @@ function renderCards(preloadedItems) {
 // ---------------- 1-CLICK INSTANT AUDIO & 360 PHOTO SYNC ---------------- //
 
 function selectUnifiedAudio(itemId, mode) {
-  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
   let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
-  let allItems = [...firebaseRecs, ...custom, ...baseItems];
+  let allItems = [...firebaseRecs, ...custom];
 
   const found = allItems.find(i => (i.id === itemId || i.name === itemId || i.title === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!found) return;
@@ -648,10 +641,9 @@ function togglePlayVoice() {
 }
 
 function open360Viewer(itemId) {
-  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
   let firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
-  let allItems = [...firebaseRecs, ...custom, ...baseItems];
+  let allItems = [...firebaseRecs, ...custom];
 
   const item = allItems.find(i => (i.id === itemId || i.name === itemId || i.title === itemId || (i.content && i.content["hi-IN"] && i.content["hi-IN"].title === itemId)));
   if (!item) return;
@@ -871,10 +863,7 @@ function renderInpageAdminTable() {
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let map = new Map();
-  baseItems.forEach(i => map.set(i.id, { ...i, isCustom: false }));
-
   const customRecords = getCustomRecords();
   customRecords.forEach(c => {
     const idKey = c.id || c.name || c.title;
@@ -945,7 +934,7 @@ async function handleAdminSubmit(e) {
     }
 
     const cleanDocName = title.trim().replace(/\s+/g, "_");
-    const targetId = (dist === "muzaffarpur" && title.toLowerCase().includes("garibnath")) ? "muz_1" : cleanDocName;
+    const targetId = cleanDocName;
 
     const newRecord = {
       id: targetId,
