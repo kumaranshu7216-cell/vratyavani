@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Final Resolved Architecture: Dynamic Multi-Language Cards, 360 Photo Sync & Instant TTS Audio
+ * Final Multi-Language Fallback, Audio & 360 Photo Sync Architecture
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -27,7 +27,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// ---------------- UI MULTI-LANGUAGE STRINGS ---------------- //
+// ---------------- 5-LANGUAGE UI DICTIONARY ---------------- //
 const uiStrings = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -200,7 +200,7 @@ function startAppFlow() {
         document.getElementById("locationModal").style.display = "flex";
       }, 700);
     }
-  }, 800);
+  }, 1200);
 }
 
 function openLocationModalDirect() {
@@ -409,13 +409,14 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- RENDER CARDS WITH ROBUST LANGUAGE & ID SYNC ---------------- //
+// ---------------- RENDER CARDS WITH ROBUST LANGUAGE TRANSLATION ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
   container.innerHTML = "";
 
   const t = uiStrings[window.currentLanguage] || uiStrings["hi-IN"];
+  const currentLang = window.currentLanguage || "hi-IN";
 
   let items = preloadedItems;
   if (!items) {
@@ -428,13 +429,7 @@ function renderCards(preloadedItems) {
       const firebaseRecs = JSON.parse(localStorage.getItem("vratyavani_firebase_records") || "[]");
       [...firebaseRecs, ...custom].forEach(c => {
         if (c.district && c.district.toLowerCase() === window.currentDistrict.toLowerCase()) {
-          const titleLower = (c.name || c.title || "").toLowerCase();
-          if (titleLower.includes("garibnath") || titleLower.includes("गरीबनाथ")) {
-            map.delete("muz_1");
-            map.set("muz_1", { ...c, id: "muz_1" });
-          } else {
-            map.set(c.id || c.name, c);
-          }
+          map.set(c.id || c.name, c);
         }
       });
     } catch(e) {}
@@ -447,15 +442,12 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    // Exact language lookup with robust fallback to hi-IN or en-IN or direct properties
-    let langContent = item.content?.[window.currentLanguage];
-    if (!langContent || !langContent.title) {
-      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || {
-        title: item.name || item.title || "Heritage Site",
-        heritageDesc: item.story || item.desc || "Historical monument.",
-        livingCulture: item.livingCulture || "Local sacred ritual."
-      };
-    }
+    // भाषा के अनुसार सटीक कंटेंट फेच करें (Current -> Hindi -> English -> Default)
+    let langContent = item.content?.[currentLang] || item.content?.["hi-IN"] || item.content?.["en-IN"];
+    
+    const titleText = langContent?.title || item.name || item.title || "Heritage Site";
+    const heritageDescText = langContent?.heritageDesc || item.story || item.desc || "Historical monument overview.";
+    const livingCultureText = langContent?.livingCulture || item.livingCulture || "Local sacred tradition.";
 
     let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
@@ -467,12 +459,12 @@ function renderCards(preloadedItems) {
     const cardHtml = `
       <div class="unified-card">
         <div class="card-image-wrap" onclick="open360Viewer('${itemId}')" style="cursor:pointer;">
-          <img src="${displayImage}" alt="${langContent.title}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80';" loading="lazy" />
+          <img src="${displayImage}" alt="${titleText}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80';" loading="lazy" />
           <span class="btn-view360-badge">🌐 360° View</span>
         </div>
         <div class="card-dual-content">
           <div style="display:flex; align-items:center; justify-content:space-between;">
-            <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${langContent.title}</h4>
+            <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${titleText}</h4>
             <span class="risk-badge ${item.riskClass || 'risk-mod'}">${item.riskScore || 'Active'}</span>
           </div>
           
@@ -481,11 +473,11 @@ function renderCards(preloadedItems) {
           </div>
           
           <div class="heritage-block">
-            <strong>${t.heritageLabel}</strong> ${langContent.heritageDesc}
+            <strong>${t.heritageLabel}</strong> ${heritageDescText}
           </div>
 
           <div class="culture-block">
-            <strong>${t.cultureLabel}</strong> ${langContent.livingCulture}
+            <strong>${t.cultureLabel}</strong> ${livingCultureText}
           </div>
 
           <div class="dual-audio-btns">
@@ -525,25 +517,19 @@ function selectUnifiedAudio(itemId, mode) {
   activeAudioItem = found;
   activeAudioMode = mode;
 
-  let langContent = found.content?.[window.currentLanguage];
-  if (!langContent || !langContent.title) {
-    langContent = found.content?.["hi-IN"] || found.content?.["en-IN"] || {
-      title: found.name || found.title,
-      heritageDesc: found.story || found.desc,
-      livingCulture: found.livingCulture
-    };
-  }
+  let langContent = found.content?.[window.currentLanguage] || found.content?.["hi-IN"] || found.content?.["en-IN"];
+  const titleText = langContent?.title || found.name || found.title || "Heritage Site";
 
   const textToPlay = (mode === 'culture') 
-    ? (langContent.cultureAudio || langContent.livingCulture || found.livingCulture || "Local cultural ritual.") 
-    : (langContent.heritageAudio || langContent.heritageDesc || found.story || found.desc || "Historical monument overview.");
+    ? (langContent?.cultureAudio || langContent?.livingCulture || found.livingCulture || "Local cultural ritual.") 
+    : (langContent?.heritageAudio || langContent?.heritageDesc || found.story || found.desc || "Historical monument overview.");
     
   const badgeLabel = (mode === 'culture') ? "🎭 [जीवंत संस्कृति]" : "🏛️ [इतिहास]";
 
   const nowPlayingEl = document.getElementById("nowPlayingText");
   if (nowPlayingEl) {
     nowPlayingEl.innerHTML = `
-      <strong>${langContent.title}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
+      <strong>${titleText}</strong> <small style="color:${mode === 'culture' ? '#c026d3' : '#d97706'}; font-weight:bold;">${badgeLabel}</small><br>
       <em>"${textToPlay}"</em>
     `;
   }
@@ -613,7 +599,6 @@ function togglePlayVoice() {
   }
 }
 
-// 360 Viewer with exact item match
 function open360Viewer(itemId) {
   let baseItems = (typeof unifiedHeritageCultureData !== "undefined" && unifiedHeritageCultureData[window.currentDistrict]) ? [...unifiedHeritageCultureData[window.currentDistrict]] : [];
   let custom = getCustomRecords();
