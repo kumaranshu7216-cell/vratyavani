@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Unified Heritage & Living Culture Engine
- * Final Multi-Language Fallback, Audio & 360 Photo Sync Architecture
+ * Final Resolved Architecture: Universal Multi-Language Fallback & Dynamic Custom Record Translation
  */
 
 window.currentDistrict = "muzaffarpur";
@@ -27,7 +27,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// ---------------- 5-LANGUAGE UI DICTIONARY ---------------- //
+// ---------------- 5-LANGUAGE UI & DYNAMIC DICTIONARY ---------------- //
 const uiStrings = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -293,6 +293,9 @@ window.applyLanguage = function(langKey) {
   const playBtn = document.getElementById("playAudioBtn");
   if (playBtn) playBtn.innerText = t.btnPlay;
 
+  // Update Citizen Modal Labels dynamically based on language
+  updateCitizenModalLabels(langKey);
+
   if (!activeAudioItem) {
     const np = document.getElementById("nowPlayingText");
     if (np) np.innerText = t.nowPlayingDefault;
@@ -302,6 +305,30 @@ window.applyLanguage = function(langKey) {
 
   renderCards();
 };
+
+function updateCitizenModalLabels(lang) {
+  const lbls = {
+    "hi-IN": { head: "🏛️ धरोहर एवं लोक-संस्कृति योगदान", desc: "धरोहर स्थल और उससे जुड़ी सांस्कृतिक परंपरा एक साथ दर्ज करें।", state: "राज्य", dist: "ज़िला", village: "गाँव / क्षेत्र (Village / Area)", landmark: "प्रसिद्ध लैंडमार्क (Landmark)", title: "धरोहर का नाम (Place / Temple)", ritual: "जुड़ी हुई जीवंत संस्कृति / परंपरा", photo: "फोटो जोड़ें (लाइव कैमरा या गैलरी)", coords: "स्थान निर्देशांक (GPS)", story: "मौखिक इतिहास / लोक-गाथा (Oral Narrative)", submit: "सत्यापन हेतु भेजें (Submit for Review)" },
+    "en-IN": { head: "🏛️ Heritage & Living Culture Contribution", desc: "Register heritage site and associated living tradition together.", state: "State", dist: "District", village: "Village / Area", landmark: "Landmark", title: "Heritage Site Name", ritual: "Living Culture / Tradition", photo: "Upload Image (Camera/Gallery)", coords: "Coordinates (GPS)", story: "Oral Narrative / Story", submit: "Submit for Review" },
+    "pa-IN": { head: "🏛️ ਵਿਰਾਸਤ ਅਤੇ ਸੰਸਕ੍ਰਿਤੀ ਯੋਗਦਾਨ", desc: "ਵਿਰਾਸਤੀ ਸਥਾਨ ਅਤੇ ਇਸਦੀ ਪਰੰਪਰਾ ਦਰਜ ਕਰੋ।", state: "ਰਾਜ", dist: "ਜ਼ਿਲ੍ਹਾ", village: "ਪਿੰਡ / ਖੇਤਰ", landmark: "ਪ੍ਰਸਿੱਧ ਲੈਂਡਮਾਰਕ", title: "ਵਿਰਾਸਤ ਦਾ ਨਾਮ", ritual: "ਜਿਉਂਦੀ ਪਰੰਪਰਾ", photo: "ਫੋਟੋ ਅੱਪਲੋਡ ਕਰੋ", coords: "ਜੀ.ਪੀ.ਐਸ (GPS)", story: "ਇਤਿਹਾਸ / ਕਹਾਣੀ", submit: "ਸਮੀਖਿਆ ਲਈ ਭੇਜੋ" },
+    "bho-IN": { head: "🏛️ धरोहर आ लोक-संस्कृति योगदान", desc: "धरोहर स्थल आ संस्कृति दर्ज करीं।", state: "राज्य", dist: "जिला", village: "गाँव / क्षेत्र", landmark: "लैंडमार्क", title: "धरोहर के नाम", ritual: "जीवंत परंपरा", photo: "फोटो जोड़ीं", coords: "स्थान (GPS)", story: "इतिहास / गाथा", submit: "सत्यापन हेतु भेजीं" },
+    "mai-IN": { head: "🏛️ धरोहर एवं लोक-संस्कृति योगदान", desc: "धरोहर स्थल आ संस्कृति दर्ज करू।", state: "राज्य", dist: "जिला", village: "गाँव / क्षेत्र", landmark: "लैंडमार्क", title: "धरोहर के नाम", ritual: "जीवंत परंपरा", photo: "फोटो जोड़ू", coords: "स्थान (GPS)", story: "इतिहास / कथा", submit: "सत्यापन लेल भेजू" }
+  };
+  const l = lbls[lang] || lbls["hi-IN"];
+  
+  if(document.getElementById("citModalHead")) document.getElementById("citModalHead").innerText = l.head;
+  if(document.getElementById("citModalDesc")) document.getElementById("citModalDesc").innerText = l.desc;
+  if(document.getElementById("lblCitState")) document.getElementById("lblCitState").innerText = l.state;
+  if(document.getElementById("lblCitDist")) document.getElementById("lblCitDist").innerText = l.dist;
+  if(document.getElementById("lblCitVillage")) document.getElementById("lblCitVillage").innerText = l.village;
+  if(document.getElementById("lblCitLandmark")) document.getElementById("lblCitLandmark").innerText = l.landmark;
+  if(document.getElementById("lblCitTitle")) document.getElementById("lblCitTitle").innerText = l.title;
+  if(document.getElementById("lblCitRitual")) document.getElementById("lblCitRitual").innerText = l.ritual;
+  if(document.getElementById("lblCitPhoto")) document.getElementById("lblCitPhoto").innerText = l.photo;
+  if(document.getElementById("lblCitCoords")) document.getElementById("lblCitCoords").innerText = l.coords;
+  if(document.getElementById("lblCitStory")) document.getElementById("lblCitStory").innerText = l.story;
+  if(document.getElementById("btnCitSubmit")) document.getElementById("btnCitSubmit").innerText = l.submit;
+}
 
 function onConsoleLangChange(lang) {
   window.applyLanguage(lang);
@@ -409,7 +436,7 @@ window.loadDistrictData = function(districtKey) {
   renderCards(items);
 };
 
-// ---------------- RENDER CARDS WITH ROBUST LANGUAGE TRANSLATION ---------------- //
+// ---------------- RENDER CARDS WITH SMART DYNAMIC TRANSLATION FALLBACK ---------------- //
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -442,12 +469,21 @@ function renderCards(preloadedItems) {
   }
 
   items.forEach(item => {
-    // भाषा के अनुसार सटीक कंटेंट फेच करें (Current -> Hindi -> English -> Default)
-    let langContent = item.content?.[currentLang] || item.content?.["hi-IN"] || item.content?.["en-IN"];
+    // 1. Exact language match check
+    let langContent = item.content?.[currentLang];
     
+    // 2. If custom record has only English/Hindi, fallback and adapt gracefully across languages
+    if (!langContent || !langContent.title) {
+      langContent = item.content?.["hi-IN"] || item.content?.["en-IN"] || {
+        title: item.name || item.title || "Heritage Site",
+        heritageDesc: item.story || item.desc || "Historical monument overview.",
+        livingCulture: item.livingCulture || "Local sacred tradition."
+      };
+    }
+
     const titleText = langContent?.title || item.name || item.title || "Heritage Site";
-    const heritageDescText = langContent?.heritageDesc || item.story || item.desc || "Historical monument overview.";
-    const livingCultureText = langContent?.livingCulture || item.livingCulture || "Local sacred tradition.";
+    const heritageDescText = langContent?.heritageDesc || langContent?.heritageAudio || item.story || item.desc || "Historical monument overview.";
+    const livingCultureText = langContent?.livingCulture || langContent?.cultureAudio || item.livingCulture || "Local sacred tradition.";
 
     let displayImage = item.imageUrl || item.image;
     if (!displayImage || displayImage.includes("photo-1527786356703-4b100091cd2c")) {
