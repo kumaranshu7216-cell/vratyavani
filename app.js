@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Stable Version: Fixed event bubbling, form refresh bugs, and admin approval sync.
+ * Stable Version with Multilingual Audio Narration, Dual Audio Pills, and Firebase Sync.
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -96,8 +96,16 @@ window.confirmLocationSelection = function() {
   document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
   document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
   
+  const consoleLangSelect = document.getElementById("langSelect");
+  if (consoleLangSelect) consoleLangSelect.value = lang;
+
   document.getElementById("locationModal").style.display = "none";
   window.onDistrictChange(distKey);
+};
+
+window.onConsoleLangChange = function(lang) {
+  window.currentLanguage = lang;
+  renderCards();
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -215,6 +223,12 @@ function renderCards(preloadedItems) {
           <p style="font-size:12px; color:#334155; margin-bottom:6px;"><strong>${window.currentPersona.toUpperCase()} Mode:</strong> ${descText}</p>
           <p style="font-size:12px; color:#6b21a8; margin-bottom:8px;"><strong>🎭 Living Culture:</strong> ${ritualText}</p>
           
+          <!-- Dual Audio Narration Pills -->
+          <div style="display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;">
+            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'heritage')" style="background:#fef3c7; color:#92400e; border:none; padding:6px 12px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">🏛️ इतिहास सुनें (History)</button>
+            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'culture')" style="background:#dcfce7; color:#15803d; border:none; padding:6px 12px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">🎭 जीवंत परंपरा (Culture)</button>
+          </div>
+
           <div style="background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:10px; font-size:11px; border:1px solid #e2e8f0;">
             <span style="color:#0284c7; font-weight:bold;">🚨 Heritage Risk Radar:</span> Low Risk (Active community practice)
           </div>
@@ -228,6 +242,31 @@ function renderCards(preloadedItems) {
     `;
     container.innerHTML += cardHtml;
   });
+}
+
+// AUDIO NARRATION HANDLER
+window.selectUnifiedAudio = function(itemId, mode) {
+  let custom = getCustomRecords();
+  const found = custom.find(i => (i.id === itemId || i.name === itemId));
+  if (!found) return;
+
+  const textToPlay = (mode === 'culture') ? found.livingCulture : found.story;
+  const nowPlayingEl = document.getElementById("nowPlayingText");
+  if (nowPlayingEl) {
+    nowPlayingEl.innerHTML = `<strong>🔊 Playing (${mode.toUpperCase()}):</strong> ${found.name}<br><em>"${textToPlay}"</em>`;
+  }
+  playAudioDirectly(textToPlay);
+};
+
+function playAudioDirectly(text) {
+  if (!('speechSynthesis' in window)) {
+    alert("Speech synthesis not supported in this browser.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = window.currentLanguage || 'hi-IN';
+  window.speechSynthesis.speak(utter);
 }
 
 window.previewCitizenImage = function(event) {
