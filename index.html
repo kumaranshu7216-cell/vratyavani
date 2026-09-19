@@ -145,22 +145,22 @@
   </main>
 
   <!-- 360 Panorama Modal -->
-  <div id="panoramaModal" class="modal-backdrop" onclick="closePanoramaModal(event)">
+  <div id="panoramaModal" class="modal-backdrop" onclick="if(event.target === this) closePanoramaModal()">
     <div class="modal-box modal-box-animated" style="background:#0f172a; color:#fff; max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3 id="panoTitle" style="color:var(--accent-gold); font-size:16px;">WebXR 360° Immersive Tour</h3>
-        <span class="close-modal" onclick="closePanoramaModal()">&times;</span>
+        <span class="close-modal" onclick="closePanoramaModal()" style="cursor:pointer; font-size:22px;">&times;</span>
       </div>
       <div id="panoramaContainer" style="width:100%; height:360px; border-radius:10px; margin-top:10px;"></div>
     </div>
   </div>
 
   <!-- Upcoming Heritage Submission Modal -->
-  <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
-    <div class="modal-box modal-box-animated" style="text-align:left; max-width:480px;">
+  <div id="citizenModal" class="modal-backdrop" onclick="if(event.target === this) closeCitizenModal()">
+    <div class="modal-box modal-box-animated" onclick="event.stopPropagation()" style="text-align:left; max-width:480px; background:#fff; color:#000;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ Submit Upcoming Heritage</h3>
-        <span class="close-modal" onclick="closeCitizenModal()">&times;</span>
+        <span class="close-modal" onclick="closeCitizenModal()" style="cursor:pointer; font-size:22px;">&times;</span>
       </div>
       <p style="font-size:11px; color:#64748b; margin-bottom:10px;">Processed through VratyaVani Trust Engine (AI Validation & Metadata Check).</p>
 
@@ -206,9 +206,9 @@
   </div>
 
   <!-- Heritage Passport Modal -->
-  <div id="passportModal" class="modal-backdrop" onclick="closePassportModal(event)">
-    <div class="modal-box modal-box-animated" style="text-align:center; max-width:400px; background:linear-gradient(135deg, #1e1b4b, #31103c); color:#fff;">
-      <span class="close-modal" onclick="closePassportModal()" style="color:#fff;">&times;</span>
+  <div id="passportModal" class="modal-backdrop" onclick="if(event.target === this) closePassportModal()">
+    <div class="modal-box modal-box-animated" onclick="event.stopPropagation()" style="text-align:center; max-width:400px; background:linear-gradient(135deg, #1e1b4b, #31103c); color:#fff;">
+      <span class="close-modal" onclick="closePassportModal()" style="color:#fff; cursor:pointer; font-size:22px;">&times;</span>
       <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">🛂 MY HERITAGE PASSPORT</h3>
       <p style="font-size:11px; color:#cbd5e1; margin-bottom:15px;">Digital Explorer & Preservation Record</p>
       
@@ -246,9 +246,9 @@
   </nav>
 
   <!-- Admin Login Modal -->
-  <div id="loginModal" class="modal-backdrop" onclick="closeLoginModal(event)">
-    <div class="modal-box" style="text-align: left;">
-      <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+  <div id="loginModal" class="modal-backdrop" onclick="if(event.target === this) closeLoginModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" style="text-align: left; background:#fff; color:#000;">
+      <span class="close-modal" onclick="closeLoginModal()" style="cursor:pointer; font-size:22px;">&times;</span>
       <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin-bottom: 4px;">Trust Engine Curation Gate</h3>
       <form id="adminLoginForm" onsubmit="handleAdminLogin(event); return false;">
         <div style="display:flex; flex-direction:column; gap:10px;">
@@ -269,9 +269,8 @@
   </div>
 
   <!-- Admin Approval Desk -->
-  <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
-    <div class="modal-box" style="text-align: left; max-width: 650px;">
-      <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
+  <div id="adminPanelModal" class="modal-backdrop" onclick="if(event.target === this) closeAdminPanelModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" style="text-align: left; max-width: 650px; background:#fff; color:#000;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
         <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin:0;">🛡️ VratyaVani Trust & Curation Desk</h3>
         <button type="button" onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Logout</button>

@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Unified Architecture: Trust Engine + Risk Radar + Living Heritage Clusters + Firebase Sync
+ * Stable Version: Fixed event bubbling, form refresh bugs, and admin approval sync.
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -83,11 +83,7 @@ window.startAppFlow = function() {
 window.openLocationModalDirect = function() { document.getElementById("locationModal").style.display = "flex"; };
 window.closeLocationModal = function() { document.getElementById("locationModal").style.display = "none"; };
 window.openPassportModal = function() { document.getElementById("passportModal").style.display = "flex"; };
-window.closePassportModal = function(e) {
-  if (!e || e.target.id === "passportModal" || e.target.classList.contains("close-modal")) {
-    document.getElementById("passportModal").style.display = "none";
-  }
-};
+window.closePassportModal = function() { document.getElementById("passportModal").style.display = "none"; };
 
 window.confirmLocationSelection = function() {
   const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
@@ -168,7 +164,7 @@ window.loadDistrictData = function(districtKey) {
       window.mapInstance.flyTo(items[0].coords, 13);
       items.forEach(item => {
         const marker = L.marker(item.coords).addTo(window.mapInstance);
-        marker.bindPopup(`<strong>🏛️ ${item.name || item.title}</strong><br><small>Cluster: ${item.village || 'Heritage Circuit'}</small>`);
+        marker.bindPopup(`<strong>🏛️ ${item.name || item.title}</strong><br><small>Cluster: ${item.village || 'Circuit'}</small>`);
         mapMarkers.push(marker);
       });
     }
@@ -184,7 +180,7 @@ function renderCards(preloadedItems) {
   let items = preloadedItems || getCustomRecords().filter(c => c.district?.toLowerCase() === window.currentDistrict.toLowerCase());
 
   if (items.length === 0) {
-    container.innerHTML = `<div style="color:#64748b; padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">इस ज़िले में अभी कोई सत्यापित रिकॉर्ड नहीं है। ऊपर दिए गए 'Submit Upcoming Heritage' बटन से नया डेटा जोड़ें।</div>`;
+    container.innerHTML = `<div style="color:#64748b; padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">इस ज़िले में अभी कोई रिकॉर्ड नहीं है। 'Submit Upcoming Heritage' से नया डेटा जोड़ें।</div>`;
     return;
   }
 
@@ -192,13 +188,12 @@ function renderCards(preloadedItems) {
     let titleText = item.name || item.title || "Heritage Site";
     let descText = item.story || item.desc || "Historical monument overview.";
     
-    // AI Persona adaptation based on selected mode
     if (window.currentPersona === 'kids') {
-      descText = "बाल कथा: " + descText.substring(0, 90) + "... (बच्चों के लिए सरल और रोचक विवरण!)";
+      descText = "बाल कथा: " + descText.substring(0, 90) + "... (बच्चों के लिए सरल विवरण!)";
     } else if (window.currentPersona === 'researcher') {
-      descText = "Research Archive: " + descText + " [Metadata Verified, GPS: " + (item.coords ? item.coords.join(', ') : 'N/A') + "]";
+      descText = "Research Archive: " + descText + " [Metadata Verified]";
     } else if (window.currentPersona === 'spiritual') {
-      descText = "आध्यात्मिक संदर्भ: " + descText + " (सांस्कृतिक और पवित्र स्थल आस्था केंद्र)";
+      descText = "आध्यात्मिक संदर्भ: " + descText + " (पवित्र आस्था केंद्र)";
     }
 
     let ritualText = item.livingCulture || "Local sacred tradition.";
@@ -216,17 +211,17 @@ function renderCards(preloadedItems) {
             <h4 style="font-size:16px; font-weight:700; color:#1e1b4b;">${titleText}</h4>
             <span style="background:#dcfce7; color:#15803d; padding:2px 8px; font-size:10px; font-weight:bold; border-radius:10px;">🟢 VERIFIED TRUST</span>
           </div>
-          <div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:6px;">📍 Cluster Area: ${item.village || 'Main Circuit'} ${item.landmark ? `• ${item.landmark}` : ''}</div>
+          <div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:6px;">📍 Cluster Area: ${item.village || 'Main Circuit'}</div>
           <p style="font-size:12px; color:#334155; margin-bottom:6px;"><strong>${window.currentPersona.toUpperCase()} Mode:</strong> ${descText}</p>
           <p style="font-size:12px; color:#6b21a8; margin-bottom:8px;"><strong>🎭 Living Culture:</strong> ${ritualText}</p>
           
           <div style="background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:10px; font-size:11px; border:1px solid #e2e8f0;">
-            <span style="color:#0284c7; font-weight:bold;">🚨 Heritage Risk Radar:</span> Low Risk (Active community practice, regular transmission)
+            <span style="color:#0284c7; font-weight:bold;">🚨 Heritage Risk Radar:</span> Low Risk (Active community practice)
           </div>
 
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn-sm" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})" style="background:#e0f2fe; color:#0369a1; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">📍 Cluster Map</button>
-            <button type="button" class="btn-sm" style="background:#fef3c7; color:#b45309; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="alert('🔗 WhatsApp Artisan Bridge connected: Connect with local weavers and craftspeople.')">🛍️ Artisan Livelihood</button>
+            <button type="button" class="btn-sm" style="background:#fef3c7; color:#b45309; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="alert('🔗 WhatsApp Artisan Bridge connected: Connect with local artisans.')">🛍️ Artisan Livelihood</button>
           </div>
         </div>
       </div>
@@ -256,19 +251,18 @@ window.handleCitizenSubmit = function(e) {
     id: `pending_${Date.now()}`,
     title: document.getElementById("citTitle").value.trim(),
     district: document.getElementById("citDistrict").value.trim().toLowerCase(),
-    village: document.getElementById("citVillage").value.trim() || "Heritage Cluster",
-    landmark: "",
+    village: document.getElementById("citVillage").value.trim() || "Cluster Area",
     ritual: document.getElementById("citRitual").value.trim(),
     coords: document.getElementById("citCoords").value.split(",").map(v => parseFloat(v.trim())),
     story: document.getElementById("citStory").value.trim(),
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    aiValidation: "✓ Metadata Verified | GPS Consistent"
+    aiValidation: "✓ Metadata Verified"
   };
 
   const pendingQueue = getPendingSubmissions();
   pendingQueue.unshift(pendingItem);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingQueue));
-  alert(`🛡️ Trust Engine Success: "${pendingItem.title}" submitted successfully for expert review!`);
+  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक रिव्यू के लिए भेज दिया गया है!`);
   e.target.reset();
   citizenUploadedBase64 = null;
   const boxEl = document.getElementById("citImagePreviewBox");
@@ -281,10 +275,8 @@ window.openAdminPanel = function() {
   document.getElementById("adminPanelModal").style.display = "flex";
 };
 
-window.closeAdminPanelModal = function(e) {
-  if (!e || e.target.id === "adminPanelModal" || e.target.classList.contains("close-modal")) {
-    document.getElementById("adminPanelModal").style.display = "none";
-  }
+window.closeAdminPanelModal = function() {
+  document.getElementById("adminPanelModal").style.display = "none";
 };
 
 function renderInpageAdminTable() {
@@ -322,7 +314,6 @@ window.approvePendingSubmission = async function(index) {
     name: approvedItem.title,
     district: approvedItem.district.toLowerCase(),
     village: approvedItem.village || "",
-    landmark: approvedItem.landmark || "",
     coords: approvedItem.coords,
     image: approvedItem.image,
     imageUrl: approvedItem.image,
@@ -342,7 +333,7 @@ window.approvePendingSubmission = async function(index) {
   pendingItems.splice(index, 1);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingItems));
 
-  alert(`✅ "${approvedItem.title}" has successfully passed the Trust Engine and is now live!`);
+  alert(`✅ "${approvedItem.title}" अप्रूव होकर लाइव हो गया है!`);
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
@@ -371,8 +362,8 @@ window.openLoginModal = function() {
   else document.getElementById("loginModal").style.display = "flex";
 };
 
-window.closeLoginModal = function(e) {
-  if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) document.getElementById("loginModal").style.display = "none";
+window.closeLoginModal = function() {
+  document.getElementById("loginModal").style.display = "none";
 };
 
 window.switchMobileTab = function(tab) {
@@ -407,11 +398,9 @@ window.open360Viewer = function(itemId) {
   }, 200);
 };
 
-window.closePanoramaModal = function(e) {
-  if (!e || e.target.id === "panoramaModal" || e.target.classList.contains("close-modal")) {
-    document.getElementById("panoramaModal").style.display = "none";
-    if (pannellumViewerInstance) { try { pannellumViewerInstance.destroy(); } catch(e) {} }
-  }
+window.closePanoramaModal = function() {
+  document.getElementById("panoramaModal").style.display = "none";
+  if (pannellumViewerInstance) { try { pannellumViewerInstance.destroy(); } catch(e) {} }
 };
 
 window.focusOnMapTab = function(lat, lng) {
