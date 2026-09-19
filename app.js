@@ -1,6 +1,6 @@
 /**
  * VratyaVani AI — Community-Verified Immersive Heritage Network
- * Stable & Clean Fixed Version for Upload and District Input
+ * Stable Fixed Version: Prevents form flashing and ensures smooth Admin Approval sync.
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -25,18 +25,9 @@ window.mapInstance = null;
 let mapMarkers = [];
 let pannellumViewerInstance = null;
 let citizenUploadedBase64 = null;
-let adminUploadedBase64 = null;
 
 const STORAGE_KEY = "vratyavani_custom_records";
 const PENDING_KEY = "vratyavani_pending_submissions";
-
-const districtCentres = {
-  muzaffarpur: [26.1245, 85.3902],
-  patna: [25.5941, 85.1376],
-  varanasi: [25.3109, 83.0107],
-  amritsar: [31.6200, 74.8765],
-  gaya: [24.7914, 85.0002]
-};
 
 const stateDistrictHints = {
   bihar: ["Muzaffarpur", "Patna", "Gaya"],
@@ -44,47 +35,22 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-const uiStrings = {
-  "hi-IN": {
-    heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
-    heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
-    mapTitle: "📍 Living Heritage Clusters & Map",
-    voiceConsoleTitle: "🎙️ Multilingual AI Story Mode",
-    nowPlayingDefault: "इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...",
-    emptyMsg: "इस ज़िले में अभी कोई रिकॉर्ड नहीं है। 'Submit Upcoming Heritage' से नया डेटा जोड़ें।",
-    heritageLabel: "🏛️ Trust & Heritage Overview:",
-    cultureLabel: "🎭 Living Culture & Ritual:"
-  },
-  "en-IN": {
-    heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
-    heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
-    mapTitle: "📍 Living Heritage Clusters & Map",
-    voiceConsoleTitle: "🎙️ Multilingual AI Story Mode",
-    nowPlayingDefault: "Choose 'History' or 'Living Culture' to experience immersive AI narration...",
-    emptyMsg: "No records found in this district. Please submit upcoming heritage.",
-    heritageLabel: "🏛️ Trust & Heritage Overview:",
-    cultureLabel: "🎭 Living Culture & Ritual:"
-  }
-};
-
 function populatePanIndiaStateDropdowns() {
-  const dropdownIds = ['selState', 'citState', 'recState'];
-  dropdownIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = "";
-    const states = [
-      { code: 'bihar', name: 'Bihar (बिहार)' },
-      { code: 'up', name: 'Uttar Pradesh (उत्तर प्रदेश)' },
-      { code: 'punjab', name: 'Punjab (पंजाब)' }
-    ];
-    states.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.code;
-      opt.innerText = s.name;
-      el.appendChild(opt);
-    });
+  const el = document.getElementById('selState');
+  if (!el) return;
+  el.innerHTML = "";
+  const states = [
+    { code: 'bihar', name: 'Bihar (बिहार)' },
+    { code: 'up', name: 'Uttar Pradesh (उत्तर प्रदेश)' },
+    { code: 'punjab', name: 'Punjab (पंजाब)' }
+  ];
+  states.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.code;
+    opt.innerText = s.name;
+    el.appendChild(opt);
   });
+  window.onStateSelectionChanged('bihar');
 }
 
 window.onStateSelectionChanged = function(stateCode) {
@@ -108,9 +74,9 @@ window.startAppFlow = function() {
       setTimeout(() => {
         splash.style.display = "none";
         document.getElementById("locationModal").style.display = "flex";
-      }, 500);
+      }, 400);
     }
-  }, 800);
+  }, 600);
 };
 
 window.openLocationModalDirect = function() { document.getElementById("locationModal").style.display = "flex"; };
@@ -206,40 +172,32 @@ function renderCards(preloadedItems) {
   if (!container) return;
   container.innerHTML = "";
 
-  const t = uiStrings[window.currentLanguage] || uiStrings["hi-IN"];
   let items = preloadedItems || getCustomRecords().filter(c => c.district?.toLowerCase() === window.currentDistrict.toLowerCase());
 
   if (items.length === 0) {
-    container.innerHTML = `<div style="color:var(--text-muted); padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">${t.emptyMsg}</div>`;
+    container.innerHTML = `<div style="color:#64748b; padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">इस ज़िले में अभी कोई रिकॉर्ड नहीं है। 'Submit Upcoming Heritage' से नया डेटा जोड़ें।</div>`;
     return;
   }
 
   items.forEach(item => {
     let titleText = item.name || item.title || "Heritage Site";
-    let heritageDescText = item.story || item.desc || "Historical monument overview.";
-    let livingCultureText = item.livingCulture || "Local sacred tradition.";
-
+    let descText = item.story || item.desc || "Historical monument overview.";
+    let ritualText = item.livingCulture || "Local sacred tradition.";
     let displayImage = item.imageUrl || item.image || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     const itemId = item.id || item.name || "item_" + Math.random();
 
     const cardHtml = `
-      <div class="unified-card">
-        <div class="card-image-wrap" onclick="open360Viewer('${itemId}')" style="cursor:pointer;">
-          <img src="${displayImage}" alt="${titleText}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc';" loading="lazy" />
-          <span class="btn-view360-badge">🌐 360° WebXR</span>
+      <div class="unified-card" style="background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:15px;">
+        <div onclick="open360Viewer('${itemId}')" style="cursor:pointer; position:relative;">
+          <img src="${displayImage}" alt="${titleText}" style="width:100%; height:180px; object-fit:cover; border-radius:8px;" />
+          <span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.7); color:#fff; padding:3px 8px; font-size:10px; border-radius:4px;">🌐 360° WebXR</span>
         </div>
-        <div class="card-dual-content">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${titleText}</h4>
-            <span class="risk-badge" style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:bold;">🟢 VERIFIED TRUST</span>
-          </div>
-          <div style="font-size:11px; color:#c2410c; font-weight:700;">📍 ${item.village || ''} ${item.landmark ? `• ${item.landmark}` : ''}</div>
-          <div class="heritage-block"><strong>${t.heritageLabel}</strong> ${heritageDescText}</div>
-          <div class="culture-block"><strong>${t.cultureLabel}</strong> ${livingCultureText}</div>
-          <div class="card-actions" style="margin-top:6px;">
-            <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">📍 Map</button>
-            <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${itemId}')">360° View</button>
-          </div>
+        <div style="margin-top:10px;">
+          <h4 style="font-size:16px; font-weight:700; color:#1e1b4b; margin-bottom:4px;">${titleText}</h4>
+          <div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:6px;">📍 ${item.village || ''} ${item.landmark ? `• ${item.landmark}` : ''}</div>
+          <p style="font-size:12px; color:#334155; margin-bottom:6px;"><strong>विवरण:</strong> ${descText}</p>
+          <p style="font-size:12px; color:#6b21a8; margin-bottom:10px;"><strong>संस्कृति:</strong> ${ritualText}</p>
+          <button type="button" class="btn-sm" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})" style="background:#e0f2fe; color:#0369a1; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">📍 Map पर देखें</button>
         </div>
       </div>
     `;
@@ -247,7 +205,6 @@ function renderCards(preloadedItems) {
   });
 }
 
-// CITIZEN SUBMISSION WITH IMAGE PREVIEW FIX
 window.previewCitizenImage = function(event) {
   const file = event.target.files[0];
   if (file) {
@@ -270,18 +227,18 @@ window.handleCitizenSubmit = function(e) {
     title: document.getElementById("citTitle").value.trim(),
     district: document.getElementById("citDistrict").value.trim().toLowerCase(),
     village: document.getElementById("citVillage").value.trim() || "Local Area",
-    landmark: document.getElementById("citLandmark").value.trim() || "",
+    landmark: "",
     ritual: document.getElementById("citRitual").value.trim(),
     coords: document.getElementById("citCoords").value.split(",").map(v => parseFloat(v.trim())),
     story: document.getElementById("citStory").value.trim(),
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    aiValidation: "✓ Metadata Verified | GPS Consistent"
+    aiValidation: "✓ Metadata Verified"
   };
 
   const pendingQueue = getPendingSubmissions();
   pendingQueue.unshift(pendingItem);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingQueue));
-  alert(`🛡️ Trust Engine Success: "${pendingItem.title}" submitted for review!`);
+  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक एडमिन अप्रूवल के लिए भेज दिया गया है!`);
   e.target.reset();
   citizenUploadedBase64 = null;
   const boxEl = document.getElementById("citImagePreviewBox");
@@ -307,18 +264,17 @@ function renderInpageAdminTable() {
   const pendingItems = getPendingSubmissions();
 
   if (pendingItems.length === 0) {
-    pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:8px; text-align:center; color:#64748b;">No pending submissions.</td></tr>`;
+    pendingTbody.innerHTML = `<tr><td colspan="3" style="padding:10px; text-align:center; color:#64748b;">No pending submissions.</td></tr>`;
     return;
   }
 
   pendingItems.forEach((pItem, index) => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td style="padding:6px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
-      <td style="padding:6px; border:1px solid #e2e8f0;">${pItem.district}</td>
-      <td style="padding:6px; border:1px solid #e2e8f0; color:#15803d; font-size:10px;">${pItem.aiValidation}</td>
-      <td style="padding:6px; border:1px solid #e2e8f0;">
-        <button onclick="approvePendingSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
+      <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
+      <td style="padding:8px; border:1px solid #e2e8f0;">${pItem.district}</td>
+      <td style="padding:8px; border:1px solid #e2e8f0;">
+        <button type="button" onclick="approvePendingSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
       </td>
     `;
     pendingTbody.appendChild(row);
@@ -355,14 +311,16 @@ window.approvePendingSubmission = async function(index) {
   pendingItems.splice(index, 1);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingItems));
 
-  alert(`✅ Approved and synced to Firebase Cloud successfully!`);
+  alert(`✅ "${approvedItem.title}" अप्रूव हो गया है और लाइव हो गया है!`);
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
 
 window.handleAdminLogin = function(e) {
   e.preventDefault();
-  if (document.getElementById("adminUserId").value.trim() === "admin" && document.getElementById("adminPassword").value.trim() === "Admin@2026") {
+  const uid = document.getElementById("adminUserId").value.trim();
+  const pass = document.getElementById("adminPassword").value.trim();
+  if (uid === "admin" && pass === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
     document.getElementById("loginModal").style.display = "none";
     openAdminPanel();
@@ -381,48 +339,9 @@ window.openLoginModal = function() {
   if (sessionStorage.getItem("vratyavani_admin_auth") === "true") openAdminPanel();
   else document.getElementById("loginModal").style.display = "flex";
 };
+
 window.closeLoginModal = function(e) {
   if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) document.getElementById("loginModal").style.display = "none";
-};
-
-window.previewAdminImage = function(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      adminUploadedBase64 = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-window.handleAdminSubmit = async function(e) {
-  e.preventDefault();
-  const directRecord = {
-    id: `rec_${Date.now()}`,
-    name: document.getElementById("recTitle").value.trim(),
-    district: document.getElementById("recDistrict").value.trim().toLowerCase(),
-    coords: document.getElementById("recCoords").value.split(",").map(v => parseFloat(v.trim())),
-    image: adminUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    imageUrl: adminUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    story: document.getElementById("recDesc").value.trim(),
-    livingCulture: document.getElementById("recRitual").value.trim(),
-    createdAt: new Date().toLocaleString()
-  };
-
-  try {
-    await setDoc(doc(db, "vratyavani_records", directRecord.id), directRecord);
-  } catch (err) {}
-
-  let customRecords = getCustomRecords();
-  customRecords.unshift(directRecord);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
-
-  alert(`🎉 Published directly to Firebase Cloud!`);
-  e.target.reset();
-  adminUploadedBase64 = null;
-  closeAdminPanelModal();
-  loadDistrictData(window.currentDistrict);
 };
 
 window.switchMobileTab = function(tab) {
@@ -473,6 +392,5 @@ window.focusOnMapTab = function(lat, lng) {
 };
 
 window.showQrModal = function() { alert("Spot QR Code Scanner Active for Offline Mode."); };
-window.closeQrModal = function() {};
 window.openCitizenModal = function() { document.getElementById("citizenModal").style.display = "flex"; };
 window.closeCitizenModal = function() { document.getElementById("citizenModal").style.display = "none"; };

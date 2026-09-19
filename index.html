@@ -18,46 +18,22 @@
 
   <!-- Modern Animated Splash Screen -->
   <div id="splashScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #1e1b4b, #31103c, #0f172a); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, transform 0.8s ease;">
-    <div style="position: relative; width: 85px; height: 85px; background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(217, 119, 6, 0.45); animation: pulseLogo 2s infinite ease-in-out;">
-      <span style="font-size: 50px; font-weight: 900; color: #ffffff; font-family: 'Cinzel', serif; letter-spacing: -2px; text-shadow: 0 2px 5px rgba(0,0,0,0.3);">V</span>
+    <div style="position: relative; width: 85px; height: 85px; background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(217, 119, 6, 0.45);">
+      <span style="font-size: 50px; font-weight: 900; color: #ffffff; font-family: 'Cinzel', serif;">V</span>
     </div>
-    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; margin-top: 18px; font-family: 'Cinzel', serif; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(255,255,255,0.2);">
+    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; margin-top: 18px; font-family: 'Cinzel', serif;">
       VratyaVani AI
     </h1>
-    <div style="margin-top: 6px; overflow: hidden; border-right: 2px solid #f59e0b; white-space: nowrap; animation: typing 2.2s steps(28, end), blink-caret 0.75s step-end infinite;">
-      <p style="color: #cbd5e1; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-family: sans-serif; margin: 0;">
-        Immersive Heritage & Preservation Network
-      </p>
-    </div>
   </div>
-
-  <style>
-    @keyframes pulseLogo {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-      70% { transform: scale(1.06); box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-    }
-    @keyframes typing {
-      from { width: 0 }
-      to { width: 100% }
-    }
-    @keyframes blink-caret {
-      from, to { border-color: transparent }
-      50% { border-color: #f59e0b; }
-    }
-  </style>
 
   <!-- Territory Setup Modal -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:22px;">🏛️</span>
-          <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Network</h3>
-        </div>
+        <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Network</h3>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Discover → Verify → Experience → Preserve</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">राज्य और ज़िला चुनें</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -70,7 +46,7 @@
           <datalist id="districtDatalist"></datalist>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Voice Guide Dialect (भाषा / बोली)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Voice Guide Dialect (भाषा)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
             <option value="hi-IN" selected>हिंदी (Hindi)</option>
             <option value="en-IN">English</option>
@@ -79,7 +55,7 @@
             <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
           </select>
         </div>
-        <button onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
+        <button type="button" onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
           Explore Network ➔
         </button>
       </div>
@@ -96,10 +72,10 @@
       </div>
     </div>
     <div class="nav-controls">
-      <button class="btn-reselect" onclick="openLocationModalDirect()">
+      <button type="button" class="btn-reselect" onclick="openLocationModalDirect()">
         📍 <span id="navDistrictLabel">MUZAFFARPUR</span> • <span id="navLangLabel">HI</span>
       </button>
-      <span id="networkStatusBadge" class="network-badge online">● Firebase Cloud Sync</span>
+      <span id="networkStatusBadge" class="network-badge online">● Cloud Sync</span>
     </div>
   </header>
 
@@ -107,18 +83,8 @@
   <section class="hero-banner">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">India's Community-Verified Immersive Heritage & Preservation Network</p>
-    <div class="hero-badges">
-      <span>🛡️ Trust Engine</span>
-      <span>🚨 Risk Radar</span>
-      <span>☁️ Firebase Sync</span>
-      <span>🎙️ AI Story Modes</span>
-      <span>🛍️ Artisan Bridge</span>
-    </div>
     <div style="margin-top: 12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-      <button id="btnRadarTrigger" onclick="detectNearbyHeritageRadar()" style="background:#38bdf8; color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
-        📡 Heritage Risk Radar
-      </button>
-      <button id="btnCitizenTrigger" onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
+      <button type="button" onclick="openCitizenModal()" style="background:var(--accent-gold); color:#000; border:none; padding:7px 14px; border-radius:20px; font-weight:800; font-size:11px; cursor:pointer;">
         ➕ Submit Upcoming Heritage
       </button>
     </div>
@@ -134,17 +100,12 @@
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
           <option value="hi-IN" selected>हिंदी (Hindi)</option>
           <option value="en-IN">English</option>
-          <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
-          <option value="mai-IN">मैथिली (Maithili)</option>
-          <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
         </select>
       </div>
-      <div class="audio-now-playing" id="nowPlayingText">
-        Select 'History' or 'Living Culture' to experience immersive AI narration...
-      </div>
+      <div class="audio-now-playing" id="nowPlayingText">इतिहास या जीवंत संस्कृति सुनकर अनुभव करें...</div>
       <div class="audio-controls">
-        <button id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Narrative</button>
-        <button id="qrGuideBtn" onclick="showQrModal()">📲 Spot QR Guide</button>
+        <button type="button" id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Narrative</button>
+        <button type="button" onclick="showQrModal()">📲 Spot QR Guide</button>
       </div>
     </div>
   </main>
@@ -156,18 +117,13 @@
       <span id="currentDistrictBadge">MUZAFFARPUR</span>
     </div>
     <div id="map"></div>
-    <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct">
-      🗺️ Open Heritage Circuit in Google Maps
-    </a>
   </main>
 
   <!-- 360 Panorama Modal -->
   <div id="panoramaModal" class="modal-backdrop" onclick="closePanoramaModal(event)">
     <div class="modal-box modal-box-animated" style="background:#0f172a; color:#fff; max-width:750px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <h3 id="panoTitle" style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:16px;">WebXR 360° Immersive Tour</h3>
-        </div>
+        <h3 id="panoTitle" style="color:var(--accent-gold); font-size:16px;">WebXR 360° Immersive Tour</h3>
         <span class="close-modal" onclick="closePanoramaModal()">&times;</span>
       </div>
       <div id="panoramaContainer" style="width:100%; height:360px; border-radius:10px; margin-top:10px;"></div>
@@ -178,71 +134,44 @@
   <div id="citizenModal" class="modal-backdrop" onclick="closeCitizenModal(event)">
     <div class="modal-box modal-box-animated" style="text-align:left; max-width:480px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <h3 id="citModalHead" style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ Submit Upcoming Heritage</h3>
+        <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ Submit Upcoming Heritage</h3>
         <span class="close-modal" onclick="closeCitizenModal()">&times;</span>
       </div>
-      <p id="citModalDesc" style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
-        Contribute unknown heritage. Verified via Trust Engine (Metadata + AI Validation).
-      </p>
 
-      <form id="citizenForm" onsubmit="handleCitizenSubmit(event)">
+      <form id="citizenForm" onsubmit="handleCitizenSubmit(event); return false;">
         <div style="display:flex; flex-direction:column; gap:8px;">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div>
-              <label id="lblCitState" style="font-size:10px; font-weight:700;">State</label>
-              <select id="citState" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;"></select>
-            </div>
-            <div>
-              <label id="lblCitDist" style="font-size:10px; font-weight:700;">District</label>
-              <input type="text" id="citDistrict" placeholder="Muzaffarpur" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
-            </div>
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div>
-              <label id="lblCitVillage" style="font-size:10px; font-weight:700;">Village / Area</label>
-              <input type="text" id="citVillage" placeholder="Purani Bazar" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
-            </div>
-            <div>
-              <label id="lblCitLandmark" style="font-size:10px; font-weight:700;">Landmark</label>
-              <input type="text" id="citLandmark" placeholder="Near Temple" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
-            </div>
-          </div>
-
           <div>
-            <label id="lblCitTitle" style="font-size:10px; font-weight:700;">Heritage Name</label>
-            <input type="text" id="citTitle" placeholder="Shrine Name" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">District (ज़िला)</label>
+            <input type="text" id="citDistrict" placeholder="Muzaffarpur" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
-
           <div>
-            <label id="lblCitRitual" style="font-size:10px; font-weight:700;">Living Culture / Ritual</label>
-            <input type="text" id="citRitual" placeholder="Annual folk festival" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">Village / Area (गाँव/क्षेत्र)</label>
+            <input type="text" id="citVillage" placeholder="Purani Bazar" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
-
           <div>
-            <label id="lblCitPhoto" style="font-size:10px; font-weight:700;">Evidence Photo (Metadata & GPS Verified)</label>
-            <input type="file" id="citPhotoInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
+            <label style="font-size:10px; font-weight:700;">Heritage Name (धरोहर का नाम)</label>
+            <input type="text" id="citTitle" placeholder="Durga Mandir" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">Living Culture / Ritual (संस्कृति/परंपरा)</label>
+            <input type="text" id="citRitual" placeholder="Aarti & Prayer" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">Evidence Photo (फोटो)</label>
+            <input type="file" id="citPhotoInput" accept="image/*" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
-              <img id="citPreviewImg" src="" style="max-height:120px; border-radius:6px; border:1px solid var(--border-color);" />
+              <img id="citPreviewImg" src="" style="max-height:100px; border-radius:5px;" />
             </div>
           </div>
-
           <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label id="lblCitCoords" style="font-size:10px; font-weight:700;">GPS Coordinates</label>
-              <button type="button" onclick="detectLiveGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 6px; border-radius:4px; font-size:10px; cursor:pointer;">
-                📍 Auto GPS
-              </button>
-            </div>
-            <input type="text" id="citCoords" placeholder="26.1245, 85.3902" required style="width:100%; padding:6px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; margin-top:3px;" />
+            <label style="font-size:10px; font-weight:700;">GPS Coordinates (GPS)</label>
+            <input type="text" id="citCoords" required value="26.1245, 85.3902" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
-
           <div>
-            <label id="lblCitStory" style="font-size:10px; font-weight:700;">Oral Narrative / Description</label>
-            <textarea id="citStory" rows="3" placeholder="Local historical background..." required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-size:11px; font-family:inherit;"></textarea>
+            <label style="font-size:10px; font-weight:700;">Oral Narrative (विवरण)</label>
+            <textarea id="citStory" rows="2" required placeholder="Historical background..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></textarea>
           </div>
-
-          <button type="submit" id="btnCitSubmit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+          <button type="submit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
             Submit to Trust Engine
           </button>
         </div>
@@ -253,20 +182,16 @@
   <!-- Mobile Bottom Navigation Bar -->
   <nav class="bottom-app-bar">
     <div class="bottom-nav-item active" id="btnNavHome" onclick="switchMobileTab('home')">
-      <span class="icon">🏛️</span>
-      <span>Home</span>
+      <span class="icon">🏛️</span><span>Home</span>
     </div>
     <div class="bottom-nav-item" id="btnNavMap" onclick="switchMobileTab('map')">
-      <span class="icon">📍</span>
-      <span>Map</span>
+      <span class="icon">📍</span><span>Map</span>
     </div>
     <div class="bottom-nav-item" onclick="openLocationModalDirect()">
-      <span class="icon">🌐</span>
-      <span>Territory</span>
+      <span class="icon">🌐</span><span>Territory</span>
     </div>
     <div class="bottom-nav-item" onclick="openLoginModal()">
-      <span class="icon">⚙️</span>
-      <span>Admin</span>
+      <span class="icon">⚙️</span><span>Admin</span>
     </div>
   </nav>
 
@@ -275,104 +200,54 @@
     <div class="modal-box" style="text-align: left;">
       <span class="close-modal" onclick="closeLoginModal()">&times;</span>
       <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin-bottom: 4px;">Trust Engine Curation Gate</h3>
-      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event); return false;">
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:11px; font-weight:700;">Admin ID</label>
-            <input type="text" id="adminUserId" placeholder="admin" required style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px;" />
+            <input type="text" id="adminUserId" placeholder="admin" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;" />
           </div>
           <div>
             <label style="font-size:11px; font-weight:700;">Password</label>
-            <input type="password" id="adminPassword" placeholder="••••••••" required style="width:100%; padding:8px; border:1px solid var(--border-color); border-radius:6px;" />
+            <input type="password" id="adminPassword" placeholder="Admin@2026" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;" />
           </div>
           <button type="submit" style="margin-top:6px; padding:10px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
-            Access Curation Desk
+            Access Desk
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Admin Approval & Verification Desk -->
+  <!-- Admin Approval Desk -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="closeAdminPanelModal(event)">
-    <div class="modal-box" style="text-align: left; max-width: 680px;">
+    <div class="modal-box" style="text-align: left; max-width: 650px;">
       <span class="close-modal" onclick="closeAdminPanelModal()">&times;</span>
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:8px; margin-bottom:12px;">
-        <div>
-          <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin:0;">🛡️ VratyaVani Trust & Curation Desk</h3>
-          <span style="font-size:11px; color:#15803d; font-weight:bold;">● Firebase Cloud Sync Active</span>
-        </div>
-        <button onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Logout</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
+        <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin:0;">🛡️ Trust & Curation Desk</h3>
+        <button type="button" onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
-      <h4 style="margin-top:4px; font-size:13px; color:#c2410c;">
-        📥 Pending Community Submissions (Trust Engine Review Queue)
-      </h4>
-      <div style="max-height:160px; overflow-y:auto; margin-top:6px; margin-bottom:16px; border:1px solid #cbd5e1; border-radius:6px;">
+      <h4 style="font-size:12px; color:#c2410c; margin-bottom:6px;">📥 Pending Community Submissions (Approval Queue)</h4>
+      <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:15px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#fef2f2; text-align:left;">
               <th style="padding:6px; border:1px solid #e2e8f0;">Title</th>
-              <th style="padding:6px; border:1px solid #e2e8f0;">District / Village</th>
-              <th style="padding:6px; border:1px solid #e2e8f0;">AI Validation Check</th>
+              <th style="padding:6px; border:1px solid #e2e8f0;">District</th>
               <th style="padding:6px; border:1px solid #e2e8f0;">Action</th>
             </tr>
           </thead>
           <tbody id="pendingCitizenTableBody">
-            <tr><td colspan="4" style="padding:8px; text-align:center; color:#64748b;">No pending submissions in queue.</td></tr>
+            <tr><td colspan="3" style="padding:8px; text-align:center; color:#64748b;">No pending submissions.</td></tr>
           </tbody>
         </table>
       </div>
-
-      <h4 style="font-size:13px; color:var(--primary-deep); border-top:1px solid var(--border-color); padding-top:10px;">
-        ➕ Direct Verified Record Publication (Firebase Cloud)
-      </h4>
-      <form id="addRecordForm" onsubmit="handleAdminSubmit(event)">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-          <div>
-            <label style="font-size:11px; font-weight:bold;">State</label>
-            <select id="recState" required style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;"></select>
-          </div>
-          <div>
-            <label style="font-size:11px; font-weight:bold;">District</label>
-            <input type="text" id="recDistrict" required placeholder="Muzaffarpur" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
-          </div>
-          <div style="grid-column:1/-1;">
-            <label style="font-size:11px; font-weight:bold;">Heritage Site Name</label>
-            <input type="text" id="recTitle" required placeholder="Durga Mandir" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
-          </div>
-          <div style="grid-column:1/-1;">
-            <label style="font-size:11px; font-weight:bold;">Living Cultural Ritual</label>
-            <input type="text" id="recRitual" required placeholder="Aarti & Prayer" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
-          </div>
-          <div>
-            <label style="font-size:11px; font-weight:bold;">Coordinates</label>
-            <input type="text" id="recCoords" required value="26.1245, 85.3902" style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px;" />
-          </div>
-          <div>
-            <label style="font-size:11px; font-weight:bold;">Upload Image</label>
-            <input type="file" id="recPhotoFile" accept="image/*" capture="environment" onchange="previewAdminImage(event)" style="width:100%; font-size:11px; padding:4px;" />
-          </div>
-          <div style="grid-column:1/-1;">
-            <label style="font-size:11px; font-weight:bold;">Oral Narrative Script</label>
-            <textarea id="recDesc" rows="2" required placeholder="Historical background..." style="width:100%; padding:7px; border:1px solid var(--border-color); border-radius:5px; font-family:inherit;"></textarea>
-          </div>
-        </div>
-        <button type="submit" style="margin-top:10px; width:100%; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
-          Publish to Firebase Cloud
-        </button>
-      </form>
     </div>
   </div>
-
-  <footer class="footer">
-    <p><strong>VratyaVani AI</strong> — India's Community-Verified Immersive Heritage Network (SIH26197)</p>
-  </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   <script src="data.js"></script>
-  <!-- type="module" होना अनिवार्य है क्योंकि app.js में Firebase import है -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
