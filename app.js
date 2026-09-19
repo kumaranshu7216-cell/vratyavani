@@ -3,8 +3,8 @@
  * Architecture: Trust Engine + Risk Radar + Firebase Cloud Sync + Multi-Language AI Narration
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -87,7 +87,7 @@ const uiStrings = {
     btnView360: "🌐 360° ਦ੍ਰਿਸ਼",
     btnPlay: "▶ Play Narrative",
     emptyMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
-    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
+    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣकारी:",
     cultureLabel: "🎭 ਜਿਉਂਦੀ ਪਰੰਪਰਾ:"
   },
   "bho-IN": {
@@ -146,7 +146,7 @@ window.onStateSelectionChanged = function(stateCode) {
   if (distInput) distInput.value = hints[0];
 };
 
-function startAppFlow() {
+window.startAppFlow = function() {
   populatePanIndiaStateDropdowns();
   setTimeout(() => {
     const splash = document.getElementById("splashScreen");
@@ -158,7 +158,7 @@ function startAppFlow() {
       }, 700);
     }
   }, 1000);
-}
+};
 
 window.openLocationModalDirect = function() { document.getElementById("locationModal").style.display = "flex"; };
 window.closeLocationModal = function() { document.getElementById("locationModal").style.display = "none"; };
@@ -226,7 +226,6 @@ function getPendingSubmissions() {
   } catch (e) { return []; }
 }
 
-// SYNC DATA FROM FIREBASE FIRESTORE
 async function syncCloudHeritage() {
   try {
     const querySnapshot = await getDocs(collection(db, "vratyavani_records"));
@@ -324,7 +323,6 @@ function renderCards(preloadedItems) {
   });
 }
 
-// CITIZEN SUBMISSION
 window.handleCitizenSubmit = function(e) {
   e.preventDefault();
   const pendingItem = {
@@ -348,7 +346,6 @@ window.handleCitizenSubmit = function(e) {
   closeCitizenModal();
 };
 
-// ADMIN APPROVAL & FIREBASE SYNC
 window.openAdminPanel = function() {
   renderInpageAdminTable();
   document.getElementById("adminPanelModal").style.display = "flex";
@@ -404,7 +401,6 @@ window.approvePendingSubmission = async function(index) {
     createdAt: new Date().toLocaleString()
   };
 
-  // Save to Firebase Cloud Firestore
   try {
     await setDoc(doc(db, "vratyavani_records", verifiedRecord.id), verifiedRecord);
   } catch (err) {}
