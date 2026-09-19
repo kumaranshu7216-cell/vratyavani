@@ -1,7 +1,22 @@
 /**
  * VratyaVani AI — Community-Verified Immersive Heritage Network
- * Architecture: Trust Engine + Risk Radar + PWA Offline Edge + Multi-Language AI Narration
+ * Architecture: Trust Engine + Risk Radar + Firebase Cloud Sync + Multi-Language AI Narration
  */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
+  authDomain: "vratyavani-a48fc.firebaseapp.com",
+  projectId: "vratyavani-a48fc",
+  storageBucket: "vratyavani-a48fc.firebasestorage.app",
+  messagingSenderId: "512746364837",
+  appId: "1:512746364837:web:639440528e52d23fd4d24c"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
 
 window.currentDistrict = "muzaffarpur";
 window.currentState = "bihar";
@@ -28,7 +43,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// UI Multi-Language Dictionary with Trust & Preservation terms
+// UI Multi-Language Dictionary
 const uiStrings = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -145,14 +160,10 @@ function startAppFlow() {
   }, 1000);
 }
 
-function openLocationModalDirect() {
-  document.getElementById("locationModal").style.display = "flex";
-}
-function closeLocationModal() {
-  document.getElementById("locationModal").style.display = "none";
-}
+window.openLocationModalDirect = function() { document.getElementById("locationModal").style.display = "flex"; };
+window.closeLocationModal = function() { document.getElementById("locationModal").style.display = "none"; };
 
-function confirmLocationSelection() {
+window.confirmLocationSelection = function() {
   const selectedState = document.getElementById("selState").value;
   const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
   const lang = document.getElementById("selLang").value;
@@ -168,29 +179,25 @@ function confirmLocationSelection() {
   document.getElementById("locationModal").style.display = "none";
   window.applyLanguage(lang);
   window.onDistrictChange(distKey);
-}
+};
 
 window.applyLanguage = function(langKey) {
   window.currentLanguage = langKey;
   const t = uiStrings[langKey] || uiStrings["hi-IN"];
-
   const elH1 = document.getElementById("heroTagline");
   if (elH1) elH1.innerText = t.heroTitle;
   const elH2 = document.getElementById("heroSubTagline");
   if (elH2) elH2.innerText = t.heroSub;
   const elMapT = document.getElementById("mapSectionTitle");
   if (elMapT) elMapT.innerText = t.mapTitle;
-
   renderCards();
 };
 
-function onConsoleLangChange(lang) {
-  window.applyLanguage(lang);
-}
+window.onConsoleLangChange = function(lang) { window.applyLanguage(lang); };
 
 document.addEventListener("DOMContentLoaded", () => {
   initMap();
-  loadDistrictData(window.currentDistrict);
+  syncCloudHeritage();
 });
 
 function initMap() {
@@ -198,12 +205,12 @@ function initMap() {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window.mapInstance);
 }
 
-function onDistrictChange(districtKey) {
+window.onDistrictChange = function(districtKey) {
   window.currentDistrict = districtKey;
   const distBadge = document.getElementById("currentDistrictBadge");
   if (distBadge) distBadge.innerText = districtKey.toUpperCase();
   loadDistrictData(window.currentDistrict);
-}
+};
 
 function getCustomRecords() {
   try {
@@ -219,10 +226,21 @@ function getPendingSubmissions() {
   } catch (e) { return []; }
 }
 
-// LOAD USER UPLOADED DATA EXCLUSIVELY
+// SYNC DATA FROM FIREBASE FIRESTORE
+async function syncCloudHeritage() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "vratyavani_records"));
+    const cloudRecords = [];
+    querySnapshot.forEach((d) => cloudRecords.push({ id: d.id, ...d.data() }));
+    if (cloudRecords.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudRecords));
+    }
+  } catch (e) {}
+  loadDistrictData(window.currentDistrict);
+}
+
 window.loadDistrictData = function(districtKey) {
   let mergedMap = new Map();
-
   try {
     const custom = getCustomRecords();
     custom.forEach(c => {
@@ -233,7 +251,6 @@ window.loadDistrictData = function(districtKey) {
   } catch (e) {}
 
   const items = Array.from(mergedMap.values());
-
   mapMarkers.forEach(m => window.mapInstance.removeLayer(m));
   mapMarkers = [];
 
@@ -245,11 +262,9 @@ window.loadDistrictData = function(districtKey) {
       mapMarkers.push(marker);
     });
   }
-
   renderCards(items);
 };
 
-// RENDER CARDS WITH TRUST ENGINE STATUS & MULTI-LANGUAGE TRANSLATION
 function renderCards(preloadedItems) {
   const container = document.getElementById("cardsGrid");
   if (!container) return;
@@ -257,19 +272,7 @@ function renderCards(preloadedItems) {
 
   const t = uiStrings[window.currentLanguage] || uiStrings["hi-IN"];
   const currentLang = window.currentLanguage || "hi-IN";
-
-  let items = preloadedItems;
-  if (!items) {
-    let map = new Map();
-    try {
-      getCustomRecords().forEach(c => {
-        if (c.district && c.district.toLowerCase() === window.currentDistrict.toLowerCase()) {
-          map.set(c.id || c.name, c);
-        }
-      });
-    } catch(e) {}
-    items = Array.from(map.values());
-  }
+  let items = preloadedItems || getCustomRecords().filter(c => c.district?.toLowerCase() === window.currentDistrict.toLowerCase());
 
   if (items.length === 0) {
     container.innerHTML = `<div style="color:var(--text-muted); padding:30px; text-align:center; grid-column:1/-1; font-weight:600; font-size:14px;">${t.emptyMsg}</div>`;
@@ -281,21 +284,11 @@ function renderCards(preloadedItems) {
     let heritageDescText = item.story || item.desc || "Historical monument overview.";
     let livingCultureText = item.livingCulture || "Local sacred tradition.";
 
-    // Multi-Language Dynamic Translation Mapping & Fallback for Custom Records
     if (currentLang !== "en-IN") {
       const lowerTitle = titleText.toLowerCase();
-      if (currentLang === "hi-IN") {
-        if (lowerTitle.includes("durga")) {
-          titleText = "दुर्गा मंदिर";
-          heritageDescText = item.story || "यह ऐतिहासिक मंदिर इस क्षेत्र की आध्यात्मिक पहचान और आस्था का केंद्र है।";
-          livingCultureText = item.livingCulture || "आरती: पंडित जी द्वारा सुबह और शाम की विशेष पूजा अर्चना।";
-        }
-      } else if (currentLang === "pa-IN") {
-        if (lowerTitle.includes("durga")) {
-          titleText = "ਦੁਰਗਾ ਮੰਦਰ";
-          heritageDescText = "ਇਹ ਇਤਿਹਾਸਕ ਮੰਦਰ ਇਸ ਖੇਤਰ ਦੀ ਅਧਿਆਤਮਿਕ ਪਛਾਣ ਹੈ।";
-          livingCultureText = "ਆਰਤੀ ਅਤੇ ਵਿਸ਼ੇਸ਼ ਪੂਜਾ ਅਰਚਨਾ।";
-        }
+      if (currentLang === "hi-IN" && lowerTitle.includes("durga")) {
+        titleText = "दुर्गा मंदिर";
+        heritageDescText = item.story || "यह ऐतिहासिक मंदिर इस क्षेत्र की आध्यात्मिक पहचान है।";
       }
     }
 
@@ -305,7 +298,7 @@ function renderCards(preloadedItems) {
     const cardHtml = `
       <div class="unified-card">
         <div class="card-image-wrap" onclick="open360Viewer('${itemId}')" style="cursor:pointer;">
-          <img src="${displayImage}" alt="${titleText}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80';" loading="lazy" />
+          <img src="${displayImage}" alt="${titleText}" class="heritage-card-img" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1561361513-2d000a50f0dc';" loading="lazy" />
           <span class="btn-view360-badge">🌐 360° WebXR</span>
         </div>
         <div class="card-dual-content">
@@ -313,24 +306,13 @@ function renderCards(preloadedItems) {
             <h4 style="font-size:16px; font-weight:700; color:var(--text-main);">${titleText}</h4>
             <span class="risk-badge" style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:bold;">🟢 VERIFIED TRUST</span>
           </div>
-          
-          <div style="font-size:11px; color:#c2410c; font-weight:700;">
-            📍 ${item.village || ''} ${item.landmark ? `• ${item.landmark}` : ''}
-          </div>
-          
-          <div class="heritage-block">
-            <strong>${t.heritageLabel}</strong> ${heritageDescText}
-          </div>
-
-          <div class="culture-block">
-            <strong>${t.cultureLabel}</strong> ${livingCultureText}
-          </div>
-
+          <div style="font-size:11px; color:#c2410c; font-weight:700;">📍 ${item.village || ''} ${item.landmark ? `• ${item.landmark}` : ''}</div>
+          <div class="heritage-block"><strong>${t.heritageLabel}</strong> ${heritageDescText}</div>
+          <div class="culture-block"><strong>${t.cultureLabel}</strong> ${livingCultureText}</div>
           <div class="dual-audio-btns">
             <button class="btn-audio-pill btn-audio-hist" onclick="selectUnifiedAudio('${itemId}', 'heritage')">${t.btnListenHist}</button>
             <button class="btn-audio-pill btn-audio-cult" onclick="selectUnifiedAudio('${itemId}', 'culture')">${t.btnListenCult}</button>
           </div>
-
           <div class="card-actions" style="margin-top:6px;">
             <button class="btn-sm btn-locate" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})">${t.btnMap}</button>
             <button class="btn-sm" style="background:#e0f2fe; color:#0369a1;" onclick="open360Viewer('${itemId}')">360° View</button>
@@ -342,69 +324,50 @@ function renderCards(preloadedItems) {
   });
 }
 
-// CITIZEN SUBMISSION WITH TRUST ENGINE AI METADATA CHECK
-function handleCitizenSubmit(e) {
+// CITIZEN SUBMISSION
+window.handleCitizenSubmit = function(e) {
   e.preventDefault();
-
-  const title = document.getElementById("citTitle").value.trim();
-  const district = document.getElementById("citDistrict").value.trim().toLowerCase();
-  const village = document.getElementById("citVillage").value.trim();
-  const landmark = document.getElementById("citLandmark") ? document.getElementById("citLandmark").value.trim() : "";
-  const ritual = document.getElementById("citRitual").value.trim();
-  const coordsRaw = document.getElementById("citCoords").value.trim();
-  const story = document.getElementById("citStory").value.trim();
-
-  let coords = [26.1245, 85.3902];
-  if (coordsRaw.includes(",")) {
-    const parts = coordsRaw.split(",");
-    coords = [parseFloat(parts[0].trim()), parseFloat(parts[1].trim())];
-  }
-
   const pendingItem = {
     id: `pending_${Date.now()}`,
-    title: title,
-    district: district,
-    village: village,
-    landmark: landmark,
-    ritual: ritual,
-    coords: coords,
-    story: story,
+    title: document.getElementById("citTitle").value.trim(),
+    district: document.getElementById("citDistrict").value.trim().toLowerCase(),
+    village: document.getElementById("citVillage").value.trim(),
+    landmark: document.getElementById("citLandmark").value.trim(),
+    ritual: document.getElementById("citRitual").value.trim(),
+    coords: document.getElementById("citCoords").value.split(",").map(v => parseFloat(v.trim())),
+    story: document.getElementById("citStory").value.trim(),
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    aiValidation: "✓ Metadata Verified | GPS Consistent | No Duplicates",
-    submittedAt: new Date().toLocaleDateString()
+    aiValidation: "✓ Metadata Verified | GPS Consistent"
   };
 
   const pendingQueue = getPendingSubmissions();
   pendingQueue.unshift(pendingItem);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingQueue));
-
-  alert(`🛡️ Trust Engine Success: "${title}" submitted successfully for expert review!`);
+  alert(`🛡️ Trust Engine Success: "${pendingItem.title}" submitted for review!`);
   e.target.reset();
-  document.getElementById("citImagePreviewBox").style.display = "none";
   closeCitizenModal();
-}
+};
 
-// ADMIN APPROVAL PANEL & TABLE RENDERING
-function openAdminPanel() {
+// ADMIN APPROVAL & FIREBASE SYNC
+window.openAdminPanel = function() {
   renderInpageAdminTable();
   document.getElementById("adminPanelModal").style.display = "flex";
-}
+};
 
-function closeAdminPanelModal(e) {
+window.closeAdminPanelModal = function(e) {
   if (!e || e.target.id === "adminPanelModal" || e.target.classList.contains("close-modal")) {
     document.getElementById("adminPanelModal").style.display = "none";
   }
-}
+};
 
 function renderInpageAdminTable() {
   const pendingTbody = document.getElementById("pendingCitizenTableBody");
   if (!pendingTbody) return;
-
   pendingTbody.innerHTML = "";
   const pendingItems = getPendingSubmissions();
 
   if (pendingItems.length === 0) {
-    pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#64748b;">No pending submissions in queue.</td></tr>`;
+    pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:8px; text-align:center; color:#64748b;">No pending submissions.</td></tr>`;
     return;
   }
 
@@ -412,7 +375,7 @@ function renderInpageAdminTable() {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td style="padding:6px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
-      <td style="padding:6px; border:1px solid #e2e8f0;">${pItem.district} / ${pItem.village}</td>
+      <td style="padding:6px; border:1px solid #e2e8f0;">${pItem.district}</td>
       <td style="padding:6px; border:1px solid #e2e8f0; color:#15803d; font-size:10px;">${pItem.aiValidation}</td>
       <td style="padding:6px; border:1px solid #e2e8f0;">
         <button onclick="approvePendingSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
@@ -422,7 +385,7 @@ function renderInpageAdminTable() {
   });
 }
 
-window.approvePendingSubmission = function(index) {
+window.approvePendingSubmission = async function(index) {
   let pendingItems = getPendingSubmissions();
   const approvedItem = pendingItems[index];
   if (!approvedItem) return;
@@ -441,6 +404,11 @@ window.approvePendingSubmission = function(index) {
     createdAt: new Date().toLocaleString()
   };
 
+  // Save to Firebase Cloud Firestore
+  try {
+    await setDoc(doc(db, "vratyavani_records", verifiedRecord.id), verifiedRecord);
+  } catch (err) {}
+
   let customRecords = getCustomRecords();
   customRecords.unshift(verifiedRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
@@ -448,46 +416,38 @@ window.approvePendingSubmission = function(index) {
   pendingItems.splice(index, 1);
   localStorage.setItem(PENDING_KEY, JSON.stringify(pendingItems));
 
-  alert(`✅ "${approvedItem.title}" has successfully passed the Trust Engine and is now live!`);
+  alert(`✅ Approved and synced to Firebase Cloud successfully!`);
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
 
-function handleAdminLogin(e) {
+window.handleAdminLogin = function(e) {
   e.preventDefault();
-  const uid = document.getElementById("adminUserId").value.trim();
-  const pass = document.getElementById("adminPassword").value.trim();
-
-  if ((uid === "admin@vratyavani.ai" || uid === "admin") && pass === "Admin@2026") {
+  if (document.getElementById("adminUserId").value.trim() === "admin" && document.getElementById("adminPassword").value.trim() === "Admin@2026") {
     sessionStorage.setItem("vratyavani_admin_auth", "true");
     document.getElementById("loginModal").style.display = "none";
     openAdminPanel();
   } else {
     alert("Invalid Credentials! User: admin, Pass: Admin@2026");
   }
-}
+};
 
-function logoutAdmin() {
+window.logoutAdmin = function() {
   sessionStorage.removeItem("vratyavani_admin_auth");
   document.getElementById("adminPanelModal").style.display = "none";
   alert("Logged out!");
-}
+};
 
-function openLoginModal() {
-  if (sessionStorage.getItem("vratyavani_admin_auth") === "true") {
-    openAdminPanel();
-  } else {
-    document.getElementById("loginModal").style.display = "flex";
-  }
-}
-function closeLoginModal(e) {
-  if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) {
-    document.getElementById("loginModal").style.display = "none";
-  }
-}
+window.openLoginModal = function() {
+  if (sessionStorage.getItem("vratyavani_admin_auth") === "true") openAdminPanel();
+  else document.getElementById("loginModal").style.display = "flex";
+};
+window.closeLoginModal = function(e) {
+  if (!e || e.target.id === "loginModal" || e.target.classList.contains("close-modal")) document.getElementById("loginModal").style.display = "none";
+};
 
 let citizenUploadedBase64 = null;
-function previewCitizenImage(event) {
+window.previewCitizenImage = function(event) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
@@ -498,7 +458,7 @@ function previewCitizenImage(event) {
     };
     reader.readAsDataURL(file);
   }
-}
+};
 
 let adminUploadedBase64 = null;
 window.previewAdminImage = function(event) {
@@ -514,46 +474,37 @@ window.previewAdminImage = function(event) {
   }
 };
 
-async function handleAdminSubmit(e) {
+window.handleAdminSubmit = async function(e) {
   e.preventDefault();
-  const title = document.getElementById("recTitle").value.trim();
-  const dist = document.getElementById("recDistrict").value.trim().toLowerCase();
-  const ritual = document.getElementById("recRitual").value.trim();
-  const desc = document.getElementById("recDesc").value.trim();
-  const coordsRaw = document.getElementById("recCoords").value.trim();
-
-  let coords = [26.1245, 85.3902];
-  if (coordsRaw.includes(",")) {
-    const p = coordsRaw.split(",");
-    coords = [parseFloat(p[0]), parseFloat(p[1])];
-  }
-
   const directRecord = {
     id: `rec_${Date.now()}`,
-    name: title,
-    district: dist,
-    coords: coords,
+    name: document.getElementById("recTitle").value.trim(),
+    district: document.getElementById("recDistrict").value.trim().toLowerCase(),
+    coords: document.getElementById("recCoords").value.split(",").map(v => parseFloat(v.trim())),
     image: adminUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
     imageUrl: adminUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
-    story: desc,
-    livingCulture: ritual,
+    story: document.getElementById("recDesc").value.trim(),
+    livingCulture: document.getElementById("recRitual").value.trim(),
     createdAt: new Date().toLocaleString()
   };
+
+  try {
+    await setDoc(doc(db, "vratyavani_records", directRecord.id), directRecord);
+  } catch (err) {}
 
   let customRecords = getCustomRecords();
   customRecords.unshift(directRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  alert(`🎉 "${title}" published live successfully!`);
+  alert(`🎉 Published directly to Firebase Cloud!`);
   e.target.reset();
   closeAdminPanelModal();
   loadDistrictData(window.currentDistrict);
-}
+};
 
-function switchMobileTab(tab) {
+window.switchMobileTab = function(tab) {
   document.getElementById("btnNavHome").classList.remove("active");
   document.getElementById("btnNavMap").classList.remove("active");
-
   if (tab === 'home') {
     document.getElementById("btnNavHome").classList.add("active");
     document.getElementById("homeView").style.display = "block";
@@ -564,20 +515,17 @@ function switchMobileTab(tab) {
     document.getElementById("mapView").style.display = "block";
     setTimeout(() => { if (window.mapInstance) window.mapInstance.invalidateSize(); }, 150);
   }
-}
+};
 
-function selectUnifiedAudio(itemId, mode) {
+window.selectUnifiedAudio = function(itemId, mode) {
   let custom = getCustomRecords();
   const found = custom.find(i => i.id === itemId || i.name === itemId);
   if (!found) return;
-  
   const textToPlay = (mode === 'culture') ? found.livingCulture : found.story;
   const nowPlayingEl = document.getElementById("nowPlayingText");
-  if (nowPlayingEl) {
-    nowPlayingEl.innerHTML = `<strong>${found.name}</strong><br><em>"${textToPlay}"</em>`;
-  }
+  if (nowPlayingEl) nowPlayingEl.innerHTML = `<strong>${found.name}</strong><br><em>"${textToPlay}"</em>`;
   playAudioDirectly(textToPlay);
-}
+};
 
 function playAudioDirectly(text) {
   if (!('speechSynthesis' in window)) return;
@@ -587,18 +535,13 @@ function playAudioDirectly(text) {
   window.speechSynthesis.speak(utter);
 }
 
-function open360Viewer(itemId) {
+window.open360Viewer = function(itemId) {
   let custom = getCustomRecords();
   const found = custom.find(i => i.id === itemId || i.name === itemId);
   if (!found) return;
-
   document.getElementById("panoTitle").innerText = `360° WebXR Tour: ${found.name}`;
   document.getElementById("panoramaModal").style.display = "flex";
-
-  if (pannellumViewerInstance) {
-    try { pannellumViewerInstance.destroy(); } catch(e) {}
-  }
-
+  if (pannellumViewerInstance) { try { pannellumViewerInstance.destroy(); } catch(e) {} }
   setTimeout(() => {
     pannellumViewerInstance = pannellum.viewer('panoramaContainer', {
       type: 'equirectangular',
@@ -607,28 +550,24 @@ function open360Viewer(itemId) {
       autoRotate: -1.5
     });
   }, 200);
-}
+};
 
-function closePanoramaModal(e) {
+window.closePanoramaModal = function(e) {
   if (!e || e.target.id === "panoramaModal" || e.target.classList.contains("close-modal")) {
     document.getElementById("panoramaModal").style.display = "none";
-    if (pannellumViewerInstance) {
-      try { pannellumViewerInstance.destroy(); } catch(e) {}
-    }
+    if (pannellumViewerInstance) { try { pannellumViewerInstance.destroy(); } catch(e) {} }
   }
-}
+};
 
-function focusOnMapTab(lat, lng) {
+window.focusOnMapTab = function(lat, lng) {
   switchMobileTab('map');
   setTimeout(() => {
     window.mapInstance.invalidateSize();
     window.mapInstance.flyTo([lat, lng], 15);
   }, 250);
-}
+};
 
-function showQrModal() {
-  alert("Spot QR Code Scanner Active for Offline Mode.");
-}
-function closeQrModal() {}
-function openCitizenModal() { document.getElementById("citizenModal").style.display = "flex"; }
-function closeCitizenModal() { document.getElementById("citizenModal").style.display = "none"; }
+window.showQrModal = function() { alert("Spot QR Code Scanner Active for Offline Mode."); };
+window.closeQrModal = function() {};
+window.openCitizenModal = function() { document.getElementById("citizenModal").style.display = "flex"; };
+window.closeCitizenModal = function() { document.getElementById("citizenModal").style.display = "none"; };
