@@ -1,20 +1,20 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
  * 100% Real-time Cross-Device Firebase Firestore Cloud Synchronization
- * (Ensures Identical Data Across Chrome, Edge, Mobile, Laptop & Tablets)
+ * Target Project: vratyavani-a48fc
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-// Vihaan-Purkha Firebase Configuration
+// Exact Firebase Configuration for vratyavani-a48fc
 const firebaseConfig = {
-  apiKey: "AIzaSyA0bnCrIDTPracgy-qFvfXlXu7Im5RNGj0",
-  authDomain: "vihaan-purkha.firebaseapp.com",
-  projectId: "vihaan-purkha",
-  storageBucket: "vihaan-purkha.firebasestorage.app",
-  messagingSenderId: "1033538607939",
-  appId: "1:1033538607939:web:b341070cc12e6708716df6"
+  apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
+  authDomain: "vratyavani-a48fc.firebaseapp.com",
+  projectId: "vratyavani-a48fc",
+  storageBucket: "vratyavani-a48fc.firebasestorage.app",
+  messagingSenderId: "512746364837",
+  appId: "1:512746364837:web:639440528e52d23fd4d24c"
 };
 
 const fbApp = initializeApp(firebaseConfig);
@@ -146,7 +146,7 @@ const heritageNarrativeTranslations = {
   }
 };
 
-// Full UI Translation Matrix
+// Full UI Translation Matrix across 5 Dialects
 const uiDictionary = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -480,12 +480,11 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
   const lang = langKey || window.currentLanguage || "hi-IN";
   let activeBanner = null;
 
-  // 1. First fetch directly from Cloud Firestore
+  // 1. First fetch directly from Cloud Firestore (Collection: vratyavani_banners)
   try {
     const bannerDoc = await getDoc(doc(db, "vratyavani_banners", stateKey));
     if (bannerDoc.exists()) {
       activeBanner = bannerDoc.data();
-      // Keep local backup synchronized
       let bCache = {};
       try { bCache = JSON.parse(localStorage.getItem(BANNER_KEY) || "{}"); } catch(e){}
       bCache[stateKey] = activeBanner;
@@ -629,7 +628,7 @@ function getLocalPendingRecords() {
 // Complete Real-Time Firestore Synchronization (Pending + Verified)
 async function syncCloudHeritage() {
   try {
-    // 1. Verified Records
+    // 1. Verified Records from vratyavani_records
     const vSnap = await getDocs(collection(db, "vratyavani_records"));
     const verifiedList = [];
     vSnap.forEach(d => verifiedList.push({ id: d.id, ...d.data(), isVerified: true }));
@@ -768,7 +767,7 @@ function renderCards(itemsList) {
     const noVotes = (item.noVotes !== undefined) ? item.noVotes : 0;
     const isVerified = item.isVerified === true;
 
-    // Clean String Output for Voting Poll
+    // 100% Clean Render Without Typo Glitch
     const cardHtml = `
       <div class="unified-card" style="background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:15px; border-left:4px solid ${isVerified ? 'var(--accent-gold)' : '#f59e0b'};">
         <div onclick="open360Viewer('${itemId}')" style="cursor:pointer; position:relative;">
@@ -827,7 +826,7 @@ function renderCards(itemsList) {
   });
 }
 
-// Redirect Empty District to Map Radar Tab focusing on the Selected District
+// Redirect Empty District to Map Radar Tab focusing on Selected District
 window.redirectToMapRadar = function(targetDistrict) {
   switchMobileTab('map');
   setTimeout(() => {
@@ -859,7 +858,7 @@ window.detectLiveCitizenGPS = function() {
   }
 };
 
-// Community Poll Voting (Synced Directly to Cloud Firestore)
+// Community Poll Voting (Direct Real-Time Cloud Update)
 window.castPollVote = async function(itemId, type) {
   let pending = getLocalPendingRecords();
   const found = pending.find(i => i.id === itemId);
@@ -1050,7 +1049,7 @@ window.handleCitizenSubmit = async function(e) {
   const boxEl = document.getElementById("citImagePreviewBox");
   if (boxEl) boxEl.style.display = "none";
   closeCitizenModal();
-  loadDistrictData(window.currentDistrict);
+  syncCloudHeritage();
 };
 
 // Admin Login & Desk
@@ -1067,7 +1066,7 @@ window.closeAdminPanelModal = function() {
 async function renderInpageAdminTable() {
   const pendingTbody = document.getElementById("pendingCitizenTableBody");
   if (!pendingTbody) return;
-  pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#64748b;">Loading Vihaan-Purkha Cloud Queue...</td></tr>`;
+  pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#64748b;">Loading Cloud Queue...</td></tr>`;
 
   let pendingItems = [];
   try {
@@ -1168,7 +1167,7 @@ window.rejectCloudSubmission = async function(docId) {
   syncCloudHeritage();
 };
 
-// Admin State Highlight Banner Manager (Saves to Cloud & Synchronizes with all devices)
+// Admin State Highlight Banner Manager (Saves to Cloud Collection: vratyavani_banners)
 window.handleAdminBannerUpdate = async function(e) {
   e.preventDefault();
   const stateKey = document.getElementById("admBannerState").value;
@@ -1178,14 +1177,14 @@ window.handleAdminBannerUpdate = async function(e) {
 
   const bannerData = { title, desc, img: imgUrl, updatedAt: new Date().toISOString() };
 
-  // 1. Save directly to Cloud Firestore collection "vratyavani_banners"
+  // 1. Direct Save to Firestore Cloud
   try {
     await setDoc(doc(db, "vratyavani_banners", stateKey), bannerData);
   } catch (err) {
     console.warn("Banner cloud update fallback:", err);
   }
 
-  // 2. Save to LocalStorage
+  // 2. Local fallback
   let banners = {};
   try {
     const raw = localStorage.getItem(BANNER_KEY);
@@ -1195,7 +1194,7 @@ window.handleAdminBannerUpdate = async function(e) {
   banners[stateKey] = bannerData;
   localStorage.setItem(BANNER_KEY, JSON.stringify(banners));
 
-  alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर क्लाउड पर सेव हो गया है!`);
+  alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर क्लाउड पर सेव हो गया है और सभी डिवाइसेस पर लाइव है!`);
   e.target.reset();
   adminBannerUploadedBase64 = null;
   const prevBox = document.getElementById("admBannerPreviewBox");
