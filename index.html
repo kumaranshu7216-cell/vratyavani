@@ -16,27 +16,37 @@
 </head>
 <body onload="startAppFlow()">
 
-  <!-- Modern Animated Splash Screen -->
+  <!-- Premium Animated Splash Screen -->
   <div id="splashScreen" style="position: fixed; inset: 0; background: linear-gradient(135deg, #1e1b4b, #31103c, #0f172a); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, transform 0.8s ease;">
-    <div style="position: relative; width: 85px; height: 85px; background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(217, 119, 6, 0.45);">
-      <span style="font-size: 50px; font-weight: 900; color: #ffffff; font-family: 'Cinzel', serif;">V</span>
+    <div style="position: relative; width: 85px; height: 85px; background: linear-gradient(135deg, #f59e0b, #d97706, #b45309); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 12px 30px rgba(217, 119, 6, 0.45); animation: pulseLogo 2s infinite ease-in-out;">
+      <span style="font-size: 50px; font-weight: 900; color: #ffffff; font-family: 'Cinzel', serif; letter-spacing: -2px;">V</span>
     </div>
-    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; margin-top: 18px; font-family: 'Cinzel', serif;">
+    <h1 style="color: #ffffff; font-size: 30px; font-weight: 800; margin-top: 18px; font-family: 'Cinzel', serif; letter-spacing: 1px;">
       VratyaVani AI
     </h1>
-    <p style="color: #cbd5e1; font-size: 11px; letter-spacing: 1.5px; margin-top: 5px; text-transform: uppercase;">
-      Discover → Verify → Experience → Preserve → Empower
-    </p>
+    <div style="margin-top: 6px; overflow: hidden; white-space: nowrap;">
+      <p style="color: #cbd5e1; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">
+        Discover → Verify → Experience → Preserve → Empower
+      </p>
+    </div>
   </div>
 
-  <!-- Territory & Persona Setup Modal -->
+  <style>
+    @keyframes pulseLogo {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+      70% { transform: scale(1.06); box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+  </style>
+
+  <!-- Territory & Dialect Setup Modal -->
   <div id="locationModal" class="modal-backdrop">
     <div class="modal-box modal-box-animated" style="background:#1e1b4b; color:#fff; border:2px solid var(--accent-gold);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
         <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Network</h3>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">क्षेत्र और अनुभव मोड (Persona Mode) चुनें</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">राज्य, ज़िला और अपनी स्थानीय बोली चुनें</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
@@ -49,17 +59,7 @@
           <datalist id="districtDatalist"></datalist>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">AI Story Mode / Persona (अनुभव मोड)</label>
-          <select id="selPersona" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
-            <option value="tourist" selected>🧳 Tourist Mode (पर्यटक)</option>
-            <option value="student">🎓 Student Mode (छात्र)</option>
-            <option value="kids">👦 Kids Mode (बाल संस्करण)</option>
-            <option value="researcher">📚 Researcher Mode (शोधकर्ता)</option>
-            <option value="spiritual">🛕 Spiritual Context (आध्यात्मिक)</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">Dialect / Language (बोली)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">AI Voice Guide Dialect (भाषा / बोली)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
             <option value="hi-IN" selected>हिंदी (Hindi)</option>
             <option value="en-IN">English</option>
@@ -88,7 +88,7 @@
       <button type="button" class="btn-reselect" onclick="openLocationModalDirect()">
         📍 <span id="navDistrictLabel">MUZAFFARPUR</span> • <span id="navLangLabel">HI</span>
       </button>
-      <span id="networkStatusBadge" class="network-badge online">● Firebase Cloud Sync</span>
+      <span id="networkStatusBadge" class="network-badge online">● Vihaan-Purkha Sync</span>
     </div>
   </header>
 
@@ -99,7 +99,7 @@
     <div class="hero-badges">
       <span>🛡️ Trust Engine</span>
       <span>🚨 Risk Radar</span>
-      <span>🏛️ Heritage Clusters</span>
+      <span>🗳️ Community Poll Signals</span>
       <span>🛍️ Artisan Livelihood</span>
     </div>
     <div style="margin-top: 12px; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
@@ -118,7 +118,7 @@
 
     <div class="voice-console">
       <div class="console-title">
-        <span id="audioConsoleTitle">🎙️ Multilingual AI Story Mode</span>
+        <span id="audioConsoleTitle">🎙️ Multilingual AI Voice Guide</span>
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
           <option value="hi-IN" selected>हिंदी (Hindi)</option>
           <option value="en-IN">English</option>
@@ -127,7 +127,7 @@
           <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
         </select>
       </div>
-      <div class="audio-now-playing" id="nowPlayingText">इतिहास या जीवंत संस्कृति सुनकर अनुभव करें...</div>
+      <div class="audio-now-playing" id="nowPlayingText">इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...</div>
       <div class="audio-controls">
         <button type="button" id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Narrative</button>
         <button type="button" onclick="showQrModal()">📲 Spot QR Guide</button>
@@ -135,7 +135,7 @@
     </div>
   </main>
 
-  <!-- Map View with Google Maps Direct Link Restored -->
+  <!-- Map View -->
   <main class="view-container" id="mapView">
     <div class="map-header">
       <h3 id="mapSectionTitle">📍 Living Heritage Clusters & Circuit Map</h3>
@@ -165,7 +165,7 @@
         <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); font-size:16px;">🏛️ Submit Upcoming Heritage</h3>
         <span class="close-modal" onclick="closeCitizenModal()" style="cursor:pointer; font-size:22px;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#64748b; margin-bottom:10px;">Processed through VratyaVani Trust Engine (AI Validation & Metadata Check).</p>
+      <p style="font-size:11px; color:#64748b; margin-bottom:10px;">Submitted to VratyaVani Trust Engine (Cross-device verified via Cloud).</p>
 
       <form id="citizenForm" onsubmit="handleCitizenSubmit(event); return false;">
         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -186,7 +186,7 @@
             <input type="text" id="citRitual" placeholder="Aarti & Annual Folk Tradition" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
           <div>
-            <label style="font-size:10px; font-weight:700;">Evidence Photo (Metadata Checked)</label>
+            <label style="font-size:10px; font-weight:700;">Evidence Photo (Upload)</label>
             <input type="file" id="citPhotoInput" accept="image/*" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
               <img id="citPreviewImg" src="" style="max-height:100px; border-radius:5px;" />
@@ -197,11 +197,11 @@
             <input type="text" id="citCoords" required value="26.1245, 85.3902" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
           <div>
-            <label style="font-size:10px; font-weight:700;">Oral Narrative / Story</label>
+            <label style="font-size:10px; font-weight:700;">Oral Narrative / Story (Any Language)</label>
             <textarea id="citStory" rows="2" required placeholder="Historical oral account..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></textarea>
           </div>
           <button type="submit" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
-            Submit to Trust Engine
+            Submit to Community & Cloud
           </button>
         </div>
       </form>
@@ -279,19 +279,19 @@
         <button type="button" onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
-      <h4 style="font-size:12px; color:#c2410c; margin-bottom:6px;">📥 Pending Community Submissions (Trust Engine Queue)</h4>
+      <h4 style="font-size:12px; color:#c2410c; margin-bottom:6px;">📥 Pending Community Submissions (Cloud Queue)</h4>
       <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:15px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#fef2f2; text-align:left;">
               <th style="padding:6px; border:1px solid #e2e8f0;">Title</th>
               <th style="padding:6px; border:1px solid #e2e8f0;">District</th>
-              <th style="padding:6px; border:1px solid #e2e8f0;">AI Validation</th>
+              <th style="padding:6px; border:1px solid #e2e8f0;">Community Signals</th>
               <th style="padding:6px; border:1px solid #e2e8f0;">Action</th>
             </tr>
           </thead>
           <tbody id="pendingCitizenTableBody">
-            <tr><td colspan="4" style="padding:8px; text-align:center; color:#64748b;">No pending submissions.</td></tr>
+            <tr><td colspan="4" style="padding:8px; text-align:center; color:#64748b;">No pending submissions in queue.</td></tr>
           </tbody>
         </table>
       </div>
@@ -301,6 +301,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   <script src="data.js"></script>
+  <!-- type="module" ensures proper ES SDK loading -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
