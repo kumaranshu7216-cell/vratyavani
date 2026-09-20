@@ -46,26 +46,26 @@
         <h3 style="font-family:'Cinzel',serif; color:var(--accent-gold); font-size:18px;">VratyaVani Network</h3>
         <span class="close-modal" onclick="closeLocationModal()" style="color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</span>
       </div>
-      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">राज्य, ज़िला और अपनी स्थानीय बोली चुनें</p>
+      <p style="font-size:11px; color:#cbd5e1; margin-bottom:12px;">Rajya, Zila aur apni sthaniya boli chunein</p>
       
       <div style="display:flex; flex-direction:column; gap:10px;">
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State (राज्य)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">State (Rajya)</label>
           <select id="selState" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;" onchange="onStateSelectionChanged(this.value)"></select>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District (ज़िला)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">District (Zila)</label>
           <input list="districtDatalist" id="selDistrictInput" placeholder="Muzaffarpur, Patna..." style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569; font-size:11px;" />
           <datalist id="districtDatalist"></datalist>
         </div>
         <div>
-          <label style="font-size:11px; font-weight:700; color:#fed7aa;">AI Voice Guide Dialect (भाषा / बोली)</label>
+          <label style="font-size:11px; font-weight:700; color:#fed7aa;">AI Voice Guide Dialect (Bhasha / Boli)</label>
           <select id="selLang" style="width:100%; padding:8px; border-radius:6px; background:#0f172a; color:#fff; border:1px solid #475569;">
-            <option value="hi-IN" selected>हिंदी (Hindi)</option>
+            <option value="hi-IN" selected>Hindi (हिंदी)</option>
             <option value="en-IN">English</option>
-            <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
-            <option value="mai-IN">मैथिली (Maithili)</option>
-            <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
+            <option value="mai-IN">Maithili (मैथिली)</option>
+            <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
           </select>
         </div>
         <button type="button" onclick="confirmLocationSelection()" style="margin-top:6px; padding:10px; background:var(--accent-gold); color:#000; border:none; border-radius:6px; font-weight:800; font-size:13px; cursor:pointer;">
@@ -88,13 +88,14 @@
       <button type="button" class="btn-reselect" onclick="openLocationModalDirect()">
         📍 <span id="navDistrictLabel">MUZAFFARPUR</span> • <span id="navLangLabel">HI</span>
       </button>
-      <span id="networkStatusBadge" class="network-badge online">● Vihaan-Purkha Sync</span>
+      <!-- Online / Offline Auto-Detect Badge -->
+      <span id="networkStatusBadge" class="network-badge online">● Online PWA</span>
     </div>
   </header>
 
   <!-- Hero Banner -->
   <section class="hero-banner">
-    <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
+    <h2 id="heroTagline">Purkhon Ki Thaati, Digital Vani Ki Paati</h2>
     <p id="heroSubTagline">India's Community-Verified Immersive Heritage & Preservation Network</p>
     <div class="hero-badges">
       <span>🛡️ Trust Engine</span>
@@ -120,14 +121,14 @@
       <div class="console-title">
         <span id="audioConsoleTitle">🎙️ Multilingual AI Voice Guide</span>
         <select id="langSelect" onchange="onConsoleLangChange(this.value)">
-          <option value="hi-IN" selected>हिंदी (Hindi)</option>
+          <option value="hi-IN" selected>Hindi (हिंदी)</option>
           <option value="en-IN">English</option>
-          <option value="bho-IN">भोजपुरी (Bhojpuri)</option>
-          <option value="mai-IN">मैथिली (Maithili)</option>
-          <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+          <option value="bho-IN">Bhojpuri (भोजपुरी)</option>
+          <option value="mai-IN">Maithili (मैथिली)</option>
+          <option value="pa-IN">Punjabi (ਪੰਜਾਬੀ)</option>
         </select>
       </div>
-      <div class="audio-now-playing" id="nowPlayingText">इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...</div>
+      <div class="audio-now-playing" id="nowPlayingText">Itihaas ya jeevant sanskriti chun kar sunein...</div>
       <div class="audio-controls">
         <button type="button" id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Narrative</button>
         <button type="button" onclick="showQrModal()">📲 Spot QR Guide</button>
@@ -135,16 +136,23 @@
     </div>
   </main>
 
-  <!-- Map View -->
+  <!-- Map View with Circuit List -->
   <main class="view-container" id="mapView">
     <div class="map-header">
       <h3 id="mapSectionTitle">📍 Living Heritage Clusters & Circuit Map</h3>
       <span id="currentDistrictBadge">MUZAFFARPUR</span>
     </div>
     <div id="map"></div>
+    
     <a id="btnDirectGoogleMaps" href="https://maps.google.com" target="_blank" class="btn-gmaps-direct" style="display:block; text-align:center; background:#1e1b4b; color:#fff; padding:10px; border-radius:8px; margin-top:10px; font-weight:bold; text-decoration:none;">
-      🗺️ Open in Google Maps (Live Navigation)
+      🗺️ Open Circuit in Google Maps
     </a>
+
+    <!-- Circuit Location Cards Below Map -->
+    <div style="margin-top:18px;">
+      <h4 style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:8px;">📍 Key Circuit Points in this Region</h4>
+      <div id="mapLocationsList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
   </main>
 
   <!-- 360 Panorama Modal -->
@@ -169,8 +177,13 @@
 
       <form id="citizenForm" onsubmit="handleCitizenSubmit(event); return false;">
         <div style="display:flex; flex-direction:column; gap:8px;">
+          <!-- State Selection in Submission Modal -->
           <div>
-            <label style="font-size:10px; font-weight:700;">District (ज़िला)</label>
+            <label style="font-size:10px; font-weight:700;">State (Rajya)</label>
+            <select id="citState" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></select>
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">District (Zila)</label>
             <input type="text" id="citDistrict" placeholder="Muzaffarpur" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
           <div>
@@ -183,7 +196,11 @@
           </div>
           <div>
             <label style="font-size:10px; font-weight:700;">Living Culture / Ritual</label>
-            <input type="text" id="citRitual" placeholder="Aarti & Annual Folk Tradition" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+            <input type="text" id="citRitual" placeholder="Aarti & Sacred Offerings" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">Tradition / Folk Practice (Parampara)</label>
+            <input type="text" id="citTradition" placeholder="Annual folk festival & musical gathering" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
           <div>
             <label style="font-size:10px; font-weight:700;">Evidence Photo (Upload)</label>
@@ -193,8 +210,14 @@
             </div>
           </div>
           <div>
-            <label style="font-size:10px; font-weight:700;">GPS Coordinates</label>
-            <input type="text" id="citCoords" required value="26.1245, 85.3902" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label style="font-size:10px; font-weight:700;">GPS Coordinates</label>
+              <!-- Live GPS Location Detection Button -->
+              <button type="button" onclick="detectLiveCitizenGPS()" style="background:#e0f2fe; color:#0369a1; border:none; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">
+                📍 Auto Live GPS
+              </button>
+            </div>
+            <input type="text" id="citCoords" required value="26.1245, 85.3902" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px; margin-top:3px;" />
           </div>
           <div>
             <label style="font-size:10px; font-weight:700;">Oral Narrative / Story (Any Language)</label>
@@ -271,16 +294,17 @@
     </div>
   </div>
 
-  <!-- Admin Approval Desk -->
+  <!-- Admin Approval & Direct Publishing Desk -->
   <div id="adminPanelModal" class="modal-backdrop" onclick="if(event.target === this) closeAdminPanelModal()">
-    <div class="modal-box" onclick="event.stopPropagation()" style="text-align: left; max-width: 650px; background:#fff; color:#000;">
+    <div class="modal-box" onclick="event.stopPropagation()" style="text-align: left; max-width: 680px; background:#fff; color:#000; max-height:90vh; overflow-y:auto;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #cbd5e1; padding-bottom:8px; margin-bottom:12px;">
         <h3 style="font-family:'Cinzel',serif; color:var(--primary-deep); margin:0;">🛡️ VratyaVani Trust & Curation Desk</h3>
         <button type="button" onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
+      <!-- Section 1: Pending Submissions Queue -->
       <h4 style="font-size:12px; color:#c2410c; margin-bottom:6px;">📥 Pending Community Submissions (Cloud Queue)</h4>
-      <div style="max-height:180px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:15px;">
+      <div style="max-height:160px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:15px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
           <thead>
             <tr style="background:#fef2f2; text-align:left;">
@@ -295,13 +319,60 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Section 2: Direct Admin Heritage Publication Form -->
+      <h4 style="font-size:12px; color:var(--primary-deep); margin-bottom:6px; border-top:1px solid #e2e8f0; padding-top:10px;">
+        ➕ Direct Verified Heritage Publication (Admin Bypass)
+      </h4>
+      <form id="adminDirectForm" onsubmit="handleAdminDirectSubmit(event); return false;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>
+            <label style="font-size:10px; font-weight:700;">State</label>
+            <select id="admState" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></select>
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">District</label>
+            <input type="text" id="admDistrict" placeholder="Varanasi, Muzaffarpur..." required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Heritage Name / Monument</label>
+            <input type="text" id="admTitle" placeholder="Kashi Vishwanath Temple" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">Village / Area</label>
+            <input type="text" id="admVillage" placeholder="Vishwanath Gali" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">GPS Coordinates</label>
+            <input type="text" id="admCoords" value="25.3109, 83.0107" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Living Culture / Ritual</label>
+            <input type="text" id="admRitual" placeholder="Mangala Aarti & Ganga Snan" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Tradition / Folk Practice (Parampara)</label>
+            <input type="text" id="admTradition" placeholder="Dev Deepawali celebration and Vedic chanting" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Historical Overview / Oral Narrative</label>
+            <textarea id="admStory" rows="2" required placeholder="Ancient sacred heritage description..." style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></textarea>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Image File (Optional)</label>
+            <input type="file" id="admPhotoInput" accept="image/*" onchange="previewAdminImage(event)" style="width:100%; font-size:11px;" />
+          </div>
+        </div>
+        <button type="submit" style="margin-top:10px; width:100%; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
+          Direct Publish to Cloud & Live
+        </button>
+      </form>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
   <script src="data.js"></script>
-  <!-- type="module" ensures proper ES SDK loading -->
   <script type="module" src="app.js"></script>
 </body>
 </html>
