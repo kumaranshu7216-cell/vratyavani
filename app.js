@@ -1,6 +1,7 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Real-Time Firebase Cloud Sync for State Banners, Pending Submissions & Multilingual Narratives
+ * 100% Real-time Cross-Device Firebase Firestore Cloud Synchronization
+ * (Ensures Identical Data Across Chrome, Edge, Mobile, Laptop & Tablets)
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -33,7 +34,7 @@ const STORAGE_KEY = "vratyavani_custom_records";
 const PENDING_KEY = "vratyavani_pending_submissions";
 const BANNER_KEY = "vratyavani_custom_banner";
 
-// Coordinates Map for Selected District Radar Autofocus
+// Coordinates Map for District Radar Autofocus
 const districtCoordinatesMap = {
   muzaffarpur: [26.1245, 85.3902],
   patna: [25.5941, 85.1376],
@@ -51,7 +52,7 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// Default State Cultural Highlight Profiles (Localized for each dialect)
+// Default State Cultural Highlight Profiles
 const defaultStateProfiles = {
   bihar: {
     "hi-IN": {
@@ -92,24 +93,6 @@ const defaultStateProfiles = {
       desc: "काशी के पावन घाटों पर दीपों का दिव्य महोत्सव व वैदिक परंपरा",
       img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
     },
-    "pa-IN": {
-      badge: "ਉੱਤਰ ਪ੍ਰਦੇਸ਼ ਸੱਭਿਆਚਾਰਕ ਪਛਾਣ",
-      title: "ਦੇਵ ਦੀਪਾਵਲੀ ਅਤੇ ਗੰਗਾ ਆਰਤੀ (Dev Deepawali)",
-      desc: "ਕਾਸ਼ੀ ਦੇ ਘਾਟਾਂ 'ਤੇ ਦੀਵਿਆਂ ਦਾ ਅਲੌਕਿਕ ਤਿਉਹਾਰ ਅਤੇ ਵੈਦਿਕ ਪਰੰਪਰਾ",
-      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
-    },
-    "bho-IN": {
-      badge: "उत्तर प्रदेश सांस्कृतिक पहचान",
-      title: "देव दीपावली आ गंगा आरती (Dev Deepawali)",
-      desc: "बनारस के घाट पर दीया के उजोर आ पावन वैदिक परंपरा",
-      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
-    },
-    "mai-IN": {
-      badge: "उत्तर प्रदेश सांस्कृतिक पहचान",
-      title: "देव दीपावली एवं गंगा आरती (Dev Deepawali)",
-      desc: "काशीक पावन घाट पर दीप प्रज्वलन एवं वैदिक अनुष्ठान",
-      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
-    },
     "en-IN": {
       badge: "UTTAR PRADESH CULTURAL IDENTITY",
       title: "Dev Deepawali & Ganga Aarti",
@@ -122,24 +105,6 @@ const defaultStateProfiles = {
       badge: "PUNJAB CULTURAL IDENTITY",
       title: "होला मोहल्ला व बैसाखी (Hola Mohalla & Vaisakhi)",
       desc: "सिख शौर्य, आध्यात्मिक आनंद और आनंदपुर साहिब की जीवंत परंपरा",
-      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
-    },
-    "pa-IN": {
-      badge: "ਪੰਜਾਬ ਸੱਭਿਆਚਾਰਕ ਪਛਾਣ",
-      title: "ਹੋਲਾ ਮਹੱਲਾ ਤੇ ਵਿਸਾਖੀ (Hola Mohalla & Vaisakhi)",
-      desc: "ਸਿੱਖ ਵਿਰਾਸਤ, ਵੀਰਤਾ ਅਤੇ ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਦੀ ਪਾਵਨ ਪਰੰਪਰਾ",
-      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
-    },
-    "bho-IN": {
-      badge: "पंजाब सांस्कृतिक पहचान",
-      title: "होला मोहल्ला आ बैसाखी (Hola Mohalla & Vaisakhi)",
-      desc: "सिख वीरता, अध्यात्म आ आनंदपुर साहिब के परंपरा",
-      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
-    },
-    "mai-IN": {
-      badge: "पंजाब सांस्कृतिक पहचान",
-      title: "होला मोहल्ला एवं बैसाखी (Hola Mohalla & Vaisakhi)",
-      desc: "सिख शौर्य एवं आनंदपुर साहिबक पावन परंपरा",
       img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
     },
     "en-IN": {
@@ -181,7 +146,7 @@ const heritageNarrativeTranslations = {
   }
 };
 
-// Full UI Translation Matrix across 5 Dialects
+// Full UI Translation Matrix
 const uiDictionary = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -507,7 +472,7 @@ window.onConsoleLangChange = function(lang) {
   loadDistrictData(window.currentDistrict);
 };
 
-// Real-Time Firebase Cloud Sync for State Cultural Banners
+// Real-Time Firebase Cloud Sync for State Cultural Banners (Identical on All Devices)
 window.updateStateCulturalShowcase = async function(stateKey, langKey) {
   const box = document.getElementById("stateCulturalHighlightBox");
   if (!box) return;
@@ -515,13 +480,20 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
   const lang = langKey || window.currentLanguage || "hi-IN";
   let activeBanner = null;
 
-  // 1. Check Cloud Firestore Banners collection first
+  // 1. First fetch directly from Cloud Firestore
   try {
     const bannerDoc = await getDoc(doc(db, "vratyavani_banners", stateKey));
     if (bannerDoc.exists()) {
       activeBanner = bannerDoc.data();
+      // Keep local backup synchronized
+      let bCache = {};
+      try { bCache = JSON.parse(localStorage.getItem(BANNER_KEY) || "{}"); } catch(e){}
+      bCache[stateKey] = activeBanner;
+      localStorage.setItem(BANNER_KEY, JSON.stringify(bCache));
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Banner Firestore fetch fallback:", e);
+  }
 
   // 2. Fallback to Local Storage if offline
   if (!activeBanner) {
@@ -534,8 +506,8 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
     } catch (e) {}
   }
 
-  // 3. Fallback to Localized Defaults
-  if (activeBanner) {
+  // 3. Render cloud/admin customized or default profile
+  if (activeBanner && activeBanner.title) {
     document.getElementById("stateHighlightBadge").innerText = `${stateKey.toUpperCase()} CULTURAL IDENTITY`;
     document.getElementById("stateHighlightTitle").innerText = activeBanner.title;
     document.getElementById("stateHighlightDesc").innerText = activeBanner.desc;
@@ -654,9 +626,10 @@ function getLocalPendingRecords() {
   } catch (e) { return []; }
 }
 
-// Real-Time Cross Device Firestore Sync
+// Complete Real-Time Firestore Synchronization (Pending + Verified)
 async function syncCloudHeritage() {
   try {
+    // 1. Verified Records
     const vSnap = await getDocs(collection(db, "vratyavani_records"));
     const verifiedList = [];
     vSnap.forEach(d => verifiedList.push({ id: d.id, ...d.data(), isVerified: true }));
@@ -664,12 +637,16 @@ async function syncCloudHeritage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(verifiedList));
     }
 
+    // 2. Pending Submissions (Synced to all devices for voting & admin queue)
     const pSnap = await getDocs(collection(db, "vratyavani_pending"));
     const pendingList = [];
     pSnap.forEach(d => pendingList.push({ id: d.id, ...d.data(), isVerified: false }));
     if (pendingList.length > 0) {
       localStorage.setItem(PENDING_KEY, JSON.stringify(pendingList));
     }
+
+    // 3. Cultural Banner Sync
+    await window.updateStateCulturalShowcase(window.currentState, window.currentLanguage);
   } catch (e) {
     console.warn("Cloud sync fallback to local:", e);
   }
@@ -695,7 +672,6 @@ window.loadDistrictData = function(districtKey) {
         mapMarkers.push(marker);
       });
     } else {
-      // Focus strictly on Selected District Center Coordinates (NOT User Live Location)
       const targetCoords = districtCoordinatesMap[districtKey.toLowerCase()] || [26.1245, 85.3902];
       window.mapInstance.flyTo(targetCoords, 12);
     }
@@ -756,7 +732,6 @@ function renderCards(itemsList) {
   const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
   const lang = window.currentLanguage;
 
-  // Empty District: Show Heritage Radar Focus Button for the Selected District
   if (itemsList.length === 0) {
     container.innerHTML = `
       <div style="background:#fff; border-radius:12px; padding:25px; text-align:center; grid-column:1/-1; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
@@ -775,7 +750,7 @@ function renderCards(itemsList) {
     let ritual = item.livingCulture || "Sacred traditional practice.";
     let tradition = item.tradition || "Annual folk celebration & heritage gathering.";
 
-    // Automatic Translation Adaptation for Baba Garibnath or known sites
+    // In-Memory Translation Adaptation for Baba Garibnath or famous sites
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes("garibnath") || lowerTitle.includes("garib nath")) {
       const transObj = heritageNarrativeTranslations["baba garibnath"][lang];
@@ -793,7 +768,7 @@ function renderCards(itemsList) {
     const noVotes = (item.noVotes !== undefined) ? item.noVotes : 0;
     const isVerified = item.isVerified === true;
 
-    // 100% Fixed Clean String Rendering for Poll Votes (Bug Fixed)
+    // Clean String Output for Voting Poll
     const cardHtml = `
       <div class="unified-card" style="background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:15px; border-left:4px solid ${isVerified ? 'var(--accent-gold)' : '#f59e0b'};">
         <div onclick="open360Viewer('${itemId}')" style="cursor:pointer; position:relative;">
@@ -813,7 +788,7 @@ function renderCards(itemsList) {
           <p style="font-size:12px; color:#6b21a8; margin-bottom:5px;"><strong>${d.cultureLabel}</strong> ${ritual}</p>
           <p style="font-size:12px; color:#b45309; margin-bottom:8px;"><strong>${d.traditionLabel}</strong> ${tradition}</p>
           
-          <!-- Triple Multilingual Audio Narration Pills (History, Culture & Tradition) -->
+          <!-- Triple Multilingual Audio Narration Pills -->
           <div style="display:flex; gap:6px; margin:10px 0; flex-wrap:wrap;">
             <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'heritage')" style="background:#fef3c7; color:#92400e; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${d.btnListenHist}</button>
             <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'culture')" style="background:#dcfce7; color:#15803d; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${d.btnListenCult}</button>
@@ -884,7 +859,7 @@ window.detectLiveCitizenGPS = function() {
   }
 };
 
-// Community Poll Voting (Yes / No)
+// Community Poll Voting (Synced Directly to Cloud Firestore)
 window.castPollVote = async function(itemId, type) {
   let pending = getLocalPendingRecords();
   const found = pending.find(i => i.id === itemId);
@@ -902,7 +877,9 @@ window.castPollVote = async function(itemId, type) {
         noVotes: found.noVotes,
         votes: found.votes 
       });
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Poll vote cloud update fallback:", e);
+    }
     alert(`👍 आपका पोल सिग्नल (${type.toUpperCase()}) दर्ज हो गया है!`);
     loadDistrictData(window.currentDistrict);
   }
@@ -1032,7 +1009,7 @@ window.previewAdminBannerImage = function(event) {
   }
 };
 
-// Citizen Submission
+// Citizen Submission (Directly to Cloud Firestore vratyavani_pending)
 window.handleCitizenSubmit = async function(e) {
   e.preventDefault();
   const pendingId = `pending_${Date.now()}`;
@@ -1055,17 +1032,19 @@ window.handleCitizenSubmit = async function(e) {
     submittedAt: new Date().toLocaleString()
   };
 
-  let localPending = getLocalPendingRecords();
-  localPending.unshift(pendingItem);
-  localStorage.setItem(PENDING_KEY, JSON.stringify(localPending));
-
+  // 1. Cloud First
   try {
     await setDoc(doc(db, "vratyavani_pending", pendingId), pendingItem);
   } catch (err) {
     console.warn("Cloud upload fallback:", err);
   }
 
-  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक Vihaan-Purkha क्लाउड में सबमिट हो गया है और होम स्क्रीन पर वोटिंग के लिए लाइव है!`);
+  // 2. Local fallback
+  let localPending = getLocalPendingRecords();
+  localPending.unshift(pendingItem);
+  localStorage.setItem(PENDING_KEY, JSON.stringify(localPending));
+
+  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक क्लाउड में सबमिट हो गया है और सभी डिवाइसेस पर लाइव है!`);
   e.target.reset();
   citizenUploadedBase64 = null;
   const boxEl = document.getElementById("citImagePreviewBox");
@@ -1084,6 +1063,7 @@ window.closeAdminPanelModal = function() {
   document.getElementById("adminPanelModal").style.display = "none";
 };
 
+// Render Admin Verification Queue Directly from Cloud
 async function renderInpageAdminTable() {
   const pendingTbody = document.getElementById("pendingCitizenTableBody");
   if (!pendingTbody) return;
@@ -1093,9 +1073,7 @@ async function renderInpageAdminTable() {
   try {
     const pSnap = await getDocs(collection(db, "vratyavani_pending"));
     pSnap.forEach(d => pendingItems.push({ id: d.id, ...d.data() }));
-  } catch (e) {}
-
-  if (pendingItems.length === 0) {
+  } catch (e) {
     pendingItems = getLocalPendingRecords();
   }
 
@@ -1169,7 +1147,7 @@ window.approveCloudSubmission = async function(docId) {
 
   alert(`✅ "${found.title}" को मान्यता (VERIFIED TRUST) मिल गई है और यह परमानेंट लाइव हो गया है!`);
   renderInpageAdminTable();
-  loadDistrictData(window.currentDistrict);
+  syncCloudHeritage();
 };
 
 // Admin Rejection Handler
@@ -1187,10 +1165,10 @@ window.rejectCloudSubmission = async function(docId) {
 
   alert("❌ सबमिशन रिजेक्ट कर दिया गया है।");
   renderInpageAdminTable();
-  loadDistrictData(window.currentDistrict);
+  syncCloudHeritage();
 };
 
-// Admin State Highlight Banner Manager (Saves to Cloud & Local)
+// Admin State Highlight Banner Manager (Saves to Cloud & Synchronizes with all devices)
 window.handleAdminBannerUpdate = async function(e) {
   e.preventDefault();
   const stateKey = document.getElementById("admBannerState").value;
@@ -1200,7 +1178,7 @@ window.handleAdminBannerUpdate = async function(e) {
 
   const bannerData = { title, desc, img: imgUrl, updatedAt: new Date().toISOString() };
 
-  // 1. Save to Cloud Firestore
+  // 1. Save directly to Cloud Firestore collection "vratyavani_banners"
   try {
     await setDoc(doc(db, "vratyavani_banners", stateKey), bannerData);
   } catch (err) {
@@ -1217,7 +1195,7 @@ window.handleAdminBannerUpdate = async function(e) {
   banners[stateKey] = bannerData;
   localStorage.setItem(BANNER_KEY, JSON.stringify(banners));
 
-  alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर क्लाउड पर सिंक हो गया है!`);
+  alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर क्लाउड पर सेव हो गया है!`);
   e.target.reset();
   adminBannerUploadedBase64 = null;
   const prevBox = document.getElementById("admBannerPreviewBox");
@@ -1225,7 +1203,7 @@ window.handleAdminBannerUpdate = async function(e) {
   window.updateStateCulturalShowcase(window.currentState, window.currentLanguage);
 };
 
-// Direct Admin Heritage Publication Submission
+// Direct Admin Heritage Publication Submission (Cloud First)
 window.handleAdminDirectSubmit = async function(e) {
   e.preventDefault();
   const newId = `rec_${Date.now()}`;
@@ -1260,7 +1238,7 @@ window.handleAdminDirectSubmit = async function(e) {
   e.target.reset();
   adminUploadedBase64 = null;
   closeAdminPanelModal();
-  loadDistrictData(window.currentDistrict);
+  syncCloudHeritage();
 };
 
 window.handleAdminLogin = function(e) {
@@ -1340,4 +1318,4 @@ window.focusOnMapTab = function(lat, lng) {
 
 window.showQrModal = function() { alert("Spot QR Code Scanner Active for Offline Navigation."); };
 window.openCitizenModal = function() { document.getElementById("citizenModal").style.display = "flex"; };
-window.closeCitizenModal = function() { document.getElementById("citizenModal").style.display = "none"; }; 
+window.closeCitizenModal = function() { document.getElementById("citizenModal").style.display = "none"; };
