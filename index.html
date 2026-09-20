@@ -92,19 +92,19 @@
     </div>
   </header>
 
-  <!-- Hero Banner with Admin-Controlled Cultural Frame -->
+  <!-- Hero Banner with Responsive State Cultural Frame -->
   <section class="hero-banner" style="position:relative; overflow:hidden;">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">India's Community-Verified Immersive Heritage & Preservation Network</p>
     
-    <!-- State Cultural Showcase: Hidden by default, shown only if added by Admin -->
-    <div id="stateCulturalHighlightBox" style="display: none; margin: 12px auto 6px auto; max-width: 620px; background: rgba(0,0,0,0.45); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.5); align-items: center; gap: 12px;">
-      <img id="stateHighlightImg" src="" alt="State Culture" style="width: 65px; height: 65px; border-radius: 8px; object-fit: cover; border: 1px solid var(--accent-gold);" />
-      <div style="text-align: left;">
-        <span id="stateHighlightBadge" style="background: var(--accent-gold); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">CULTURAL HIGHLIGHT</span>
-        <h4 id="stateHighlightTitle" style="font-size: 13px; font-weight: 700; color: #fff; margin: 3px 0 2px 0;"></h4>
-        <p id="stateHighlightDesc" style="font-size: 10px; color: #cbd5e1; margin: 0;"></p>
+    <!-- State Cultural Showcase: Left Details, Right Transition Image -->
+    <div id="stateCulturalHighlightBox" style="margin: 12px auto 8px auto; max-width: 680px; background: rgba(0,0,0,0.5); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.5); display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+      <div style="text-align: left; flex: 1;">
+        <span id="stateHighlightBadge" style="background: var(--accent-gold); color: #000; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">BIHAR CULTURAL IDENTITY</span>
+        <h4 id="stateHighlightTitle" style="font-size: 14px; font-weight: 700; color: #fff; margin: 4px 0 2px 0;">महापर्व छठ पूजा (Chhath Mahaparv)</h4>
+        <p id="stateHighlightDesc" style="font-size: 11px; color: #cbd5e1; margin: 0; line-height: 1.4;">भगवान सूर्य व षष्ठी मैया की आराधना का प्राचीन लोकपर्व</p>
       </div>
+      <img id="stateHighlightImg" src="https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80" alt="State Culture" style="width: 85px; height: 85px; border-radius: 10px; object-fit: cover; border: 2px solid var(--accent-gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3);" />
     </div>
 
     <div class="hero-badges">
@@ -158,7 +158,6 @@
       🗺️ Open Circuit in Google Maps
     </a>
 
-    <!-- Circuit Location Cards Below Map -->
     <div style="margin-top:18px;">
       <h4 id="circuitSectionTitle" style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:8px;">📍 Key Circuit Points in this Region</h4>
       <div id="mapLocationsList" style="display:flex; flex-direction:column; gap:8px;"></div>
@@ -217,7 +216,6 @@
             <label id="lblCitPhoto" style="font-size:10px; font-weight:700;">Evidence Photo (फोटो साक्ष्य)</label>
             <div style="display:flex; gap:6px; margin-top:3px;">
               <input type="file" id="citPhotoInput" accept="image/*" onchange="previewCitizenImage(event)" style="flex:1; font-size:10px;" />
-              <!-- Direct Live Camera Button -->
               <label for="citCameraInput" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">
                 📷 Live Camera
               </label>
@@ -320,7 +318,7 @@
         <button type="button" onclick="logoutAdmin()" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Logout</button>
       </div>
 
-      <!-- Section 1: Pending Community Submissions Queue with Vote Counts and Approve/Reject Buttons -->
+      <!-- Section 1: Pending Community Submissions Queue -->
       <h4 style="font-size:12px; color:#c2410c; margin-bottom:6px;">📥 Pending Community Submissions (Cloud Verification Queue)</h4>
       <div style="max-height:170px; overflow-y:auto; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:15px;">
         <table style="width:100%; border-collapse:collapse; font-size:11px;">
@@ -338,7 +336,7 @@
         </table>
       </div>
 
-      <!-- Section 2: Admin State Cultural Showcase Manager (Admin Only) -->
+      <!-- Section 2: Admin State Cultural Showcase Manager (Admin Control with Upload & Camera) -->
       <h4 style="font-size:12px; color:#b45309; margin-bottom:6px; border-top:1px solid #e2e8f0; padding-top:10px;">
         🖼️ Manage State Cultural Highlight Banner (Admin Control)
       </h4>
@@ -361,8 +359,17 @@
             <input type="text" id="admBannerDesc" placeholder="Ancient tradition description..." required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
           <div style="grid-column: 1 / -1;">
-            <label style="font-size:10px; font-weight:700;">Highlight Image URL</label>
-            <input type="url" id="admBannerImgUrl" placeholder="https://..." required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+            <label style="font-size:10px; font-weight:700;">Choose Photo / Live Camera</label>
+            <div style="display:flex; gap:6px; margin-top:3px;">
+              <input type="file" id="admBannerFileInput" accept="image/*" onchange="previewAdminBannerImage(event)" style="flex:1; font-size:10px;" />
+              <label for="admBannerCameraInput" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">
+                📷 Camera
+              </label>
+              <input type="file" id="admBannerCameraInput" accept="image/*" capture="environment" onchange="previewAdminBannerImage(event)" style="display:none;" />
+            </div>
+            <div id="admBannerPreviewBox" style="display:none; margin-top:6px; text-align:center;">
+              <img id="admBannerPreviewImg" src="" style="max-height:80px; border-radius:5px;" />
+            </div>
           </div>
         </div>
         <button type="submit" style="margin-top:8px; width:100%; padding:7px; background:#b45309; color:#fff; border:none; border-radius:5px; font-weight:700; font-size:11px; cursor:pointer;">

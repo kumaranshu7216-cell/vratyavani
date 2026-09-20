@@ -1,13 +1,11 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Unified Architecture with:
- * - Specific District/State Focus on Map Radar when empty
- * - True In-Memory Translation Engine (Hindi, Punjabi, Bhojpuri, Maithili, English)
- * - Native Accent TTS Voice Narration
- * - Community Poll Signal Voting (Yes / No) with Fixed Render
- * - Admin Approve / Reject Cloud Actions
- * - Live Camera Capture Support
- * - Admin-Only State Cultural Highlight Controls
+ * Complete Update:
+ * - Poll Voting string cleanup (fixed glitch Yes: 1Eert{} No: 0)
+ * - State Cultural Highlight localized & aligned properly
+ * - Admin Banner image upload + live camera capture
+ * - In-Memory translation dictionary & native dialect audio narration
+ * - Specific district coordinates radar autofocus
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -34,6 +32,7 @@ let mapMarkers = [];
 let pannellumViewerInstance = null;
 let citizenUploadedBase64 = null;
 let adminUploadedBase64 = null;
+let adminBannerUploadedBase64 = null;
 
 const STORAGE_KEY = "vratyavani_custom_records";
 const PENDING_KEY = "vratyavani_pending_submissions";
@@ -57,7 +56,107 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// Full In-Memory Heritage Translation Database (English to Native Dialects)
+// Default State Cultural Highlight Profiles (Localized for each dialect)
+const defaultStateProfiles = {
+  bihar: {
+    "hi-IN": {
+      badge: "BIHAR CULTURAL IDENTITY",
+      title: "महापर्व छठ पूजा (Chhath Mahaparv)",
+      desc: "भगवान सूर्य व षष्ठी मैया की आराधना का प्राचीन लोकपर्व",
+      img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+    },
+    "pa-IN": {
+      badge: "ਬਿਹਾਰ ਸੱਭਿਆਚਾਰਕ ਪਛਾਣ",
+      title: "ਮਹਾਪਰਵ ਛਠ ਪੂਜਾ (Chhath Mahaparv)",
+      desc: "ਸੂਰਜ ਭਗਵਾਨ ਅਤੇ ਛਠੀ ਮਈਆ ਦੀ ਪੂਜਾ ਦਾ ਪਵਿੱਤਰ ਲੋਕ ਤਿਉਹਾਰ",
+      img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+    },
+    "bho-IN": {
+      badge: "बिहार लोक पहचान",
+      title: "महापरब छठ पूजा (Chhath Mahaparv)",
+      desc: "भगवान सुरुज देव आ छठी मइया के आराधना के महान लोकपरब",
+      img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+    },
+    "mai-IN": {
+      badge: "बिहार सांस्कृतिक पहचान",
+      title: "महापर्व छठि पूजा (Chhath Mahaparv)",
+      desc: "भगवान सूर्य एवं षष्ठी देवीक पावन आराधना पर्व",
+      img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+    },
+    "en-IN": {
+      badge: "BIHAR CULTURAL IDENTITY",
+      title: "Chhath Mahaparv Folk Festival",
+      desc: "Ancient Vedic festival dedicated to the Sun God and Chhathi Maiya",
+      img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+    }
+  },
+  up: {
+    "hi-IN": {
+      badge: "UTTAR PRADESH CULTURAL IDENTITY",
+      title: "देव दीपावली व भव्य गंगा आरती (Dev Deepawali)",
+      desc: "काशी के पावन घाटों पर दीपों का दिव्य महोत्सव व वैदिक परंपरा",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+    },
+    "pa-IN": {
+      badge: "ਉੱਤਰ ਪ੍ਰਦੇਸ਼ ਸੱਭਿਆਚਾਰਕ ਪਛਾਣ",
+      title: "ਦੇਵ ਦੀਪਾਵਲੀ ਅਤੇ ਗੰਗਾ ਆਰਤੀ (Dev Deepawali)",
+      desc: "ਕਾਸ਼ੀ ਦੇ ਘਾਟਾਂ 'ਤੇ ਦੀਵਿਆਂ ਦਾ ਅਲੌਕਿਕ ਤਿਉਹਾਰ ਅਤੇ ਵੈਦਿਕ ਪਰੰਪਰਾ",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+    },
+    "bho-IN": {
+      badge: "उत्तर प्रदेश सांस्कृतिक पहचान",
+      title: "देव दीपावली आ गंगा आरती (Dev Deepawali)",
+      desc: "बनारस के घाट पर दीया के उजोर आ पावन वैदिक परंपरा",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+    },
+    "mai-IN": {
+      badge: "उत्तर प्रदेश सांस्कृतिक पहचान",
+      title: "देव दीपावली एवं गंगा आरती (Dev Deepawali)",
+      desc: "काशीक पावन घाट पर दीप प्रज्वलन एवं वैदिक अनुष्ठान",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+    },
+    "en-IN": {
+      badge: "UTTAR PRADESH CULTURAL IDENTITY",
+      title: "Dev Deepawali & Ganga Aarti",
+      desc: "Divine festival of lights celebrated on the sacred ghats of Varanasi",
+      img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+    }
+  },
+  punjab: {
+    "hi-IN": {
+      badge: "PUNJAB CULTURAL IDENTITY",
+      title: "होला मोहल्ला व बैसाखी (Hola Mohalla & Vaisakhi)",
+      desc: "सिख शौर्य, आध्यात्मिक आनंद और आनंदपुर साहिब की जीवंत परंपरा",
+      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+    },
+    "pa-IN": {
+      badge: "ਪੰਜਾਬ ਸੱਭਿਆਚਾਰਕ ਪਛਾਣ",
+      title: "ਹੋਲਾ ਮਹੱਲਾ ਤੇ ਵਿਸਾਖੀ (Hola Mohalla & Vaisakhi)",
+      desc: "ਸਿੱਖ ਵਿਰਾਸਤ, ਵੀਰਤਾ ਅਤੇ ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਦੀ ਪਾਵਨ ਪਰੰਪਰਾ",
+      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+    },
+    "bho-IN": {
+      badge: "पंजाब सांस्कृतिक पहचान",
+      title: "होला मोहल्ला आ बैसाखी (Hola Mohalla & Vaisakhi)",
+      desc: "सिख वीरता, अध्यात्म आ आनंदपुर साहिब के परंपरा",
+      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+    },
+    "mai-IN": {
+      badge: "पंजाब सांस्कृतिक पहचान",
+      title: "होला मोहल्ला एवं बैसाखी (Hola Mohalla & Vaisakhi)",
+      desc: "सिख शौर्य एवं आनंदपुर साहिबक पावन परंपरा",
+      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+    },
+    "en-IN": {
+      badge: "PUNJAB CULTURAL IDENTITY",
+      title: "Hola Mohalla & Vaisakhi",
+      desc: "Celebration of martial heritage, spirituality, and Anandpur Sahib traditions",
+      img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+    }
+  }
+};
+
+// Full In-Memory Heritage Translation Database
 const heritageNarrativeTranslations = {
   "baba garibnath": {
     "hi-IN": {
@@ -306,7 +405,6 @@ const uiDictionary = {
   }
 };
 
-// Online / Offline Auto Detection
 function setupNetworkStatusDetector() {
   const badge = document.getElementById("networkStatusBadge");
   const updateStatus = () => {
@@ -401,7 +499,7 @@ window.confirmLocationSelection = function() {
   if (consoleLangSelect) consoleLangSelect.value = lang;
 
   document.getElementById("locationModal").style.display = "none";
-  window.renderAdminStateHighlight(selectedState);
+  window.updateStateCulturalShowcase(selectedState, lang);
   window.applyInterfaceLanguage(lang);
   window.onDistrictChange(distKey);
 };
@@ -409,32 +507,42 @@ window.confirmLocationSelection = function() {
 window.onConsoleLangChange = function(lang) {
   window.currentLanguage = lang;
   document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
+  window.updateStateCulturalShowcase(window.currentState, lang);
   window.applyInterfaceLanguage(lang);
   loadDistrictData(window.currentDistrict);
 };
 
-// Admin State Highlight Banner (Appears only if created by admin)
-window.renderAdminStateHighlight = function(stateKey) {
+// Render State Cultural Highlight Banner (Responsive & Localized)
+window.updateStateCulturalShowcase = function(stateKey, langKey) {
   const box = document.getElementById("stateCulturalHighlightBox");
-  const raw = localStorage.getItem(BANNER_KEY);
-  if (!raw) {
-    if (box) box.style.display = "none";
-    return;
-  }
+  if (!box) return;
+
+  const lang = langKey || window.currentLanguage || "hi-IN";
+  
+  // 1. Check if admin uploaded custom banner
+  let customBanner = null;
   try {
-    const banners = JSON.parse(raw);
-    const active = banners[stateKey];
-    if (active && active.title) {
-      document.getElementById("stateHighlightBadge").innerText = `${stateKey.toUpperCase()} CULTURAL IDENTITY`;
-      document.getElementById("stateHighlightTitle").innerText = active.title;
-      document.getElementById("stateHighlightDesc").innerText = active.desc;
-      document.getElementById("stateHighlightImg").src = active.img;
-      box.style.display = "flex";
-    } else {
-      box.style.display = "none";
+    const raw = localStorage.getItem(BANNER_KEY);
+    if (raw) {
+      const banners = JSON.parse(raw);
+      if (banners[stateKey]) customBanner = banners[stateKey];
     }
-  } catch (e) {
-    if (box) box.style.display = "none";
+  } catch(e) {}
+
+  if (customBanner) {
+    document.getElementById("stateHighlightBadge").innerText = `${stateKey.toUpperCase()} CULTURAL IDENTITY`;
+    document.getElementById("stateHighlightTitle").innerText = customBanner.title;
+    document.getElementById("stateHighlightDesc").innerText = customBanner.desc;
+    document.getElementById("stateHighlightImg").src = customBanner.img;
+    box.style.display = "flex";
+  } else {
+    // 2. Localized Default Showcase
+    const p = (defaultStateProfiles[stateKey] && defaultStateProfiles[stateKey][lang]) ? defaultStateProfiles[stateKey][lang] : defaultStateProfiles["bihar"]["hi-IN"];
+    document.getElementById("stateHighlightBadge").innerText = p.badge;
+    document.getElementById("stateHighlightTitle").innerText = p.title;
+    document.getElementById("stateHighlightDesc").innerText = p.desc;
+    document.getElementById("stateHighlightImg").src = p.img;
+    box.style.display = "flex";
   }
 };
 
@@ -582,7 +690,6 @@ window.loadDistrictData = function(districtKey) {
         mapMarkers.push(marker);
       });
     } else {
-      // Focus strictly on Selected District Center Coordinates (NOT User Live Location)
       const targetCoords = districtCoordinatesMap[districtKey.toLowerCase()] || [26.1245, 85.3902];
       window.mapInstance.flyTo(targetCoords, 12);
     }
@@ -643,7 +750,6 @@ function renderCards(itemsList) {
   const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
   const lang = window.currentLanguage;
 
-  // Empty District: Show Heritage Radar Focus Button for the Selected District
   if (itemsList.length === 0) {
     container.innerHTML = `
       <div style="background:#fff; border-radius:12px; padding:25px; text-align:center; grid-column:1/-1; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
@@ -662,7 +768,7 @@ function renderCards(itemsList) {
     let ritual = item.livingCulture || "Sacred traditional practice.";
     let tradition = item.tradition || "Annual folk celebration & heritage gathering.";
 
-    // Automatic Translation Adaptation: If user typed in English, adapt to selected dialect
+    // Automatic Translation Adaptation for Baba Garibnath or known sites
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes("garibnath") || lowerTitle.includes("garib nath")) {
       const transObj = heritageNarrativeTranslations["baba garibnath"][lang];
@@ -676,8 +782,8 @@ function renderCards(itemsList) {
 
     let displayImage = item.imageUrl || item.image || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     const itemId = item.id || `item_${Math.random()}`;
-    const yesVotes = item.yesVotes || item.votes || 1;
-    const noVotes = item.noVotes || 0;
+    const yesVotes = (item.yesVotes !== undefined) ? item.yesVotes : (item.votes || 1);
+    const noVotes = (item.noVotes !== undefined) ? item.noVotes : 0;
     const isVerified = item.isVerified === true;
 
     // Fixed Clean String Rendering for Poll Votes (Bug Fixed)
@@ -712,7 +818,10 @@ function renderCards(itemsList) {
             <div style="background:#f8fafc; border:1px dashed #f59e0b; padding:8px 10px; border-radius:6px; margin-bottom:10px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <span style="font-size:11px; color:#92400e; font-weight:700;">🗳️ Community Poll Signals:</span>
-                <span style="font-size:10px; color:#15803d; font-weight:bold;">🟢 Yes: ${yesVotes} \vert{} 🔴 No: ${noVotes}</span>
+                <span style="font-size:10px; font-weight:bold;">
+                  <span style="color:#15803d;">🟢 Yes: ${yesVotes}</span> &nbsp;|&nbsp; 
+                  <span style="color:#991b1b;">🔴 No: ${noVotes}</span>
+                </span>
               </div>
               <div style="display:flex; gap:8px;">
                 <button type="button" onclick="castPollVote('${itemId}', 'yes')" style="flex:1; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:4px 6px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">${d.btnVoteYes}</button>
@@ -774,11 +883,11 @@ window.castPollVote = async function(itemId, type) {
   const found = pending.find(i => i.id === itemId);
   if (found) {
     if (type === 'yes') {
-      found.yesVotes = (found.yesVotes || found.votes || 1) + 1;
+      found.yesVotes = (found.yesVotes !== undefined ? found.yesVotes : (found.votes || 1)) + 1;
     } else {
-      found.noVotes = (found.noVotes || 0) + 1;
+      found.noVotes = (found.noVotes !== undefined ? found.noVotes : 0) + 1;
     }
-    found.votes = (found.yesVotes || 1);
+    found.votes = found.yesVotes;
     localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
     try {
       await updateDoc(doc(db, "vratyavani_pending", itemId), { 
@@ -833,7 +942,6 @@ function playAudioDirectly(text, lang) {
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   
-  // Set Accurate Voice Synthesis Dialect
   utter.lang = lang || window.currentLanguage || 'hi-IN';
   utter.rate = 0.90;
   utter.pitch = 1.0;
@@ -897,6 +1005,22 @@ window.previewAdminImage = function(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
       adminUploadedBase64 = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+// Admin Banner Image File Preview
+window.previewAdminBannerImage = function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      adminBannerUploadedBase64 = e.target.result;
+      const imgEl = document.getElementById("admBannerPreviewImg");
+      const boxEl = document.getElementById("admBannerPreviewBox");
+      if (imgEl) imgEl.src = adminBannerUploadedBase64;
+      if (boxEl) boxEl.style.display = "block";
     };
     reader.readAsDataURL(file);
   }
@@ -977,8 +1101,8 @@ async function renderInpageAdminTable() {
 
   pendingItems.forEach((pItem) => {
     const row = document.createElement("tr");
-    const yes = pItem.yesVotes || pItem.votes || 1;
-    const no = pItem.noVotes || 0;
+    const yes = (pItem.yesVotes !== undefined) ? pItem.yesVotes : (pItem.votes || 1);
+    const no = (pItem.noVotes !== undefined) ? pItem.noVotes : 0;
     row.innerHTML = `
       <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
       <td style="padding:8px; border:1px solid #e2e8f0;">${pItem.district}</td>
@@ -994,7 +1118,7 @@ async function renderInpageAdminTable() {
   });
 }
 
-// Approve Cloud Submission (Directly becomes VERIFIED TRUST)
+// Approve Cloud Submission
 window.approveCloudSubmission = async function(docId) {
   let pending = getLocalPendingRecords();
   let found = pending.find(i => i.id === docId);
@@ -1060,13 +1184,13 @@ window.rejectCloudSubmission = async function(docId) {
   loadDistrictData(window.currentDistrict);
 };
 
-// Admin State Highlight Banner Manager (Admin Controlled Only)
+// Admin State Highlight Banner Manager (With Image Upload/Camera)
 window.handleAdminBannerUpdate = function(e) {
   e.preventDefault();
   const stateKey = document.getElementById("admBannerState").value;
   const title = document.getElementById("admBannerTitle").value.trim();
   const desc = document.getElementById("admBannerDesc").value.trim();
-  const imgUrl = document.getElementById("admBannerImgUrl").value.trim();
+  const imgUrl = adminBannerUploadedBase64 || "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80";
 
   let banners = {};
   try {
@@ -1079,7 +1203,10 @@ window.handleAdminBannerUpdate = function(e) {
 
   alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर सेट हो गया है!`);
   e.target.reset();
-  window.renderAdminStateHighlight(window.currentState);
+  adminBannerUploadedBase64 = null;
+  const prevBox = document.getElementById("admBannerPreviewBox");
+  if (prevBox) prevBox.style.display = "none";
+  window.updateStateCulturalShowcase(window.currentState, window.currentLanguage);
 };
 
 // Direct Admin Heritage Publication Submission
