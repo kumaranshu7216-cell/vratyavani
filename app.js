@@ -1,11 +1,12 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Unified Vihaan-Purkha Core Architecture:
- * - Firebase Firestore Cloud Sync (Cross-Device Consistent Data)
- * - Auto Online/Offline Status Indicator
- * - Radar Empty District Auto-Redirect to Map
- * - Triple Audio Narration: History, Culture, & Tradition
- * - Living Heritage Circuit Locations List Below Map
+ * Complete Update:
+ * - Specific District/State Focus on Map Radar when empty (not user's live location)
+ * - Complete UI, Bottom Nav & Modal Translation
+ * - Proper Native Language AI Voice Narration (Bhashini-aligned)
+ * - Community Voting Poll (Yes / No)
+ * - Admin Approve & Reject Actions
+ * - State Cultural Festival/Highlight Sync
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -36,47 +37,135 @@ let adminUploadedBase64 = null;
 const STORAGE_KEY = "vratyavani_custom_records";
 const PENDING_KEY = "vratyavani_pending_submissions";
 
+// Coordinates Map for District Radar Autofocus
+const districtCoordinatesMap = {
+  muzaffarpur: [26.1245, 85.3902],
+  patna: [25.5941, 85.1376],
+  gaya: [24.7914, 85.0002],
+  varanasi: [25.3109, 83.0107],
+  ayodhya: [26.7922, 82.1998],
+  mathura: [27.4924, 77.6737],
+  amritsar: [31.6200, 74.8765],
+  "anandpur sahib": [31.2359, 76.4988]
+};
+
 const stateDistrictHints = {
   bihar: ["Muzaffarpur", "Patna", "Gaya"],
   up: ["Varanasi", "Ayodhya", "Mathura"],
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// 5-Dialect Dynamic Translation Matrix (Bhashini-Aligned)
-const dialectTranslations = {
+// State Cultural Highlight Profiles (Displays on Hero Frame)
+const stateCulturalProfiles = {
+  bihar: {
+    badge: "BIHAR CULTURAL IDENTITY",
+    title: "महापर्व छठ पूजा (Chhath Mahaparv)",
+    desc: "भगवान सूर्य व षष्ठी मैया की आराधना का प्राचीन लोकपर्व",
+    img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
+  },
+  up: {
+    badge: "UTTAR PRADESH CULTURAL IDENTITY",
+    title: "देव दीपावली व भव्य गंगा आरती (Dev Deepawali)",
+    desc: "काशी के पावन घाटों पर दीपों का दिव्य महोत्सव व वैदिक परंपरा",
+    img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
+  },
+  punjab: {
+    badge: "PUNJAB CULTURAL IDENTITY",
+    title: "ਹੋਲਾ ਮਹੱਲਾ ਤੇ ਵਿਸਾਖੀ (Hola Mohalla & Vaisakhi)",
+    desc: "ਸਿੱਖ ਵਿਰਾਸਤ, ਵੀਰਤਾ ਅਤੇ ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਦੀ ਪਾਵਨ ਪਰੰਪਰਾ",
+    img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+  }
+};
+
+// Full UI Translation Matrix across 5 Dialects
+const uiDictionary = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
     heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
     mapTitle: "📍 Living Heritage Clusters & Circuit Map",
     voiceConsoleTitle: "🎙️ Multilingual AI Voice Guide",
+    circuitSectionTitle: "📍 इस क्षेत्र के प्रमुख सर्किट स्थल",
+    nowPlayingDefault: "इतिहास, संस्कृति या परंपरा चुनकर अपनी बोली में सुनें...",
+    emptyDistrictMsg: "इस ज़िले में अभी कोई रिकॉर्ड नहीं है।",
+    btnRadarText: "📡 चुने गए ज़िले का सर्किट मैप पर देखें",
     btnListenHist: "🏛️ इतिहास सुनें",
     btnListenCult: "🎭 संस्कृति सुनें",
     btnListenTrad: "📜 परंपरा सुनें",
-    btnVote: "👍 Verify Signal (वोट करें)",
+    btnVoteYes: "👍 Yes (सत्यापित है)",
+    btnVoteNo: "👎 No (अमान्य)",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवंत संस्कृति:",
     traditionLabel: "📜 लोक परंपरा:",
     verifiedTrust: "🟢 VERIFIED TRUST",
     upcomingLabel: "🟡 UPCOMING HERITAGE",
+    tabHome: "होम",
+    tabMap: "क्लस्टर्स",
+    tabTerritory: "क्षेत्र",
+    tabAdmin: "एडमिन",
+    locModalTitle: "VratyaVani नेटवर्क",
+    locModalSub: "राज्य, ज़िला और अपनी स्थानीय बोली चुनें",
+    lblState: "State (राज्य)",
+    lblDistrict: "District (ज़िला)",
+    lblLang: "AI Voice Guide Dialect (भाषा / बोली)",
+    btnExplore: "Explore Verified Network ➔",
+    citHeading: "🏛️ Submit Upcoming Heritage",
+    citSubText: "नागरिक साक्ष्य आधारित ट्रस्ट इंजन सत्यापन (Cloud Synced)",
+    lblCitState: "State (राज्य)",
+    lblCitDistrict: "District (ज़िला)",
+    lblCitVillage: "Village / Cluster Area (गाँव / क्षेत्र)",
+    lblCitTitle: "Heritage Name (धरोहर का नाम)",
+    lblCitRitual: "Living Culture / Ritual (जीवंत संस्कृति / पूजा)",
+    lblCitTradition: "Tradition / Folk Practice (लोक परंपरा)",
+    lblCitPhoto: "Evidence Photo (फोटो अपलोड)",
+    lblCitGps: "GPS Coordinates (जीपीएस)",
+    lblCitStory: "Oral Narrative / Story (ऐतिहासिक विवरण / कथा)",
+    btnCitSubmit: "Submit to Community & Cloud",
     durgaTitle: "दुर्गा मंदिर",
     durgaDesc: "यह ऐतिहासिक मंदिर इस क्षेत्र की आध्यात्मिक पहचान, आस्था और सामुदायिक एकता का मुख्य केंद्र है।",
     durgaCulture: "आरती: पंडित जी और स्थानीय समुदाय द्वारा प्रातः व सांध्यकालीन विशेष दीप व धूप अर्चना।",
-    durgaTradition: "परंपरा: नवरात्रि के दौरान नौ दिनों का भव्य लोक मेला और अखंड कीर्तन परंपरा।"
+    durgaTradition: "परंपरा: पावन नवरात्रि में नौ दिनों का भव्य लोक मेला और अखंड कीर्तन परंपरा।"
   },
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
     heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
     mapTitle: "📍 Living Heritage Clusters & Circuit Map",
     voiceConsoleTitle: "🎙️ Multilingual AI Voice Guide",
+    circuitSectionTitle: "📍 Key Circuit Points in this Region",
+    nowPlayingDefault: "Select History, Culture or Tradition to experience AI narration...",
+    emptyDistrictMsg: "No records found in this district yet.",
+    btnRadarText: "📡 Explore Selected District on Map Radar",
     btnListenHist: "🏛️ History Audio",
     btnListenCult: "🎭 Culture Audio",
     btnListenTrad: "📜 Tradition Audio",
-    btnVote: "👍 Verify Signal (Vote)",
+    btnVoteYes: "👍 Yes (Verify)",
+    btnVoteNo: "👎 No (Reject)",
     heritageLabel: "🏛️ Heritage Overview:",
     cultureLabel: "🎭 Living Culture:",
     traditionLabel: "📜 Folk Tradition:",
     verifiedTrust: "🟢 VERIFIED TRUST",
     upcomingLabel: "🟡 UPCOMING HERITAGE",
+    tabHome: "Home",
+    tabMap: "Clusters",
+    tabTerritory: "Territory",
+    tabAdmin: "Admin",
+    locModalTitle: "VratyaVani Network",
+    locModalSub: "Select State, District and Local Dialect",
+    lblState: "State",
+    lblDistrict: "District",
+    lblLang: "AI Voice Guide Dialect",
+    btnExplore: "Explore Verified Network ➔",
+    citHeading: "🏛️ Submit Upcoming Heritage",
+    citSubText: "Submitted to VratyaVani Trust Engine (Cross-device verified via Cloud).",
+    lblCitState: "State",
+    lblCitDistrict: "District",
+    lblCitVillage: "Village / Cluster Area",
+    lblCitTitle: "Heritage Name / Shrine",
+    lblCitRitual: "Living Culture / Ritual",
+    lblCitTradition: "Tradition / Folk Practice",
+    lblCitPhoto: "Evidence Photo (Upload)",
+    lblCitGps: "GPS Coordinates",
+    lblCitStory: "Oral Narrative / Story",
+    btnCitSubmit: "Submit to Community & Cloud",
     durgaTitle: "Durga Mandir",
     durgaDesc: "This historic temple serves as the spiritual heartbeat, faith center, and communal unity of the neighborhood.",
     durgaCulture: "Aarti: Sacred morning and evening oil-lamp offerings led by the priest and community devotees.",
@@ -87,15 +176,42 @@ const dialectTranslations = {
     heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
     mapTitle: "📍 धरोहर क्लस्टर आ सर्किट नक्शा",
     voiceConsoleTitle: "🎙️ बहुभाषी AI आवाज गाइड",
+    circuitSectionTitle: "📍 एह इलाका के मुख्य सर्किट स्थल",
+    nowPlayingDefault: "इतिहास भा लोक-परंपरा चुनीं आ अपनी बोली में सुनीं...",
+    emptyDistrictMsg: "एह जिला में अभी कवनो रेकॉर्ड नइखे।",
+    btnRadarText: "📡 चुनल जिला के सर्किट नक्शा पर देखीं",
     btnListenHist: "🏛️ इतिहास सुनीं",
     btnListenCult: "🎭 संस्कृति सुनीं",
     btnListenTrad: "📜 परंपरा सुनीं",
-    btnVote: "👍 सत्यता वोट दीं",
+    btnVoteYes: "👍 हाँ (सही बा)",
+    btnVoteNo: "👎 ना (गलत बा)",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 लोक संस्कृति:",
     traditionLabel: "📜 रीत-परंपरा:",
     verifiedTrust: "🟢 प्रमाणित धरोहर",
     upcomingLabel: "🟡 सत्यापन खातिर धरोहर",
+    tabHome: "होम",
+    tabMap: "क्लस्टर",
+    tabTerritory: "इलाका",
+    tabAdmin: "एडमिन",
+    locModalTitle: "VratyaVani नेटवर्क",
+    locModalSub: "राज्य, ज़िला आ अपन बोली चुनीं",
+    lblState: "राज्य",
+    lblDistrict: "ज़िला",
+    lblLang: "AI आवाज गाइड बोली",
+    btnExplore: "सत्यापित नेटवर्क देखीं ➔",
+    citHeading: "🏛️ नया धरोहर जोड़ीं",
+    citSubText: "क्लाउड आधारित कम्युनिटी ट्रस्ट इंजन",
+    lblCitState: "राज्य",
+    lblCitDistrict: "ज़िला",
+    lblCitVillage: "गाँव / इलाका",
+    lblCitTitle: "धरोहर के नाम",
+    lblCitRitual: "पूजा-पाठ / रीत",
+    lblCitTradition: "लोक परंपरा",
+    lblCitPhoto: "फोटो अपलोड",
+    lblCitGps: "जीपीएस लोकेशन",
+    lblCitStory: "इतिहास आ लोककथा",
+    btnCitSubmit: "क्लाउड में सबमिट करीं",
     durgaTitle: "दुर्गा मंदिर",
     durgaDesc: "ई ऐतिहासिक मंदिर इलाका के आध्यात्मिक पहिचान आ अगाध आस्था के पवित्र केंद्र बा।",
     durgaCulture: "आरती: पंडित जी आ ग्रामीण लोगन द्वारा सबेरे आ साँझ के विशेष दीप पूजा।",
@@ -106,15 +222,42 @@ const dialectTranslations = {
     heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
     mapTitle: "📍 धरोहर क्लस्टर एवं सर्किट मानचित्र",
     voiceConsoleTitle: "🎙️ बहुभाषी AI वाणी गाइड",
+    circuitSectionTitle: "📍 एहि क्षेत्रक प्रमुख सर्किट स्थल",
+    nowPlayingDefault: "इतिहास वा संस्कृति चुनू आ अपन मैथिली में सुनू...",
+    emptyDistrictMsg: "एहि जिला में अखन कोनो रेकॉर्ड नहि अछि।",
+    btnRadarText: "📡 चुनल जिलाक सर्किट मानचित्र पर देखू",
     btnListenHist: "🏛️ इतिहास सुनू",
     btnListenCult: "🎭 संस्कृति सुनू",
     btnListenTrad: "📜 परंपरा सुनू",
-    btnVote: "👍 सत्यापन वोट करू",
+    btnVoteYes: "👍 हाँ (सत्य अछि)",
+    btnVoteNo: "👎 नहि (अमान्य)",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवित संस्कृति:",
     traditionLabel: "📜 लोक परंपरा:",
     verifiedTrust: "🟢 सत्यापित धरोहर",
     upcomingLabel: "🟡 आगामी धरोहर",
+    tabHome: "होम",
+    tabMap: "क्लस्टर",
+    tabTerritory: "क्षेत्र",
+    tabAdmin: "एडमिन",
+    locModalTitle: "VratyaVani नेटवर्क",
+    locModalSub: "राज्य, ज़िला एवं अपन मैथिली बोली चुनू",
+    lblState: "राज्य",
+    lblDistrict: "ज़िला",
+    lblLang: "AI वाणी गाइड भाषा",
+    btnExplore: "नेटवर्क देखू ➔",
+    citHeading: "🏛️ आगामी धरोहर जोड़ू",
+    citSubText: "क्लाउड आधारित ट्रस्ट इंजन सत्यापन",
+    lblCitState: "राज्य",
+    lblCitDistrict: "ज़िला",
+    lblCitVillage: "गाँव / क्षेत्र",
+    lblCitTitle: "धरोहरक नाम",
+    lblCitRitual: "संस्कृति / अनुष्ठान",
+    lblCitTradition: "लोक परंपरा",
+    lblCitPhoto: "साक्ष्य फोटो",
+    lblCitGps: "जीपीएस",
+    lblCitStory: "ऐतिहासिक विवरण",
+    btnCitSubmit: "क्लाउड पर सबमिट करू",
     durgaTitle: "दुर्गा मंदिर",
     durgaDesc: "ई ऐतिहासिक मंदिर एहि क्षेत्रक आध्यात्मिक पहचान एवं अटूट आस्थाक केंद्र अछि।",
     durgaCulture: "आरती: पंडित जी द्वारा प्रातः एवं सांध्यकालीन विशेष दीप व धूप अर्चना।",
@@ -125,15 +268,42 @@ const dialectTranslations = {
     heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
     mapTitle: "📍 ਵਿਰਾਸਤੀ ਕਲੱਸਟਰ ਅਤੇ ਨਕਸ਼ਾ",
     voiceConsoleTitle: "🎙️ ਬਹੁ-ਭਾਸ਼ਾਈ AI ਆਡੀਓ ਗਾਈਡ",
+    circuitSectionTitle: "📍 ਇਸ ਖੇਤਰ ਦੇ ਮੁੱਖ ਵਿਰਾਸਤੀ ਸਥਾਨ",
+    nowPlayingDefault: "ਇਤਿਹਾਸ ਜਾਂ ਰੀਤਾਂ ਸੁਣੋ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ...",
+    emptyDistrictMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
+    btnRadarText: "📡 ਚੁਣੇ ਹੋਏ ਜ਼ਿਲ੍ਹੇ ਦਾ ਨਕਸ਼ਾ ਵੇਖੋ",
     btnListenHist: "🏛️ ਇਤਿਹਾਸ ਸੁਣੋ",
     btnListenCult: "🎭 ਸੱਭਿਆਚਾਰ ਸੁਣੋ",
     btnListenTrad: "📜 ਰੀਤਾਂ ਸੁਣੋ",
-    btnVote: "👍 ਤਸਦੀਕ ਵੋਟ ਪਾਓ",
+    btnVoteYes: "👍 ਹਾਂ (ਤਸਦੀਕ ਹੈ)",
+    btnVoteNo: "👎 ਨਹੀਂ (ਗਲਤ)",
     heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
     cultureLabel: "🎭 ਜਿਉਂਦਾ ਸੱਭਿਆਚਾਰ:",
     traditionLabel: "📜 ਲੋਕ ਪਰੰਪਰਾ:",
     verifiedTrust: "🟢 ਤਸਦੀਕਸ਼ੁਦਾ ਵਿਰਾਸਤ",
     upcomingLabel: "🟡 ਨਵੀਂ ਆਗਾਮੀ ਵਿਰਾਸਤ",
+    tabHome: "ਘਰ",
+    tabMap: "ਕਲੱਸਟਰ",
+    tabTerritory: "ਖੇਤਰ",
+    tabAdmin: "ਐਡਮਿਨ",
+    locModalTitle: "VratyaVani ਨੈੱਟਵਰਕ",
+    locModalSub: "ਰਾਜ, ਜ਼ਿਲ੍ਹਾ ਅਤੇ ਪੰਜਾਬੀ ਬੋਲੀ ਚੁਣੋ",
+    lblState: "ਰਾਜ",
+    lblDistrict: "ਜ਼ਿਲ੍ਹਾ",
+    lblLang: "AI ਗਾਈਡ ਬੋਲੀ",
+    btnExplore: "ਨੈੱਟਵਰਕ ਵੇਖੋ ➔",
+    citHeading: "🏛️ ਨਵੀਂ ਵਿਰਾਸਤ ਦਰਜ ਕਰੋ",
+    citSubText: "ਕਲਾਉਡ ਟਰੱਸਟ ਇੰਜਣ ਤਸਦੀਕ",
+    lblCitState: "ਰਾਜ",
+    lblCitDistrict: "ਜ਼ਿਲ੍ਹਾ",
+    lblCitVillage: "ਪਿੰਡ / ਖੇਤਰ",
+    lblCitTitle: "ਵਿਰਾਸਤ ਦਾ ਨਾਮ",
+    lblCitRitual: "ਸੱਭਿਆਚਾਰ / ਪੂਜਾ",
+    lblCitTradition: "ਲੋਕ ਪਰੰਪਰਾ",
+    lblCitPhoto: "ਫੋਟੋ ਅੱਪਲੋਡ",
+    lblCitGps: "ਜੀਪੀਐੱਸ",
+    lblCitStory: "ਇਤਿਹਾਸਕ ਕਥਾ",
+    btnCitSubmit: "ਕਲਾਉਡ 'ਤੇ ਦਰਜ ਕਰੋ",
     durgaTitle: "ਦੁਰਗਾ ਮੰਦਰ",
     durgaDesc: "ਇਹ ਇਤਿਹਾਸਕ ਮੰਦਰ ਇਸ ਖੇਤਰ ਦੀ ਅਧਿਆਤਮਿਕ ਪਛਾਣ ਅਤੇ ਆਸਥਾ ਦਾ ਮੁੱਖ ਕੇਂਦਰ ਹੈ।",
     durgaCulture: "ਆਰਤੀ: ਪੰਡਿਤ ਜੀ ਵੱਲੋਂ ਸਵੇਰ ਅਤੇ ਸ਼ਾਮ ਦੀ ਵਿਸ਼ੇਸ਼ ਦੀਪ ਅਰਚਨਾ।",
@@ -172,7 +342,7 @@ function populatePanIndiaStateDropdowns() {
     const states = [
       { code: 'bihar', name: 'Bihar (बिहार)' },
       { code: 'up', name: 'Uttar Pradesh (उत्तर प्रदेश)' },
-      { code: 'punjab', name: 'Punjab (पंजाब)' }
+      { code: 'punjab', name: 'Punjab (ਪੰਜਾਬ)' }
     ];
     states.forEach(s => {
       const opt = document.createElement("option");
@@ -219,11 +389,16 @@ window.openPassportModal = function() { document.getElementById("passportModal")
 window.closePassportModal = function() { document.getElementById("passportModal").style.display = "none"; };
 
 window.confirmLocationSelection = function() {
+  const selectedState = document.getElementById("selState").value;
   const rawDist = document.getElementById("selDistrictInput").value.trim().toLowerCase();
   const lang = document.getElementById("selLang").value;
   const distKey = rawDist || "muzaffarpur";
 
+  window.currentState = selectedState;
+  window.currentDistrict = distKey;
   window.currentLanguage = lang;
+
+  document.getElementById("navStateLabel").innerText = selectedState.toUpperCase();
   document.getElementById("navDistrictLabel").innerText = distKey.toUpperCase();
   document.getElementById("navLangLabel").innerText = lang.split('-')[0].toUpperCase();
   
@@ -231,6 +406,7 @@ window.confirmLocationSelection = function() {
   if (consoleLangSelect) consoleLangSelect.value = lang;
 
   document.getElementById("locationModal").style.display = "none";
+  window.updateStateCulturalShowcase(selectedState);
   window.applyInterfaceLanguage(lang);
   window.onDistrictChange(distKey);
 };
@@ -242,16 +418,86 @@ window.onConsoleLangChange = function(lang) {
   loadDistrictData(window.currentDistrict);
 };
 
+// Update State Festival / Identity Showcase
+window.updateStateCulturalShowcase = function(stateKey) {
+  const p = stateCulturalProfiles[stateKey] || stateCulturalProfiles["bihar"];
+  const b = document.getElementById("stateHighlightBadge");
+  const t = document.getElementById("stateHighlightTitle");
+  const d = document.getElementById("stateHighlightDesc");
+  const img = document.getElementById("stateHighlightImg");
+  if (b) b.innerText = p.badge;
+  if (t) t.innerText = p.title;
+  if (d) d.innerText = p.desc;
+  if (img) img.src = p.img;
+};
+
+// Complete Translation Function
 window.applyInterfaceLanguage = function(langKey) {
-  const dict = dialectTranslations[langKey] || dialectTranslations["hi-IN"];
+  const d = uiDictionary[langKey] || uiDictionary["hi-IN"];
+  
+  // Hero & Headers
   const h1 = document.getElementById("heroTagline");
-  if (h1) h1.innerText = dict.heroTitle;
+  if (h1) h1.innerText = d.heroTitle;
   const h2 = document.getElementById("heroSubTagline");
-  if (h2) h2.innerText = dict.heroSub;
+  if (h2) h2.innerText = d.heroSub;
   const mapT = document.getElementById("mapSectionTitle");
-  if (mapT) mapT.innerText = dict.mapTitle;
+  if (mapT) mapT.innerText = d.mapTitle;
   const audT = document.getElementById("audioConsoleTitle");
-  if (audT) audT.innerText = dict.voiceConsoleTitle;
+  if (audT) audT.innerText = d.voiceConsoleTitle;
+  const circT = document.getElementById("circuitSectionTitle");
+  if (circT) circT.innerText = d.circuitSectionTitle;
+  const nowPlay = document.getElementById("nowPlayingText");
+  if (nowPlay) nowPlay.innerText = d.nowPlayingDefault;
+
+  // Bottom Navigation
+  const tHome = document.getElementById("tabLabelHome");
+  if (tHome) tHome.innerText = d.tabHome;
+  const tMap = document.getElementById("tabLabelMap");
+  if (tMap) tMap.innerText = d.tabMap;
+  const tTerr = document.getElementById("tabLabelTerritory");
+  if (tTerr) tTerr.innerText = d.tabTerritory;
+  const tAdm = document.getElementById("tabLabelAdmin");
+  if (tAdm) tAdm.innerText = d.tabAdmin;
+
+  // Modals & Labels
+  const lTitle = document.getElementById("locModalTitle");
+  if (lTitle) lTitle.innerText = d.locModalTitle;
+  const lSub = document.getElementById("locModalSub");
+  if (lSub) lSub.innerText = d.locModalSub;
+  const lState = document.getElementById("lblSelState");
+  if (lState) lState.innerText = d.lblState;
+  const lDist = document.getElementById("lblSelDistrict");
+  if (lDist) lDist.innerText = d.lblDistrict;
+  const lLang = document.getElementById("lblSelLang");
+  if (lLang) lLang.innerText = d.lblLang;
+  const btnExp = document.getElementById("btnConfirmLoc");
+  if (btnExp) btnExp.innerText = d.btnExplore;
+
+  // Submission Form Labels
+  const cHead = document.getElementById("citModalHeading");
+  if (cHead) cHead.innerText = d.citHeading;
+  const cSub = document.getElementById("citModalSubText");
+  if (cSub) cSub.innerText = d.citSubText;
+  const lcState = document.getElementById("lblCitState");
+  if (lcState) lcState.innerText = d.lblCitState;
+  const lcDist = document.getElementById("lblCitDistrict");
+  if (lcDist) lcDist.innerText = d.lblCitDistrict;
+  const lcVill = document.getElementById("lblCitVillage");
+  if (lcVill) lcVill.innerText = d.lblCitVillage;
+  const lcTit = document.getElementById("lblCitTitle");
+  if (lcTit) lcTit.innerText = d.lblCitTitle;
+  const lcRit = document.getElementById("lblCitRitual");
+  if (lcRit) lcRit.innerText = d.lblCitRitual;
+  const lcTrad = document.getElementById("lblCitTradition");
+  if (lcTrad) lcTrad.innerText = d.lblCitTradition;
+  const lcPho = document.getElementById("lblCitPhoto");
+  if (lcPho) lcPho.innerText = d.lblCitPhoto;
+  const lcGps = document.getElementById("lblCitGps");
+  if (lcGps) lcGps.innerText = d.lblCitGps;
+  const lcSto = document.getElementById("lblCitStory");
+  if (lcSto) lcSto.innerText = d.lblCitStory;
+  const btnCitSub = document.getElementById("btnCitSubmitFinal");
+  if (btnCitSub) btnCitSub.innerText = d.btnCitSubmit;
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -328,9 +574,9 @@ window.loadDistrictData = function(districtKey) {
         mapMarkers.push(marker);
       });
     } else {
-      // Default to known district center if empty
-      const defaultCenter = [26.1245, 85.3902];
-      window.mapInstance.flyTo(defaultCenter, 11);
+      // Focus strictly on selected District Coordinates (NOT User Live Location)
+      const targetCoords = districtCoordinatesMap[districtKey.toLowerCase()] || [26.1245, 85.3902];
+      window.mapInstance.flyTo(targetCoords, 12);
     }
   }
 
@@ -338,14 +584,14 @@ window.loadDistrictData = function(districtKey) {
   renderMapCircuitList(filtered);
 };
 
-// Render Itemized 1, 2, 3 Circuit List Under Map
+// Itemized 1, 2, 3 Circuit List Under Map
 function renderMapCircuitList(itemsList) {
   const listContainer = document.getElementById("mapLocationsList");
   if (!listContainer) return;
   listContainer.innerHTML = "";
 
   if (itemsList.length === 0) {
-    listContainer.innerHTML = `<div style="font-size:12px; color:#64748b; padding:10px; background:#f8fafc; border-radius:6px; text-align:center;">No circuit points recorded yet in this district.</div>`;
+    listContainer.innerHTML = `<div style="font-size:12px; color:#64748b; padding:10px; background:#f8fafc; border-radius:6px; text-align:center;">No circuit points recorded yet in this district. Click 'Submit Upcoming Heritage' to add.</div>`;
     return;
   }
 
@@ -386,15 +632,15 @@ function renderCards(itemsList) {
   if (!container) return;
   container.innerHTML = "";
 
-  const dict = dialectTranslations[window.currentLanguage] || dialectTranslations["hi-IN"];
+  const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
 
-  // If District has no data -> Show Heritage Radar Redirect Button
+  // Empty District: Show Heritage Radar Focus Button
   if (itemsList.length === 0) {
     container.innerHTML = `
       <div style="background:#fff; border-radius:12px; padding:25px; text-align:center; grid-column:1/-1; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
-        <p style="color:#64748b; font-weight:600; font-size:13px; margin-bottom:12px;">Is zila mein abhi koi record nahi mila hai.</p>
-        <button type="button" onclick="redirectToMapRadar()" style="background:#38bdf8; color:#000; border:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; box-shadow:0 4px 10px rgba(56,189,248,0.3);">
-          📡 Explore Circuit on Map Radar
+        <p style="color:#64748b; font-weight:600; font-size:13px; margin-bottom:12px;">${d.emptyDistrictMsg}</p>
+        <button type="button" onclick="redirectToMapRadar('${window.currentDistrict}')" style="background:#38bdf8; color:#000; border:none; padding:10px 18px; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; box-shadow:0 4px 10px rgba(56,189,248,0.3);">
+          ${d.btnRadarText}
         </button>
       </div>
     `;
@@ -407,17 +653,18 @@ function renderCards(itemsList) {
     let ritual = item.livingCulture || "Sacred traditional practice.";
     let tradition = item.tradition || "Annual folk celebration & heritage gathering.";
 
-    // Language adaptation for standard known or custom records
+    // Language Dynamic Text Adaptation for native feel
     if (title.toLowerCase().includes("durga")) {
-      title = dict.durgaTitle;
-      desc = dict.durgaDesc;
-      ritual = dict.durgaCulture;
-      tradition = dict.durgaTradition;
+      title = d.durgaTitle;
+      desc = d.durgaDesc;
+      ritual = d.durgaCulture;
+      tradition = d.durgaTradition;
     }
 
     let displayImage = item.imageUrl || item.image || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
     const itemId = item.id || `item_${Math.random()}`;
-    const votes = item.votes || 1;
+    const yesVotes = item.yesVotes || item.votes || 1;
+    const noVotes = item.noVotes || 0;
     const isVerified = item.isVerified === true;
 
     const cardHtml = `
@@ -430,27 +677,33 @@ function renderCards(itemsList) {
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
             <h4 style="font-size:16px; font-weight:700; color:#1e1b4b;">${title}</h4>
             <span style="background:${isVerified ? '#dcfce7' : '#fef3c7'}; color:${isVerified ? '#15803d' : '#b45309'}; padding:2px 8px; font-size:10px; font-weight:bold; border-radius:10px;">
-              ${isVerified ? dict.verifiedTrust : dict.upcomingLabel}
+              ${isVerified ? d.verifiedTrust : d.upcomingLabel}
             </span>
           </div>
           <div style="font-size:11px; color:#c2410c; font-weight:700; margin-bottom:6px;">📍 Cluster Area: ${item.village || 'Main Circuit'}</div>
           
-          <p style="font-size:12px; color:#334155; margin-bottom:5px;"><strong>${dict.heritageLabel}</strong> ${desc}</p>
-          <p style="font-size:12px; color:#6b21a8; margin-bottom:5px;"><strong>${dict.cultureLabel}</strong> ${ritual}</p>
-          <p style="font-size:12px; color:#b45309; margin-bottom:8px;"><strong>${dict.traditionLabel}</strong> ${tradition}</p>
+          <p style="font-size:12px; color:#334155; margin-bottom:5px;"><strong>${d.heritageLabel}</strong> ${desc}</p>
+          <p style="font-size:12px; color:#6b21a8; margin-bottom:5px;"><strong>${d.cultureLabel}</strong> ${ritual}</p>
+          <p style="font-size:12px; color:#b45309; margin-bottom:8px;"><strong>${d.traditionLabel}</strong> ${tradition}</p>
           
           <!-- Triple Multilingual Audio Narration Pills (History, Culture & Tradition) -->
           <div style="display:flex; gap:6px; margin:10px 0; flex-wrap:wrap;">
-            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'heritage')" style="background:#fef3c7; color:#92400e; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${dict.btnListenHist}</button>
-            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'culture')" style="background:#dcfce7; color:#15803d; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${dict.btnListenCult}</button>
-            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'tradition')" style="background:#ede9fe; color:#5b21b6; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${dict.btnListenTrad}</button>
+            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'heritage')" style="background:#fef3c7; color:#92400e; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${d.btnListenHist}</button>
+            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'culture')" style="background:#dcfce7; color:#15803d; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${d.btnListenCult}</button>
+            <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'tradition')" style="background:#ede9fe; color:#5b21b6; border:none; padding:5px 10px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">${d.btnListenTrad}</button>
           </div>
 
-          <!-- Community Signal Voting Section for Upcoming Heritage -->
+          <!-- Community Poll Signal Voting (Yes / No) for Upcoming Heritage -->
           ${!isVerified ? `
-            <div style="background:#f8fafc; border:1px dashed #f59e0b; padding:8px 10px; border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:11px; color:#92400e; font-weight:600;">🗳️ Community Signals: <strong>${votes} Verified Votes</strong></span>
-              <button type="button" onclick="castCommunityVote('${itemId}')" style="background:#f59e0b; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">${dict.btnVote}</button>
+            <div style="background:#f8fafc; border:1px dashed #f59e0b; padding:8px 10px; border-radius:6px; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:11px; color:#92400e; font-weight:700;">🗳️ Community Poll Signals:</span>
+                <span style="font-size:10px; color:#15803d; font-weight:bold;">🟢 Yes: ${yesVotes} \vert{} 🔴 No: ${noVotes}</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="button" onclick="castPollVote('${itemId}', 'yes')" style="flex:1; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:4px 6px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">${d.btnVoteYes}</button>
+                <button type="button" onclick="castPollVote('${itemId}', 'no')" style="flex:1; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; padding:4px 6px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">${d.btnVoteNo}</button>
+              </div>
             </div>
           ` : `
             <div style="background:#f8fafc; padding:8px; border-radius:6px; margin-bottom:10px; font-size:11px; border:1px solid #e2e8f0;">
@@ -469,12 +722,14 @@ function renderCards(itemsList) {
   });
 }
 
-// Redirect Empty District to Map Radar Tab
-window.redirectToMapRadar = function() {
+// Redirect Empty District to Map Radar Tab focusing strictly on the chosen district
+window.redirectToMapRadar = function(targetDistrict) {
   switchMobileTab('map');
   setTimeout(() => {
     if (window.mapInstance) {
       window.mapInstance.invalidateSize();
+      const coords = districtCoordinatesMap[targetDistrict.toLowerCase()] || [26.1245, 85.3902];
+      window.mapInstance.flyTo(coords, 12);
     }
   }, 200);
 };
@@ -499,29 +754,38 @@ window.detectLiveCitizenGPS = function() {
   }
 };
 
-// Community Vote Function
-window.castCommunityVote = async function(itemId) {
+// Community Poll Voting (Yes / No)
+window.castPollVote = async function(itemId, type) {
   let pending = getLocalPendingRecords();
   const found = pending.find(i => i.id === itemId);
   if (found) {
-    found.votes = (found.votes || 1) + 1;
+    if (type === 'yes') {
+      found.yesVotes = (found.yesVotes || found.votes || 1) + 1;
+    } else {
+      found.noVotes = (found.noVotes || 0) + 1;
+    }
+    found.votes = (found.yesVotes || 1);
     localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
     try {
-      await updateDoc(doc(db, "vratyavani_pending", itemId), { votes: found.votes });
+      await updateDoc(doc(db, "vratyavani_pending", itemId), { 
+        yesVotes: found.yesVotes, 
+        noVotes: found.noVotes,
+        votes: found.votes 
+      });
     } catch (e) {}
-    alert(`👍 Dhanyawad! Aapka satyapana vote darj ho gaya hai. (Kul vote: ${found.votes})`);
+    alert(`👍 आपका पोल सिग्नल (${type.toUpperCase()}) सफलतापूर्वक दर्ज हो गया है!`);
     loadDistrictData(window.currentDistrict);
   }
 };
 
-// Audio Narration Handler (Triple Audio)
+// Audio Narration Handler (Speaks strictly in the selected Language)
 window.selectUnifiedAudio = function(itemId, mode) {
   let verified = getLocalVerifiedRecords();
   let pending = getLocalPendingRecords();
   const found = [...verified, ...pending].find(i => i.id === itemId);
   if (!found) return;
 
-  const dict = dialectTranslations[window.currentLanguage] || dialectTranslations["hi-IN"];
+  const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
   let title = found.name || found.title;
   let textToPlay = "";
 
@@ -534,10 +798,10 @@ window.selectUnifiedAudio = function(itemId, mode) {
   }
 
   if (title.toLowerCase().includes("durga")) {
-    title = dict.durgaTitle;
-    if (mode === 'culture') textToPlay = dict.durgaCulture;
-    else if (mode === 'tradition') textToPlay = dict.durgaTradition;
-    else textToPlay = dict.durgaDesc;
+    title = d.durgaTitle;
+    if (mode === 'culture') textToPlay = d.durgaCulture;
+    else if (mode === 'tradition') textToPlay = d.durgaTradition;
+    else textToPlay = d.durgaDesc;
   }
 
   const nowPlayingEl = document.getElementById("nowPlayingText");
@@ -551,15 +815,17 @@ function playAudioDirectly(text) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
+  
+  // Set accurate voice synthesis dialect
   utter.lang = window.currentLanguage || 'hi-IN';
-  utter.rate = 0.92;
+  utter.rate = 0.90;
   utter.pitch = 1.0;
 
   const playBtn = document.getElementById("playAudioBtn");
   utter.onstart = () => {
     if (playBtn) {
       playBtn.disabled = false;
-      playBtn.innerText = "⏹ Chal raha hai...";
+      playBtn.innerText = "⏹ चल रहा है...";
       playBtn.style.background = "#ef4444";
       playBtn.style.color = "#fff";
     }
@@ -635,6 +901,8 @@ window.handleCitizenSubmit = async function(e) {
     story: document.getElementById("citStory").value.trim(),
     image: citizenUploadedBase64 || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80",
     votes: 1,
+    yesVotes: 1,
+    noVotes: 0,
     aiValidation: "✓ Metadata Verified | GPS Consistent",
     isVerified: false,
     submittedAt: new Date().toLocaleString()
@@ -650,7 +918,7 @@ window.handleCitizenSubmit = async function(e) {
     console.warn("Cloud upload fallback:", err);
   }
 
-  alert(`🛡️ Trust Engine: "${pendingItem.title}" submit ho gaya hai aur voting signals ke liye live hai!`);
+  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक Vihaan-Purkha क्लाउड में सबमिट हो गया है और होम स्क्रीन पर वोटिंग के लिए लाइव है!`);
   e.target.reset();
   citizenUploadedBase64 = null;
   const boxEl = document.getElementById("citImagePreviewBox");
@@ -692,19 +960,24 @@ async function renderInpageAdminTable() {
 
   pendingItems.forEach((pItem) => {
     const row = document.createElement("tr");
+    const yes = pItem.yesVotes || pItem.votes || 1;
+    const no = pItem.noVotes || 0;
     row.innerHTML = `
       <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
       <td style="padding:8px; border:1px solid #e2e8f0;">${pItem.district}</td>
-      <td style="padding:8px; border:1px solid #e2e8f0; color:#15803d; font-size:10px;">${pItem.votes || 1} Signals</td>
-      <td style="padding:8px; border:1px solid #e2e8f0;">
-        <button type="button" onclick="approveCloudSubmission('${pItem.id}')" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
+      <td style="padding:8px; border:1px solid #e2e8f0; font-size:10px;">
+        <span style="color:#15803d; font-weight:bold;">Yes: ${yes}</span> | <span style="color:#991b1b; font-weight:bold;">No: ${no}</span>
+      </td>
+      <td style="padding:8px; border:1px solid #e2e8f0; display:flex; gap:6px;">
+        <button type="button" onclick="approveCloudSubmission('${pItem.id}')" style="background:#dcfce7; color:#15803d; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve</button>
+        <button type="button" onclick="rejectCloudSubmission('${pItem.id}')" style="background:#fee2e2; color:#991b1b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer;">Reject</button>
       </td>
     `;
     pendingTbody.appendChild(row);
   });
 }
 
-// Approve Cloud Submission
+// Approve Cloud Submission (Directly becomes VERIFIED TRUST)
 window.approveCloudSubmission = async function(docId) {
   let pending = getLocalPendingRecords();
   let found = pending.find(i => i.id === docId);
@@ -747,7 +1020,25 @@ window.approveCloudSubmission = async function(docId) {
   verified.unshift(verifiedRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(verified));
 
-  alert(`✅ "${found.title}" ko safaltapoorvak approve kar diya gaya hai!`);
+  alert(`✅ "${found.title}" को मान्यता (VERIFIED TRUST) मिल गई है और यह परमानेंट लाइव हो गया है!`);
+  renderInpageAdminTable();
+  loadDistrictData(window.currentDistrict);
+};
+
+// Admin Rejection Handler
+window.rejectCloudSubmission = async function(docId) {
+  if (!confirm("क्या आप इस सबमिशन को रिजेक्ट करके हटाना चाहते हैं?")) return;
+
+  try {
+    await deleteDoc(doc(db, "vratyavani_pending", docId));
+  } catch (err) {
+    console.warn("Cloud delete error:", err);
+  }
+
+  let localPending = getLocalPendingRecords().filter(i => i.id !== docId);
+  localStorage.setItem(PENDING_KEY, JSON.stringify(localPending));
+
+  alert("❌ सबमिशन रिजेक्ट कर दिया गया है।");
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
