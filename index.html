@@ -92,18 +92,18 @@
     </div>
   </header>
 
-  <!-- Hero Banner with State Cultural Highlight Frame -->
+  <!-- Hero Banner with Admin-Controlled Cultural Frame -->
   <section class="hero-banner" style="position:relative; overflow:hidden;">
     <h2 id="heroTagline">पुरखों की थाती, डिजिटल वाणी की पाती</h2>
     <p id="heroSubTagline">India's Community-Verified Immersive Heritage & Preservation Network</p>
     
-    <!-- State Cultural Highlight Frame (e.g. Chhath Puja for Bihar) -->
-    <div id="stateCulturalHighlightBox" style="margin: 12px auto 6px auto; max-width: 620px; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; gap: 12px; transition: all 0.4s ease;">
-      <img id="stateHighlightImg" src="https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80" alt="State Culture" style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid var(--accent-gold);" />
+    <!-- State Cultural Showcase: Hidden by default, shown only if added by Admin -->
+    <div id="stateCulturalHighlightBox" style="display: none; margin: 12px auto 6px auto; max-width: 620px; background: rgba(0,0,0,0.45); padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(245, 158, 11, 0.5); align-items: center; gap: 12px;">
+      <img id="stateHighlightImg" src="" alt="State Culture" style="width: 65px; height: 65px; border-radius: 8px; object-fit: cover; border: 1px solid var(--accent-gold);" />
       <div style="text-align: left;">
-        <span id="stateHighlightBadge" style="background: var(--accent-gold); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">BIHAR CULTURAL IDENTITY</span>
-        <h4 id="stateHighlightTitle" style="font-size: 13px; font-weight: 700; color: #fff; margin: 3px 0 2px 0;">महापर्व छठ पूजा (Chhath Mahaparv)</h4>
-        <p id="stateHighlightDesc" style="font-size: 10px; color: #cbd5e1; margin: 0;">भगवान सूर्य व षष्ठी मैया की आराधना का प्राचीन लोकपर्व</p>
+        <span id="stateHighlightBadge" style="background: var(--accent-gold); color: #000; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">CULTURAL HIGHLIGHT</span>
+        <h4 id="stateHighlightTitle" style="font-size: 13px; font-weight: 700; color: #fff; margin: 3px 0 2px 0;"></h4>
+        <p id="stateHighlightDesc" style="font-size: 10px; color: #cbd5e1; margin: 0;"></p>
       </div>
     </div>
 
@@ -138,7 +138,7 @@
           <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
         </select>
       </div>
-      <div class="audio-now-playing" id="nowPlayingText">इतिहास या जीवंत संस्कृति चुनकर अपनी बोली में सुनें...</div>
+      <div class="audio-now-playing" id="nowPlayingText">इतिहास, संस्कृति या परंपरा चुनकर अपनी बोली में सुनें...</div>
       <div class="audio-controls">
         <button type="button" id="playAudioBtn" onclick="togglePlayVoice()" disabled>▶ Play Narrative</button>
         <button type="button" id="btnSpotQrGuide" onclick="showQrModal()">📲 Spot QR Guide</button>
@@ -176,7 +176,7 @@
     </div>
   </div>
 
-  <!-- Upcoming Heritage Submission Modal (Fully Localized) -->
+  <!-- Upcoming Heritage Submission Modal (With Live Camera Capture Option) -->
   <div id="citizenModal" class="modal-backdrop" onclick="if(event.target === this) closeCitizenModal()">
     <div class="modal-box modal-box-animated" onclick="event.stopPropagation()" style="text-align:left; max-width:480px; background:#fff; color:#000;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -211,13 +211,23 @@
             <label id="lblCitTradition" style="font-size:10px; font-weight:700;">Tradition / Folk Practice (लोक परंपरा)</label>
             <input type="text" id="citTradition" placeholder="Annual folk festival & musical gathering" required style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
           </div>
+
+          <!-- Photo Upload & Live Camera Capture -->
           <div>
-            <label id="lblCitPhoto" style="font-size:10px; font-weight:700;">Evidence Photo (फोटो अपलोड करें)</label>
-            <input type="file" id="citPhotoInput" accept="image/*" onchange="previewCitizenImage(event)" style="width:100%; font-size:11px; margin-top:3px;" />
+            <label id="lblCitPhoto" style="font-size:10px; font-weight:700;">Evidence Photo (फोटो साक्ष्य)</label>
+            <div style="display:flex; gap:6px; margin-top:3px;">
+              <input type="file" id="citPhotoInput" accept="image/*" onchange="previewCitizenImage(event)" style="flex:1; font-size:10px;" />
+              <!-- Direct Live Camera Button -->
+              <label for="citCameraInput" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;">
+                📷 Live Camera
+              </label>
+              <input type="file" id="citCameraInput" accept="image/*" capture="environment" onchange="previewCitizenImage(event)" style="display:none;" />
+            </div>
             <div id="citImagePreviewBox" style="display:none; margin-top:6px; text-align:center;">
               <img id="citPreviewImg" src="" style="max-height:100px; border-radius:5px;" />
             </div>
           </div>
+
           <div>
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <label id="lblCitGps" style="font-size:10px; font-weight:700;">GPS Coordinates (जीपीएस)</label>
@@ -228,7 +238,7 @@
             <input type="text" id="citCoords" required value="26.1245, 85.3902" style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px; margin-top:3px;" />
           </div>
           <div>
-            <label id="lblCitStory" style="font-size:10px; font-weight:700;">Oral Narrative / Story (ऐतिहासिक विवरण / लोककथा)</label>
+            <label id="lblCitStory" style="font-size:10px; font-weight:700;">Oral Narrative / Story (ऐतिहासिक विवरण / कथा)</label>
             <textarea id="citStory" rows="2" required placeholder="Historical oral account..." style="width:100%; padding:7px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;"></textarea>
           </div>
           <button type="submit" id="btnCitSubmitFinal" style="margin-top:4px; padding:9px; background:var(--primary-deep); color:#fff; border:none; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
@@ -263,7 +273,7 @@
     </div>
   </div>
 
-  <!-- Mobile Bottom Navigation Bar (Localized IDs) -->
+  <!-- Mobile Bottom Navigation Bar -->
   <nav class="bottom-app-bar">
     <div class="bottom-nav-item active" id="btnNavHome" onclick="switchMobileTab('home')">
       <span class="icon">🏛️</span><span id="tabLabelHome">Home</span>
@@ -319,7 +329,7 @@
               <th style="padding:6px; border:1px solid #e2e8f0;">Title</th>
               <th style="padding:6px; border:1px solid #e2e8f0;">District</th>
               <th style="padding:6px; border:1px solid #e2e8f0;">Signals (Yes / No)</th>
-              <th style="padding:6px; border:1px solid #e2e8f0;">Actions (Approve / Reject)</th>
+              <th style="padding:6px; border:1px solid #e2e8f0;">Actions</th>
             </tr>
           </thead>
           <tbody id="pendingCitizenTableBody">
@@ -328,7 +338,39 @@
         </table>
       </div>
 
-      <!-- Section 2: Direct Admin Heritage Publication Form -->
+      <!-- Section 2: Admin State Cultural Showcase Manager (Admin Only) -->
+      <h4 style="font-size:12px; color:#b45309; margin-bottom:6px; border-top:1px solid #e2e8f0; padding-top:10px;">
+        🖼️ Manage State Cultural Highlight Banner (Admin Control)
+      </h4>
+      <form id="adminBannerForm" onsubmit="handleAdminBannerUpdate(event); return false;" style="background:#fffbeb; padding:10px; border-radius:6px; border:1px solid #fef3c7; margin-bottom:15px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div>
+            <label style="font-size:10px; font-weight:700;">Target State</label>
+            <select id="admBannerState" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;">
+              <option value="bihar">Bihar</option>
+              <option value="up">Uttar Pradesh</option>
+              <option value="punjab">Punjab</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px; font-weight:700;">Festival / Heritage Title</label>
+            <input type="text" id="admBannerTitle" placeholder="Chhath Puja / Ganga Aarti" required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Short Cultural Description</label>
+            <input type="text" id="admBannerDesc" placeholder="Ancient tradition description..." required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size:10px; font-weight:700;">Highlight Image URL</label>
+            <input type="url" id="admBannerImgUrl" placeholder="https://..." required style="width:100%; padding:6px; border:1px solid #cbd5e1; border-radius:5px; font-size:11px;" />
+          </div>
+        </div>
+        <button type="submit" style="margin-top:8px; width:100%; padding:7px; background:#b45309; color:#fff; border:none; border-radius:5px; font-weight:700; font-size:11px; cursor:pointer;">
+          Set State Cultural Highlight
+        </button>
+      </form>
+
+      <!-- Section 3: Direct Admin Heritage Publication Form -->
       <h4 style="font-size:12px; color:var(--primary-deep); margin-bottom:6px; border-top:1px solid #e2e8f0; padding-top:10px;">
         ➕ Direct Verified Heritage Publication (Admin Bypass)
       </h4>

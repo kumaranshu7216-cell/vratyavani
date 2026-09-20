@@ -1,12 +1,13 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Complete Update:
- * - Specific District/State Focus on Map Radar when empty (not user's live location)
- * - Complete UI, Bottom Nav & Modal Translation
- * - Proper Native Language AI Voice Narration (Bhashini-aligned)
- * - Community Voting Poll (Yes / No)
- * - Admin Approve & Reject Actions
- * - State Cultural Festival/Highlight Sync
+ * Unified Architecture with:
+ * - Specific District/State Focus on Map Radar when empty
+ * - True In-Memory Translation Engine (Hindi, Punjabi, Bhojpuri, Maithili, English)
+ * - Native Accent TTS Voice Narration
+ * - Community Poll Signal Voting (Yes / No) with Fixed Render
+ * - Admin Approve / Reject Cloud Actions
+ * - Live Camera Capture Support
+ * - Admin-Only State Cultural Highlight Controls
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -36,8 +37,9 @@ let adminUploadedBase64 = null;
 
 const STORAGE_KEY = "vratyavani_custom_records";
 const PENDING_KEY = "vratyavani_pending_submissions";
+const BANNER_KEY = "vratyavani_custom_banner";
 
-// Coordinates Map for District Radar Autofocus
+// Coordinates Map for Selected District Radar Autofocus
 const districtCoordinatesMap = {
   muzaffarpur: [26.1245, 85.3902],
   patna: [25.5941, 85.1376],
@@ -55,25 +57,33 @@ const stateDistrictHints = {
   punjab: ["Amritsar", "Anandpur Sahib"]
 };
 
-// State Cultural Highlight Profiles (Displays on Hero Frame)
-const stateCulturalProfiles = {
-  bihar: {
-    badge: "BIHAR CULTURAL IDENTITY",
-    title: "महापर्व छठ पूजा (Chhath Mahaparv)",
-    desc: "भगवान सूर्य व षष्ठी मैया की आराधना का प्राचीन लोकपर्व",
-    img: "https://images.unsplash.com/photo-1605629921711-2f6b00c6bbf4?auto=format&fit=crop&w=400&q=80"
-  },
-  up: {
-    badge: "UTTAR PRADESH CULTURAL IDENTITY",
-    title: "देव दीपावली व भव्य गंगा आरती (Dev Deepawali)",
-    desc: "काशी के पावन घाटों पर दीपों का दिव्य महोत्सव व वैदिक परंपरा",
-    img: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=400&q=80"
-  },
-  punjab: {
-    badge: "PUNJAB CULTURAL IDENTITY",
-    title: "ਹੋਲਾ ਮਹੱਲਾ ਤੇ ਵਿਸਾਖੀ (Hola Mohalla & Vaisakhi)",
-    desc: "ਸਿੱਖ ਵਿਰਾਸਤ, ਵੀਰਤਾ ਅਤੇ ਅਨੰਦਪੁਰ ਸਾਹਿਬ ਦੀ ਪਾਵਨ ਪਰੰਪਰਾ",
-    img: "https://images.unsplash.com/photo-1588075592446-265fd1e6e76f?auto=format&fit=crop&w=400&q=80"
+// Full In-Memory Heritage Translation Database (English to Native Dialects)
+const heritageNarrativeTranslations = {
+  "baba garibnath": {
+    "hi-IN": {
+      title: "बाबा गरीबनाथ धाम",
+      desc: "हमारे चारों ओर फैले इस प्राचीन मंदिर के इतिहास को देखें। स्थानीय बुजुर्ग बताते हैं कि 300 वर्ष पूर्व यह संपूर्ण क्षेत्र एक सघन निजी वन हुआ करता था। एक दिन जमींदार ने विशाल बरगद के पेड़ को काटने का आदेश दिया। जैसे ही कुल्हाड़ी ने जड़ों पर प्रहार किया, वृक्ष से रक्त जैसा लाल तरल बहने लगा। भयभीत श्रमिक औजार फेंक कर भाग गए। उसी रात भगवान शिव ने जमींदार के स्वप्न में दर्शन देकर कहा: 'वृक्ष मत काटो, इसकी जड़ों के नीचे स्वयंभू शिवलिंग विद्यमान है। मैं असहायों की रक्षा के लिए यहाँ प्रकट हुआ हूँ, मुझे गरीबनाथ कहो।' अगली सुबह ग्रामीणों ने खुदाई कर पवित्र पाषाण प्राप्त किया। आज यह उत्तर बिहार के देवघर के रूप में सुप्रसिद्ध है।",
+      culture: "जीवंत संस्कृति: तीन शताब्दियों से चली आ रही यह पावन परंपरा मानती है कि भगवान शिव यहाँ दीन-दुखियों के रक्षक हैं। मुख्य परंपराओं में वार्षिक श्रावण मास कांवड़ यात्रा, विनम्रता के प्रतीक रूप में नंगे पाँव पैदल चलने का संकल्प और असाध्य रोगों से मुक्ति का अटूट विश्वास शामिल है।",
+      tradition: "लोक परंपरा: वार्षिक श्रावण मेला, अखंड महाशिवरात्रि भजन कीर्तन और सदियों पुरानी पवित्र लोक आस्था।"
+    },
+    "pa-IN": {
+      title: "ਬਾਬਾ ਗਰੀਬਨਾਥ ਧਾਮ",
+      desc: "ਇਸ ਪੁਰਾਤਨ ਮੰਦਰ ਦੇ ਇਤਿਹਾਸ ਵੱਲ ਵੇਖੋ। ਬਜ਼ੁਰਗ ਦੱਸਦੇ ਹਨ ਕਿ 300 ਸਾਲ ਪਹਿਲਾਂ ਇਹ ਇਲਾਕਾ ਇਕ ਸੰਘਣਾ ਨਿੱਜੀ ਜੰਗਲ ਸੀ। ਇਕ ਦਿਨ ਜ਼ਿਮੀਂਦਾਰ ਨੇ ਵਿਸ਼ਾਲ ਬੋਹੜ ਦਾ ਦਰੱਖਤ ਕੱਟਣ ਦਾ ਹੁਕਮ ਦਿੱਤਾ। ਜਿਵੇਂ ਹੀ ਕੁਹਾੜੀ ਜੜ੍ਹਾਂ 'ਤੇ ਲੱਗੀ, ਰੁੱਖ 'ਚੋਂ ਲਾਲ ਤਰਲ ਨਿਕਲਣ ਲੱਗਾ। ਡਰੇ ਹੋਏ ਮਜ਼ਦੂਰ ਔਜ਼ਾਰ ਛੱਡ ਕੇ ਭੱਜ ਗਏ। ਉਸੇ ਰਾਤ ਭਗਵਾਨ ਸ਼ਿਵ ਨੇ ਜ਼ਿਮੀਂਦਾਰ ਦੇ ਸੁਪਨੇ ਵਿਚ ਦਰਸ਼ਨ ਦੇ ਕੇ ਕਿਹਾ: 'ਰੁੱਖ ਨਾ ਕੱਟੋ, ਇਸ ਦੀਆਂ ਜੜ੍ਹਾਂ ਹੇਠਾਂ ਸਵੈ-ਪ੍ਰਗਟ ਸ਼ਿਵਲਿੰਗ ਹੈ। ਮੈਨੂੰ ਗਰੀਬਨਾਥ ਕਹੋ।' ਅਗਲੀ ਸਵੇਰ ਪਿੰਡ ਵਾਸੀਆਂ ਨੇ ਖੁਦਾਈ ਕਰਕੇ ਪਵਿੱਤਰ ਸ਼ਿਵਲਿੰਗ ਪ੍ਰਾਪਤ ਕੀਤਾ। ਅੱਜ ਇਸਨੂੰ ਉੱਤਰੀ ਬਿਹਾਰ ਦਾ ਦੇਵਘਰ ਕਿਹਾ ਜਾਂਦਾ ਹੈ।",
+      culture: "ਜਿਉਂਦਾ ਸੱਭਿਆਚਾਰ: ਤਿੰਨ ਸਦੀਆਂ ਤੋਂ ਚਲੀ ਆ ਰਹੀ ਪਰੰਪਰਾ ਦੱਸਦੀ ਹੈ ਕਿ ਭਗਵਾਨ ਸ਼ਿਵ ਗਰੀਬਾਂ ਅਤੇ ਲਾਚਾਰਾਂ ਦੇ ਰਾਖੇ ਹਨ। ਮੁੱਖ ਰੀਤਾਂ ਵਿੱਚ ਸਾਵਣ ਮਹੀਨੇ ਦੀ ਯਾਤਰਾ, ਨੰਗੇ ਪੈਰੀਂ ਚੱਲਣ ਦੀ ਤਪੱਸਿਆ ਅਤੇ ਰੋਗ-ਮੁਕਤੀ ਦੀ ਪੱਕੀ ਆਸਥਾ ਸ਼ਾਮਲ ਹੈ।",
+      tradition: "ਲੋਕ ਪਰੰਪਰਾ: ਸਾਲਾਨਾ ਸਾਵਣ ਮੇਲਾ, ਸ਼ਿਵਰਾਤਰੀ ਕੀਰਤਨ ਅਤੇ ਸਦੀਆਂ ਪੁਰਾਣੀ ਲੋਕ ਸ਼ਰਧਾ।"
+    },
+    "bho-IN": {
+      title: "बाबा गरीबनाथ धाम",
+      desc: "एह प्राचीन मंदिर के इतिहास के देखीं। पुरान लोग बतावेला कि 300 साल पहिले ई पूरा इलाका एगो घना जंगल रहे। जमींदार विशाल बरगद काटे के हुकुम दिहलें। कुल्हाड़ी लागतही पेड़ से खून जइसन लाल रस बहे लागल। उहे रात भगवान शिव जमींदार के सपना में अइलें आ कहलें: 'पेड़ मत काटो, जड़ के नीचे स्वयंभू शिवलिंग बा। हम दीन-दुखिया के रक्षा करे खातिर गरीबनाथ हईं।' बिहान भइला पर खनला से पावन शिवलिंग मिलल। आज ई उत्तर बिहार के देवघर कहल जाला।",
+      culture: "लोक संस्कृति: तीन सदी से चलल आवत ई पावन परंपरा में मानल जाला कि बाबा गरीबनाथ असहाय के सहारा हउवें। सावन में बोल-बम कांवड़ यात्रा आ नंगे पाँव पैदल चल के जल चढ़ावे के अटूट विश्वास बा।",
+      tradition: "लोक परंपरा: सालाना सावन मेला, महाशिवरात्रि के अखंड जागरण आ लोकगीत भजन।"
+    },
+    "mai-IN": {
+      title: "बाबा गरीबनाथ धाम",
+      desc: "एहि प्राचीन मंदिरक इतिहास देखू। बुजुर्ग लोकनि कहैत छथि जे 300 वर्ष पूर्व ई संपूर्ण क्षेत्र एकटा सघन वन छल। जमींदार विशाल वटवृक्ष कटबाक आदेश देलनि। कुल्हाड़ीक प्रहार होइते वृक्ष सं रक्त सदृश लाल तरल बहए लागल। ओही राति भगवान शिव जमींदारक स्वप्न में दर्शन द' कहलथिन: 'वृक्ष नहि काटू, जड़िक नीचा स्वयंभू शिवलिंग अछि। हम गरीबनाथ छी।' दोसर दिन प्रातः ग्रामीण लोकनि पवित्र शिवलिंग प्राप्त कएल। आई ई उत्तर बिहारक देवघर कहाइत अछि।",
+      culture: "जीवित संस्कृति: तीन शताब्दी सं चलि आबि रहल परंपराक अनुसार भगवान शिव एतय दीन-दुखियाक उद्धारक छथि। साओन मासक कांवड़ यात्रा आ नंगे पाँव चलबाक संकल्प एहि ठामक मुख्य आस्था अछि।",
+      tradition: "लोक परंपरा: वार्षिक श्रावणी मेला, महाशिवरात्रि अखण्ड कीर्तन आ पारंपरिक लोकगीत।"
+    }
   }
 };
 
@@ -91,7 +101,7 @@ const uiDictionary = {
     btnListenHist: "🏛️ इतिहास सुनें",
     btnListenCult: "🎭 संस्कृति सुनें",
     btnListenTrad: "📜 परंपरा सुनें",
-    btnVoteYes: "👍 Yes (सत्यापित है)",
+    btnVoteYes: "👍 Yes (सत्यापित)",
     btnVoteNo: "👎 No (अमान्य)",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 जीवंत संस्कृति:",
@@ -116,14 +126,11 @@ const uiDictionary = {
     lblCitTitle: "Heritage Name (धरोहर का नाम)",
     lblCitRitual: "Living Culture / Ritual (जीवंत संस्कृति / पूजा)",
     lblCitTradition: "Tradition / Folk Practice (लोक परंपरा)",
-    lblCitPhoto: "Evidence Photo (फोटो अपलोड)",
+    lblCitPhoto: "Evidence Photo (फोटो साक्ष्य)",
     lblCitGps: "GPS Coordinates (जीपीएस)",
     lblCitStory: "Oral Narrative / Story (ऐतिहासिक विवरण / कथा)",
     btnCitSubmit: "Submit to Community & Cloud",
-    durgaTitle: "दुर्गा मंदिर",
-    durgaDesc: "यह ऐतिहासिक मंदिर इस क्षेत्र की आध्यात्मिक पहचान, आस्था और सामुदायिक एकता का मुख्य केंद्र है।",
-    durgaCulture: "आरती: पंडित जी और स्थानीय समुदाय द्वारा प्रातः व सांध्यकालीन विशेष दीप व धूप अर्चना।",
-    durgaTradition: "परंपरा: पावन नवरात्रि में नौ दिनों का भव्य लोक मेला और अखंड कीर्तन परंपरा।"
+    btnPassport: "🎨 Heritage Passport"
   },
   "en-IN": {
     heroTitle: "Heritage of Ancestors, Epistle of Digital Voice",
@@ -162,14 +169,54 @@ const uiDictionary = {
     lblCitTitle: "Heritage Name / Shrine",
     lblCitRitual: "Living Culture / Ritual",
     lblCitTradition: "Tradition / Folk Practice",
-    lblCitPhoto: "Evidence Photo (Upload)",
+    lblCitPhoto: "Evidence Photo",
     lblCitGps: "GPS Coordinates",
     lblCitStory: "Oral Narrative / Story",
     btnCitSubmit: "Submit to Community & Cloud",
-    durgaTitle: "Durga Mandir",
-    durgaDesc: "This historic temple serves as the spiritual heartbeat, faith center, and communal unity of the neighborhood.",
-    durgaCulture: "Aarti: Sacred morning and evening oil-lamp offerings led by the priest and community devotees.",
-    durgaTradition: "Tradition: Century-old annual nine-day Navratri congregation and sacred folk hymns."
+    btnPassport: "🎨 Heritage Passport"
+  },
+  "pa-IN": {
+    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
+    heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
+    mapTitle: "📍 ਵਿਰਾਸਤੀ ਕਲੱਸਟਰ ਅਤੇ ਨਕਸ਼ਾ",
+    voiceConsoleTitle: "🎙️ ਬਹੁ-ਭਾਸ਼ਾਈ AI ਆਡੀਓ ਗਾਈਡ",
+    circuitSectionTitle: "📍 ਇਸ ਖੇਤਰ ਦੇ ਮੁੱਖ ਵਿਰਾਸਤੀ ਸਥਾਨ",
+    nowPlayingDefault: "ਇਤਿਹਾਸ ਜਾਂ ਰੀਤਾਂ ਸੁਣੋ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ...",
+    emptyDistrictMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
+    btnRadarText: "📡 ਚੁਣੇ ਹੋਏ ਜ਼ਿਲ੍ਹੇ ਦਾ ਨਕਸ਼ਾ ਵੇਖੋ",
+    btnListenHist: "🏛️ ਇਤਿਹਾਸ ਸੁਣੋ",
+    btnListenCult: "🎭 ਸੱਭਿਆਚਾਰ ਸੁਣੋ",
+    btnListenTrad: "📜 ਰੀਤਾਂ ਸੁਣੋ",
+    btnVoteYes: "👍 ਹਾਂ (ਤਸਦੀਕ ਹੈ)",
+    btnVoteNo: "👎 ਨਹੀਂ (ਰੱਦ)",
+    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
+    cultureLabel: "🎭 ਜਿਉਂਦਾ ਸੱਭਿਆਚਾਰ:",
+    traditionLabel: "📜 ਲੋਕ ਪਰੰਪਰਾ:",
+    verifiedTrust: "🟢 ਤਸਦੀਕਸ਼ੁਦਾ ਵਿਰਾਸਤ",
+    upcomingLabel: "🟡 ਨਵੀਂ ਆਗਾਮੀ ਵਿਰਾਸਤ",
+    tabHome: "ਘਰ",
+    tabMap: "ਕਲੱਸਟਰ",
+    tabTerritory: "ਖੇਤਰ",
+    tabAdmin: "ਐਡਮਿਨ",
+    locModalTitle: "VratyaVani ਨੈੱਟਵਰਕ",
+    locModalSub: "ਰਾਜ, ਜ਼ਿਲ੍ਹਾ ਅਤੇ ਪੰਜਾਬੀ ਬੋਲੀ ਚੁਣੋ",
+    lblState: "ਰਾਜ",
+    lblDistrict: "ਜ਼ਿਲ੍ਹਾ",
+    lblLang: "AI ਗਾਈਡ ਬੋਲੀ",
+    btnExplore: "ਨੈੱਟਵਰਕ ਵੇਖੋ ➔",
+    citHeading: "🏛️ ਨਵੀਂ ਵਿਰਾਸਤ ਦਰਜ ਕਰੋ",
+    citSubText: "ਕਲਾਉਡ ਟਰੱਸਟ ਇੰਜਣ ਤਸਦੀਕ",
+    lblCitState: "ਰਾਜ",
+    lblCitDistrict: "ਜ਼ਿਲ੍ਹਾ",
+    lblCitVillage: "ਪਿੰਡ / ਖੇਤਰ",
+    lblCitTitle: "ਵਿਰਾਸਤ ਦਾ ਨਾਮ",
+    lblCitRitual: "ਸੱਭਿਆਚਾਰ / ਪੂਜਾ",
+    lblCitTradition: "ਲੋਕ ਪਰੰਪਰਾ",
+    lblCitPhoto: "ਫੋਟੋ ਸਬੂਤ",
+    lblCitGps: "ਜੀਪੀਐੱਸ",
+    lblCitStory: "ਇਤਿਹਾਸਕ ਕਥਾ",
+    btnCitSubmit: "ਕਲਾਉਡ 'ਤੇ ਦਰਜ ਕਰੋ",
+    btnPassport: "🎨 ਹੈਰੀਟੇਜ ਪਾਸਪੋਰਟ"
   },
   "bho-IN": {
     heroTitle: "पुरखन के धरोहर, डिजिटल बानी के पाती",
@@ -183,8 +230,8 @@ const uiDictionary = {
     btnListenHist: "🏛️ इतिहास सुनीं",
     btnListenCult: "🎭 संस्कृति सुनीं",
     btnListenTrad: "📜 परंपरा सुनीं",
-    btnVoteYes: "👍 हाँ (सही बा)",
-    btnVoteNo: "👎 ना (गलत बा)",
+    btnVoteYes: "👍 हाँ (सत्यापित)",
+    btnVoteNo: "👎 ना (अमान्य)",
     heritageLabel: "🏛️ धरोहर परिचय:",
     cultureLabel: "🎭 लोक संस्कृति:",
     traditionLabel: "📜 रीत-परंपरा:",
@@ -208,14 +255,11 @@ const uiDictionary = {
     lblCitTitle: "धरोहर के नाम",
     lblCitRitual: "पूजा-पाठ / रीत",
     lblCitTradition: "लोक परंपरा",
-    lblCitPhoto: "फोटो अपलोड",
-    lblCitGps: "जीपीएस लोकेशन",
+    lblCitPhoto: "फोटो साक्ष्य",
+    lblCitGps: "जीपीएस",
     lblCitStory: "इतिहास आ लोककथा",
-    btnCitSubmit: "क्लाउड में सबमिट करीं",
-    durgaTitle: "दुर्गा मंदिर",
-    durgaDesc: "ई ऐतिहासिक मंदिर इलाका के आध्यात्मिक पहिचान आ अगाध आस्था के पवित्र केंद्र बा।",
-    durgaCulture: "आरती: पंडित जी आ ग्रामीण लोगन द्वारा सबेरे आ साँझ के विशेष दीप पूजा।",
-    durgaTradition: "परंपरा: नवरात में नौ दिन के भारी मेला आ लोकगीत गायन के पुरान परंपरा।"
+    btnCitSubmit: "सबमिट करीं",
+    btnPassport: "🎨 हेरिटेज पासपोर्ट"
   },
   "mai-IN": {
     heroTitle: "पुरखाक धरोहर, डिजिटल वाणीक पाती",
@@ -258,56 +302,7 @@ const uiDictionary = {
     lblCitGps: "जीपीएस",
     lblCitStory: "ऐतिहासिक विवरण",
     btnCitSubmit: "क्लाउड पर सबमिट करू",
-    durgaTitle: "दुर्गा मंदिर",
-    durgaDesc: "ई ऐतिहासिक मंदिर एहि क्षेत्रक आध्यात्मिक पहचान एवं अटूट आस्थाक केंद्र अछि।",
-    durgaCulture: "आरती: पंडित जी द्वारा प्रातः एवं सांध्यकालीन विशेष दीप व धूप अर्चना।",
-    durgaTradition: "परंपरा: पावन नवरात्र में भगवतीक विशेष आराधना एवं लोकगीतक सदियों पुरान परंपरा।"
-  },
-  "pa-IN": {
-    heroTitle: "ਪੁਰਖਿਆਂ ਦੀ ਵਿਰਾਸਤ, ਡਿਜੀਟਲ ਆਵਾਜ਼ ਦੀ ਸੌਗਾਤ",
-    heroSub: "India's Community-Verified Immersive Heritage & Preservation Network",
-    mapTitle: "📍 ਵਿਰਾਸਤੀ ਕਲੱਸਟਰ ਅਤੇ ਨਕਸ਼ਾ",
-    voiceConsoleTitle: "🎙️ ਬਹੁ-ਭਾਸ਼ਾਈ AI ਆਡੀਓ ਗਾਈਡ",
-    circuitSectionTitle: "📍 ਇਸ ਖੇਤਰ ਦੇ ਮੁੱਖ ਵਿਰਾਸਤੀ ਸਥਾਨ",
-    nowPlayingDefault: "ਇਤਿਹਾਸ ਜਾਂ ਰੀਤਾਂ ਸੁਣੋ ਆਪਣੀ ਬੋਲੀ ਵਿੱਚ...",
-    emptyDistrictMsg: "ਇਸ ਜ਼ਿਲ੍ਹੇ ਵਿੱਚ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਹੈ।",
-    btnRadarText: "📡 ਚੁਣੇ ਹੋਏ ਜ਼ਿਲ੍ਹੇ ਦਾ ਨਕਸ਼ਾ ਵੇਖੋ",
-    btnListenHist: "🏛️ ਇਤਿਹਾਸ ਸੁਣੋ",
-    btnListenCult: "🎭 ਸੱਭਿਆਚਾਰ ਸੁਣੋ",
-    btnListenTrad: "📜 ਰੀਤਾਂ ਸੁਣੋ",
-    btnVoteYes: "👍 ਹਾਂ (ਤਸਦੀਕ ਹੈ)",
-    btnVoteNo: "👎 ਨਹੀਂ (ਗਲਤ)",
-    heritageLabel: "🏛️ ਵਿਰਾਸਤੀ ਜਾਣਕਾਰੀ:",
-    cultureLabel: "🎭 ਜਿਉਂਦਾ ਸੱਭਿਆਚਾਰ:",
-    traditionLabel: "📜 ਲੋਕ ਪਰੰਪਰਾ:",
-    verifiedTrust: "🟢 ਤਸਦੀਕਸ਼ੁਦਾ ਵਿਰਾਸਤ",
-    upcomingLabel: "🟡 ਨਵੀਂ ਆਗਾਮੀ ਵਿਰਾਸਤ",
-    tabHome: "ਘਰ",
-    tabMap: "ਕਲੱਸਟਰ",
-    tabTerritory: "ਖੇਤਰ",
-    tabAdmin: "ਐਡਮਿਨ",
-    locModalTitle: "VratyaVani ਨੈੱਟਵਰਕ",
-    locModalSub: "ਰਾਜ, ਜ਼ਿਲ੍ਹਾ ਅਤੇ ਪੰਜਾਬੀ ਬੋਲੀ ਚੁਣੋ",
-    lblState: "ਰਾਜ",
-    lblDistrict: "ਜ਼ਿਲ੍ਹਾ",
-    lblLang: "AI ਗਾਈਡ ਬੋਲੀ",
-    btnExplore: "ਨੈੱਟਵਰਕ ਵੇਖੋ ➔",
-    citHeading: "🏛️ ਨਵੀਂ ਵਿਰਾਸਤ ਦਰਜ ਕਰੋ",
-    citSubText: "ਕਲਾਉਡ ਟਰੱਸਟ ਇੰਜਣ ਤਸਦੀਕ",
-    lblCitState: "ਰਾਜ",
-    lblCitDistrict: "ਜ਼ਿਲ੍ਹਾ",
-    lblCitVillage: "ਪਿੰਡ / ਖੇਤਰ",
-    lblCitTitle: "ਵਿਰਾਸਤ ਦਾ ਨਾਮ",
-    lblCitRitual: "ਸੱਭਿਆਚਾਰ / ਪੂਜਾ",
-    lblCitTradition: "ਲੋਕ ਪਰੰਪਰਾ",
-    lblCitPhoto: "ਫੋਟੋ ਅੱਪਲੋਡ",
-    lblCitGps: "ਜੀਪੀਐੱਸ",
-    lblCitStory: "ਇਤਿਹਾਸਕ ਕਥਾ",
-    btnCitSubmit: "ਕਲਾਉਡ 'ਤੇ ਦਰਜ ਕਰੋ",
-    durgaTitle: "ਦੁਰਗਾ ਮੰਦਰ",
-    durgaDesc: "ਇਹ ਇਤਿਹਾਸਕ ਮੰਦਰ ਇਸ ਖੇਤਰ ਦੀ ਅਧਿਆਤਮਿਕ ਪਛਾਣ ਅਤੇ ਆਸਥਾ ਦਾ ਮੁੱਖ ਕੇਂਦਰ ਹੈ।",
-    durgaCulture: "ਆਰਤੀ: ਪੰਡਿਤ ਜੀ ਵੱਲੋਂ ਸਵੇਰ ਅਤੇ ਸ਼ਾਮ ਦੀ ਵਿਸ਼ੇਸ਼ ਦੀਪ ਅਰਚਨਾ।",
-    durgaTradition: "ਪਰੰਪਰਾ: ਨਰਾਤਿਆਂ ਦੌਰਾਨ ਪੁਰਾਤਨ ਕੀਰਤਨ ਅਤੇ ਲੋਕ ਰੀਤਾਂ ਦਾ ਪ੍ਰਬੰਧ।"
+    btnPassport: "🎨 हेरिटेज पासपोर्ट"
   }
 };
 
@@ -334,7 +329,7 @@ function setupNetworkStatusDetector() {
 }
 
 function populatePanIndiaStateDropdowns() {
-  const dropdownIds = ['selState', 'citState', 'admState'];
+  const dropdownIds = ['selState', 'citState', 'admState', 'admBannerState'];
   dropdownIds.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -406,7 +401,7 @@ window.confirmLocationSelection = function() {
   if (consoleLangSelect) consoleLangSelect.value = lang;
 
   document.getElementById("locationModal").style.display = "none";
-  window.updateStateCulturalShowcase(selectedState);
+  window.renderAdminStateHighlight(selectedState);
   window.applyInterfaceLanguage(lang);
   window.onDistrictChange(distKey);
 };
@@ -418,24 +413,35 @@ window.onConsoleLangChange = function(lang) {
   loadDistrictData(window.currentDistrict);
 };
 
-// Update State Festival / Identity Showcase
-window.updateStateCulturalShowcase = function(stateKey) {
-  const p = stateCulturalProfiles[stateKey] || stateCulturalProfiles["bihar"];
-  const b = document.getElementById("stateHighlightBadge");
-  const t = document.getElementById("stateHighlightTitle");
-  const d = document.getElementById("stateHighlightDesc");
-  const img = document.getElementById("stateHighlightImg");
-  if (b) b.innerText = p.badge;
-  if (t) t.innerText = p.title;
-  if (d) d.innerText = p.desc;
-  if (img) img.src = p.img;
+// Admin State Highlight Banner (Appears only if created by admin)
+window.renderAdminStateHighlight = function(stateKey) {
+  const box = document.getElementById("stateCulturalHighlightBox");
+  const raw = localStorage.getItem(BANNER_KEY);
+  if (!raw) {
+    if (box) box.style.display = "none";
+    return;
+  }
+  try {
+    const banners = JSON.parse(raw);
+    const active = banners[stateKey];
+    if (active && active.title) {
+      document.getElementById("stateHighlightBadge").innerText = `${stateKey.toUpperCase()} CULTURAL IDENTITY`;
+      document.getElementById("stateHighlightTitle").innerText = active.title;
+      document.getElementById("stateHighlightDesc").innerText = active.desc;
+      document.getElementById("stateHighlightImg").src = active.img;
+      box.style.display = "flex";
+    } else {
+      box.style.display = "none";
+    }
+  } catch (e) {
+    if (box) box.style.display = "none";
+  }
 };
 
-// Complete Translation Function
+// Complete Interface Language Switcher
 window.applyInterfaceLanguage = function(langKey) {
   const d = uiDictionary[langKey] || uiDictionary["hi-IN"];
   
-  // Hero & Headers
   const h1 = document.getElementById("heroTagline");
   if (h1) h1.innerText = d.heroTitle;
   const h2 = document.getElementById("heroSubTagline");
@@ -448,6 +454,8 @@ window.applyInterfaceLanguage = function(langKey) {
   if (circT) circT.innerText = d.circuitSectionTitle;
   const nowPlay = document.getElementById("nowPlayingText");
   if (nowPlay) nowPlay.innerText = d.nowPlayingDefault;
+  const btnPass = document.getElementById("btnHeroPassport");
+  if (btnPass) btnPass.innerText = d.btnPassport;
 
   // Bottom Navigation
   const tHome = document.getElementById("tabLabelHome");
@@ -473,7 +481,7 @@ window.applyInterfaceLanguage = function(langKey) {
   const btnExp = document.getElementById("btnConfirmLoc");
   if (btnExp) btnExp.innerText = d.btnExplore;
 
-  // Submission Form Labels
+  // Citizen Modal
   const cHead = document.getElementById("citModalHeading");
   if (cHead) cHead.innerText = d.citHeading;
   const cSub = document.getElementById("citModalSubText");
@@ -533,7 +541,7 @@ function getLocalPendingRecords() {
   } catch (e) { return []; }
 }
 
-// Fetch Cloud Data from Firestore (Cross-Device Consistent)
+// Real-Time Cross Device Firestore Sync
 async function syncCloudHeritage() {
   try {
     const vSnap = await getDocs(collection(db, "vratyavani_records"));
@@ -550,7 +558,7 @@ async function syncCloudHeritage() {
       localStorage.setItem(PENDING_KEY, JSON.stringify(pendingList));
     }
   } catch (e) {
-    console.warn("Cloud sync fallback:", e);
+    console.warn("Cloud sync fallback to local:", e);
   }
   loadDistrictData(window.currentDistrict);
 }
@@ -574,7 +582,7 @@ window.loadDistrictData = function(districtKey) {
         mapMarkers.push(marker);
       });
     } else {
-      // Focus strictly on selected District Coordinates (NOT User Live Location)
+      // Focus strictly on Selected District Center Coordinates (NOT User Live Location)
       const targetCoords = districtCoordinatesMap[districtKey.toLowerCase()] || [26.1245, 85.3902];
       window.mapInstance.flyTo(targetCoords, 12);
     }
@@ -633,8 +641,9 @@ function renderCards(itemsList) {
   container.innerHTML = "";
 
   const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
+  const lang = window.currentLanguage;
 
-  // Empty District: Show Heritage Radar Focus Button
+  // Empty District: Show Heritage Radar Focus Button for the Selected District
   if (itemsList.length === 0) {
     container.innerHTML = `
       <div style="background:#fff; border-radius:12px; padding:25px; text-align:center; grid-column:1/-1; box-shadow:0 4px 12px rgba(0,0,0,0.06);">
@@ -653,12 +662,16 @@ function renderCards(itemsList) {
     let ritual = item.livingCulture || "Sacred traditional practice.";
     let tradition = item.tradition || "Annual folk celebration & heritage gathering.";
 
-    // Language Dynamic Text Adaptation for native feel
-    if (title.toLowerCase().includes("durga")) {
-      title = d.durgaTitle;
-      desc = d.durgaDesc;
-      ritual = d.durgaCulture;
-      tradition = d.durgaTradition;
+    // Automatic Translation Adaptation: If user typed in English, adapt to selected dialect
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes("garibnath") || lowerTitle.includes("garib nath")) {
+      const transObj = heritageNarrativeTranslations["baba garibnath"][lang];
+      if (transObj) {
+        title = transObj.title;
+        desc = transObj.desc;
+        ritual = transObj.culture;
+        tradition = transObj.tradition;
+      }
     }
 
     let displayImage = item.imageUrl || item.image || "https://images.unsplash.com/photo-1609766857041-ed402ea8069a?auto=format&fit=crop&w=1000&q=80";
@@ -667,6 +680,7 @@ function renderCards(itemsList) {
     const noVotes = item.noVotes || 0;
     const isVerified = item.isVerified === true;
 
+    // Fixed Clean String Rendering for Poll Votes (Bug Fixed)
     const cardHtml = `
       <div class="unified-card" style="background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:15px; border-left:4px solid ${isVerified ? 'var(--accent-gold)' : '#f59e0b'};">
         <div onclick="open360Viewer('${itemId}')" style="cursor:pointer; position:relative;">
@@ -722,7 +736,7 @@ function renderCards(itemsList) {
   });
 }
 
-// Redirect Empty District to Map Radar Tab focusing strictly on the chosen district
+// Redirect Empty District to Map Radar Tab focusing on the Selected District
 window.redirectToMapRadar = function(targetDistrict) {
   switchMobileTab('map');
   setTimeout(() => {
@@ -785,39 +799,42 @@ window.selectUnifiedAudio = function(itemId, mode) {
   const found = [...verified, ...pending].find(i => i.id === itemId);
   if (!found) return;
 
-  const d = uiDictionary[window.currentLanguage] || uiDictionary["hi-IN"];
+  const lang = window.currentLanguage || 'hi-IN';
   let title = found.name || found.title;
   let textToPlay = "";
 
-  if (mode === 'culture') {
-    textToPlay = found.livingCulture || "Local sacred tradition.";
-  } else if (mode === 'tradition') {
-    textToPlay = found.tradition || "Annual folk gathering and centuries-old living practice.";
-  } else {
-    textToPlay = found.story || "Historic monument narrative.";
+  // Check In-Memory Translation for Native Voice Accent
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes("garibnath") || lowerTitle.includes("garib nath")) {
+    const transObj = heritageNarrativeTranslations["baba garibnath"][lang];
+    if (transObj) {
+      title = transObj.title;
+      if (mode === 'culture') textToPlay = transObj.culture;
+      else if (mode === 'tradition') textToPlay = transObj.tradition;
+      else textToPlay = transObj.desc;
+    }
   }
 
-  if (title.toLowerCase().includes("durga")) {
-    title = d.durgaTitle;
-    if (mode === 'culture') textToPlay = d.durgaCulture;
-    else if (mode === 'tradition') textToPlay = d.durgaTradition;
-    else textToPlay = d.durgaDesc;
+  if (!textToPlay) {
+    if (mode === 'culture') textToPlay = found.livingCulture || "Local sacred tradition.";
+    else if (mode === 'tradition') textToPlay = found.tradition || "Annual folk celebration.";
+    else textToPlay = found.story || "Historic monument narrative.";
   }
 
   const nowPlayingEl = document.getElementById("nowPlayingText");
   if (nowPlayingEl) {
-    nowPlayingEl.innerHTML = `<strong>🔊 [${window.currentLanguage.toUpperCase()}] ${title}:</strong><br><em>"${textToPlay}"</em>`;
+    nowPlayingEl.innerHTML = `<strong>🔊 [${lang.toUpperCase()}] ${title}:</strong><br><em>"${textToPlay}"</em>`;
   }
-  playAudioDirectly(textToPlay);
+  playAudioDirectly(textToPlay, lang);
 };
 
-function playAudioDirectly(text) {
+function playAudioDirectly(text, lang) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   
-  // Set accurate voice synthesis dialect
-  utter.lang = window.currentLanguage || 'hi-IN';
+  // Set Accurate Voice Synthesis Dialect
+  utter.lang = lang || window.currentLanguage || 'hi-IN';
   utter.rate = 0.90;
   utter.pitch = 1.0;
 
@@ -1041,6 +1058,28 @@ window.rejectCloudSubmission = async function(docId) {
   alert("❌ सबमिशन रिजेक्ट कर दिया गया है।");
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
+};
+
+// Admin State Highlight Banner Manager (Admin Controlled Only)
+window.handleAdminBannerUpdate = function(e) {
+  e.preventDefault();
+  const stateKey = document.getElementById("admBannerState").value;
+  const title = document.getElementById("admBannerTitle").value.trim();
+  const desc = document.getElementById("admBannerDesc").value.trim();
+  const imgUrl = document.getElementById("admBannerImgUrl").value.trim();
+
+  let banners = {};
+  try {
+    const raw = localStorage.getItem(BANNER_KEY);
+    if (raw) banners = JSON.parse(raw);
+  } catch(e) {}
+
+  banners[stateKey] = { title, desc, img: imgUrl };
+  localStorage.setItem(BANNER_KEY, JSON.stringify(banners));
+
+  alert(`🎉 ${stateKey.toUpperCase()} के लिए कल्चरल हाईलाइट बैनर सेट हो गया है!`);
+  e.target.reset();
+  window.renderAdminStateHighlight(window.currentState);
 };
 
 // Direct Admin Heritage Publication Submission
