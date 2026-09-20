@@ -1,10 +1,10 @@
 /**
  * VratyaVani AI — India's Community-Verified Immersive Heritage Network
- * Stable Version with Multilingual Audio Narration, Dual Audio Pills, and Firebase Sync.
+ * Final Stable Version: Unified Cloud + Local Storage Sync for Admin Curation Desk
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBnmNiC5xAEAli-yRDOGMJKBOGNxe9am18",
@@ -134,11 +134,23 @@ function getCustomRecords() {
   } catch (e) { return []; }
 }
 
-function getPendingSubmissions() {
+function getLocalPending() {
   try {
     const raw = localStorage.getItem(PENDING_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (e) { return []; }
+}
+
+async function getPendingSubmissionsFromCloud() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "vratyavani_pending"));
+    const pendingList = [];
+    querySnapshot.forEach((d) => pendingList.push({ id: d.id, ...d.data() }));
+    if (pendingList.length > 0) {
+      return pendingList;
+    }
+  } catch (e) {}
+  return getLocalPending();
 }
 
 async function syncCloudHeritage() {
@@ -223,7 +235,6 @@ function renderCards(preloadedItems) {
           <p style="font-size:12px; color:#334155; margin-bottom:6px;"><strong>${window.currentPersona.toUpperCase()} Mode:</strong> ${descText}</p>
           <p style="font-size:12px; color:#6b21a8; margin-bottom:8px;"><strong>🎭 Living Culture:</strong> ${ritualText}</p>
           
-          <!-- Dual Audio Narration Pills -->
           <div style="display:flex; gap:8px; margin:10px 0; flex-wrap:wrap;">
             <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'heritage')" style="background:#fef3c7; color:#92400e; border:none; padding:6px 12px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">🏛️ इतिहास सुनें (History)</button>
             <button type="button" class="btn-audio-pill" onclick="selectUnifiedAudio('${itemId}', 'culture')" style="background:#dcfce7; color:#15803d; border:none; padding:6px 12px; border-radius:15px; font-size:11px; font-weight:bold; cursor:pointer;">🎭 जीवंत परंपरा (Culture)</button>
@@ -244,7 +255,6 @@ function renderCards(preloadedItems) {
   });
 }
 
-// AUDIO NARRATION HANDLER
 window.selectUnifiedAudio = function(itemId, mode) {
   let custom = getCustomRecords();
   const found = custom.find(i => (i.id === itemId || i.name === itemId));
@@ -259,10 +269,7 @@ window.selectUnifiedAudio = function(itemId, mode) {
 };
 
 function playAudioDirectly(text) {
-  if (!('speechSynthesis' in window)) {
-    alert("Speech synthesis not supported in this browser.");
-    return;
-  }
+  if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = window.currentLanguage || 'hi-IN';
@@ -284,10 +291,11 @@ window.previewCitizenImage = function(event) {
   }
 };
 
-window.handleCitizenSubmit = function(e) {
+window.handleCitizenSubmit = async function(e) {
   e.preventDefault();
+  const pendingId = `pending_${Date.now()}`;
   const pendingItem = {
-    id: `pending_${Date.now()}`,
+    id: pendingId,
     title: document.getElementById("citTitle").value.trim(),
     district: document.getElementById("citDistrict").value.trim().toLowerCase(),
     village: document.getElementById("citVillage").value.trim() || "Cluster Area",
@@ -298,10 +306,16 @@ window.handleCitizenSubmit = function(e) {
     aiValidation: "✓ Metadata Verified"
   };
 
-  const pendingQueue = getPendingSubmissions();
-  pendingQueue.unshift(pendingItem);
-  localStorage.setItem(PENDING_KEY, JSON.stringify(pendingQueue));
-  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक रिव्यू के लिए भेज दिया गया है!`);
+  // Save to LocalStorage as well as Cloud
+  let localPending = getLocalPending();
+  localPending.unshift(pendingItem);
+  localStorage.setItem(PENDING_KEY, JSON.stringify(localPending));
+
+  try {
+    await setDoc(doc(db, "vratyavani_pending", pendingId), pendingItem);
+  } catch (err) {}
+
+  alert(`🛡️ Trust Engine: "${pendingItem.title}" सफलतापर्वक सबमिट हो गया है!`);
   e.target.reset();
   citizenUploadedBase64 = null;
   const boxEl = document.getElementById("citImagePreviewBox");
@@ -309,8 +323,8 @@ window.handleCitizenSubmit = function(e) {
   closeCitizenModal();
 };
 
-window.openAdminPanel = function() {
-  renderInpageAdminTable();
+window.openAdminPanel = async function() {
+  await renderInpageAdminTable();
   document.getElementById("adminPanelModal").style.display = "flex";
 };
 
@@ -318,34 +332,36 @@ window.closeAdminPanelModal = function() {
   document.getElementById("adminPanelModal").style.display = "none";
 };
 
-function renderInpageAdminTable() {
+async function renderInpageAdminTable() {
   const pendingTbody = document.getElementById("pendingCitizenTableBody");
   if (!pendingTbody) return;
+  pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#64748b;">Loading queue...</td></tr>`;
+  
+  const pendingItems = await getPendingSubmissionsFromCloud();
   pendingTbody.innerHTML = "";
-  const pendingItems = getPendingSubmissions();
 
   if (pendingItems.length === 0) {
     pendingTbody.innerHTML = `<tr><td colspan="4" style="padding:10px; text-align:center; color:#64748b;">No pending submissions in queue.</td></tr>`;
     return;
   }
 
-  pendingItems.forEach((pItem, index) => {
+  pendingItems.forEach((pItem) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td style="padding:8px; border:1px solid #e2e8f0;"><strong>${pItem.title}</strong></td>
       <td style="padding:8px; border:1px solid #e2e8f0;">${pItem.district}</td>
       <td style="padding:8px; border:1px solid #e2e8f0; color:#15803d; font-size:10px;">${pItem.aiValidation}</td>
       <td style="padding:8px; border:1px solid #e2e8f0;">
-        <button type="button" onclick="approvePendingSubmission(${index})" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
+        <button type="button" onclick="approveCloudSubmission('${pItem.id}')" style="background:#dcfce7; color:#15803d; border:none; padding:4px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Approve & Live</button>
       </td>
     `;
     pendingTbody.appendChild(row);
   });
 }
 
-window.approvePendingSubmission = async function(index) {
-  let pendingItems = getPendingSubmissions();
-  const approvedItem = pendingItems[index];
+window.approveCloudSubmission = async function(docId) {
+  const pendingItems = await getPendingSubmissionsFromCloud();
+  const approvedItem = pendingItems.find(i => i.id === docId);
   if (!approvedItem) return;
 
   const verifiedRecord = {
@@ -363,16 +379,18 @@ window.approvePendingSubmission = async function(index) {
 
   try {
     await setDoc(doc(db, "vratyavani_records", verifiedRecord.id), verifiedRecord);
+    await deleteDoc(doc(db, "vratyavani_pending", docId));
   } catch (err) {}
+
+  // Remove from local pending storage
+  let localPending = getLocalPending().filter(i => i.id !== docId);
+  localStorage.setItem(PENDING_KEY, JSON.stringify(localPending));
 
   let customRecords = getCustomRecords();
   customRecords.unshift(verifiedRecord);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customRecords));
 
-  pendingItems.splice(index, 1);
-  localStorage.setItem(PENDING_KEY, JSON.stringify(pendingItems));
-
-  alert(`✅ "${approvedItem.title}" अप्रूव होकर लाइव हो गया है!`);
+  alert(`✅ "${approvedItem.title}" approve होकर लाइव हो गया है!`);
   renderInpageAdminTable();
   loadDistrictData(window.currentDistrict);
 };
