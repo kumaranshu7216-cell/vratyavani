@@ -146,7 +146,7 @@ const heritageNarrativeTranslations = {
   }
 };
 
-// Full UI Translation Matrix across 5 Dialects
+// Full UI Translation Matrix
 const uiDictionary = {
   "hi-IN": {
     heroTitle: "पुरखों की थाती, डिजिटल वाणी की पाती",
@@ -472,7 +472,7 @@ window.onConsoleLangChange = function(lang) {
   loadDistrictData(window.currentDistrict);
 };
 
-// Real-Time Firebase Cloud Sync for State Cultural Banners (Identical on All Devices)
+// Real-Time Firebase Cloud Sync for State Cultural Banners (Collection: vratyavani_banners)
 window.updateStateCulturalShowcase = async function(stateKey, langKey) {
   const box = document.getElementById("stateCulturalHighlightBox");
   if (!box) return;
@@ -480,7 +480,7 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
   const lang = langKey || window.currentLanguage || "hi-IN";
   let activeBanner = null;
 
-  // 1. First fetch directly from Cloud Firestore (Collection: vratyavani_banners)
+  // 1. Direct Cloud Fetch from Firestore
   try {
     const bannerDoc = await getDoc(doc(db, "vratyavani_banners", stateKey));
     if (bannerDoc.exists()) {
@@ -494,7 +494,7 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
     console.warn("Banner Firestore fetch fallback:", e);
   }
 
-  // 2. Fallback to Local Storage if offline
+  // 2. Local Storage Fallback
   if (!activeBanner) {
     try {
       const raw = localStorage.getItem(BANNER_KEY);
@@ -505,7 +505,7 @@ window.updateStateCulturalShowcase = async function(stateKey, langKey) {
     } catch (e) {}
   }
 
-  // 3. Render cloud/admin customized or default profile
+  // 3. Render Custom Banner or Localized Defaults
   if (activeBanner && activeBanner.title) {
     document.getElementById("stateHighlightBadge").innerText = `${stateKey.toUpperCase()} CULTURAL IDENTITY`;
     document.getElementById("stateHighlightTitle").innerText = activeBanner.title;
@@ -767,7 +767,7 @@ function renderCards(itemsList) {
     const noVotes = (item.noVotes !== undefined) ? item.noVotes : 0;
     const isVerified = item.isVerified === true;
 
-    // 100% Clean Render Without Typo Glitch
+    // 100% Clean Render Without Typo Glitch & Integrated openArtisanModal Call
     const cardHtml = `
       <div class="unified-card" style="background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:15px; border-left:4px solid ${isVerified ? 'var(--accent-gold)' : '#f59e0b'};">
         <div onclick="open360Viewer('${itemId}')" style="cursor:pointer; position:relative;">
@@ -817,7 +817,7 @@ function renderCards(itemsList) {
 
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button type="button" class="btn-sm" onclick="focusOnMapTab(${item.coords[0]}, ${item.coords[1]})" style="background:#e0f2fe; color:#0369a1; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">📍 Cluster Map</button>
-            <button type="button" class="btn-sm" style="background:#fef3c7; color:#b45309; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="alert('🔗 WhatsApp Artisan Bridge: Local artisan cluster connected.')">🛍️ Artisan Livelihood</button>
+            <button type="button" class="btn-sm" style="background:#fef3c7; color:#b45309; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="openArtisanModal('${itemId}')">🛍️ Artisan Livelihood</button>
           </div>
         </div>
       </div>
@@ -825,6 +825,38 @@ function renderCards(itemsList) {
     container.innerHTML += cardHtml;
   });
 }
+
+// Artisan Livelihood Modal Handlers (With WhatsApp Bridge)
+window.openArtisanModal = function(itemId) {
+  let verified = getLocalVerifiedRecords();
+  let pending = getLocalPendingRecords();
+  const found = [...verified, ...pending].find(i => i.id === itemId);
+
+  const modal = document.getElementById("artisanModal");
+  if (!modal) return;
+
+  if (found) {
+    const locName = found.name || found.title || "Heritage Site";
+    const vill = found.village || "Local Cluster";
+    const dist = (found.district || window.currentDistrict || "").toUpperCase();
+
+    const locEl = document.getElementById("artisanLocation");
+    if (locEl) locEl.innerText = `📍 ${vill}, ${dist}`;
+
+    const waBtn = document.getElementById("artisanWhatsAppBtn");
+    if (waBtn) {
+      const msg = encodeURIComponent(`Namaste! Mai VratyaVani AI ke zariye ${locName} (${dist}) ke artisan cluster se connect karna chahta hu.`);
+      waBtn.href = `https://wa.me/919999999999?text=${msg}`;
+    }
+  }
+
+  modal.style.display = "flex";
+};
+
+window.closeArtisanModal = function() {
+  const modal = document.getElementById("artisanModal");
+  if (modal) modal.style.display = "none";
+};
 
 // Redirect Empty District to Map Radar Tab focusing on Selected District
 window.redirectToMapRadar = function(targetDistrict) {
@@ -1184,7 +1216,7 @@ window.handleAdminBannerUpdate = async function(e) {
     console.warn("Banner cloud update fallback:", err);
   }
 
-  // 2. Local fallback
+  // 2. Save to LocalStorage
   let banners = {};
   try {
     const raw = localStorage.getItem(BANNER_KEY);
